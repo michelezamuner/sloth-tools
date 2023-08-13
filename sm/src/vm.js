@@ -15,7 +15,7 @@ module.exports = class Vm {
 
   run() {
     while (this._exitStatus === null) {
-      this._opcode = this._memory.read(this._addr, 1);
+      this._opcode = this._memory.read(this._addr, 1).readUInt8();
       this._addr++;
       this._operands = this._memory.read(this._addr, this._opcodes[this._opcode][0]);
       this._addr = this._addr + this._opcodes[this._opcode][0];
@@ -26,14 +26,14 @@ module.exports = class Vm {
   }
 
   _exitI() {
-    this._exitStatus = this._operands;
+    this._exitStatus = this._operands.readUInt8();
   }
 
   _exitR() {
-    this._exitStatus = this._registers[this._operands];
+    this._exitStatus = this._registers[this._operands.readUInt8()];
   }
 
   _setI() {
-    this._registers[(this._operands & 0xff0000) >>> 16] = this._operands & 0x00ffff;
+    this._registers[this._operands[1]] = this._operands.subarray(1).readUInt16BE();
   }
-}
+};

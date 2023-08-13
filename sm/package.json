@@ -39,6 +39,7 @@
     "globals": {
       "__dirname": "readonly",
       "process": "readonly",
+      "Buffer": "readonly",
       "jest": "readonly",
       "describe": "readonly",
       "it": "readonly",
