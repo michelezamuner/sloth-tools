@@ -1,0 +1,14 @@
+#!/usr/bin/env node
+const Lexer = require('../src/lexer');
+const Parser = require('../src/parser');
+const Checker = require('../src/checker');
+const Compiler = require('../src/compiler');
+const Cli = require('../src/cli');
+
+const cli = new Cli();
+cli.pipe(new Lexer());
+cli.pipe(new Parser());
+cli.pipe(new Checker());
+cli.pipe(new Compiler());
+
+cli.run();

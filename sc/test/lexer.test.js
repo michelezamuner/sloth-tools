@@ -7,17 +7,31 @@ describe('lexer', () => {
     lexer = new Lexer();
   });
 
-  it('parses unit expression', () => {
-    const code = 'value';
+  it('parses references and values', () => {
+    const code = 'val';
     const lexemes = lexer.parse(code);
 
-    expect(lexemes).toStrictEqual(['value']);
+    expect(lexemes).toStrictEqual(['val']);
   });
 
-  it('parses namespaced unit expression', () => {
-    const code = 'namespace.value';
+  it('parses expressions', () => {
+    const code = 'fun val1 val2';
     const lexemes = lexer.parse(code);
 
-    expect(lexemes).toStrictEqual(['namespace', '.', 'value']);
+    expect(lexemes).toStrictEqual(['fun', 'val1', 'val2']);
+  });
+
+  it('parses function literals', () => {
+    const code = 'arg1 arg2 -> fun arg1 arg2';
+    const lexemes = lexer.parse(code);
+
+    expect(lexemes).toStrictEqual(['arg1', 'arg2', '->', 'fun', 'arg1', 'arg2']);
+  });
+
+  it('parses definitions', () => {
+    const code = 'res : fun val1 val2';
+    const lexemes = lexer.parse(code);
+
+    expect(lexemes).toStrictEqual(['res', ':', 'fun', 'val1', 'val2']);
   });
 });
