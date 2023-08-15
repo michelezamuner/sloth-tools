@@ -16,6 +16,33 @@ describe('sm', () => {
     expect.hasAssertions();
   });
 
+  it('calls procedure', () => {
+    const program = `
+      push_i 0x00 0x09 ; return address
+      push_i 0x00 0x11 ; call argument
+      jmp_i 0x00 0x0d ; call procedure
+      pop a ; get return value of procedure call
+      exit_r a ; exit with return value
+
+      ; procedure
+      pop a ; get procedure argument
+      incr a ; calculate return value
+      pop b ; get return address
+      push_r a ; push return value
+      jmp_r b ; return
+    `;
+
+    fs.writeFileSync('/tmp/sm_test', program);
+
+    try {
+      exec('bin/sm /tmp/sm_test');
+    } catch (e) {
+      expect(e.status).toBe(0x12);
+      expect(e.stdout.toString()).toBe('');
+    }
+    expect.hasAssertions();
+  });
+
   it('prints to stdout', () => {
     const program = `
       set_i a 0x00 0x01 ; stdout

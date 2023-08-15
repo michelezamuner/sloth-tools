@@ -62,22 +62,19 @@ describe('vm', () => {
       if (addr === 20 && size === 1) return Buffer.from([0x00]); // a
       if (addr === 21 && size === 1) return Buffer.from([0x21]); // jmp_r
       if (addr === 22 && size === 1) return Buffer.from([0x01]); // b
-      if (addr === 0xf2 && size === 2 && call === 0) { call++; return Buffer.from([0x00, 0x09]); }
-      if (addr === 0xf2 && size === 2 && call === 1) return Buffer.from([0x00, 0x12]);
-      if (addr === 0xf4 && size === 2) return Buffer.from([0x00, 0x11]);
+      if (addr === 0xf0 && size === 2 && call === 0) { call++; return Buffer.from([0x00, 0x09]); }
+      if (addr === 0xf0 && size === 2 && call === 1) return Buffer.from([0x00, 0x12]);
+      if (addr === 0xf2 && size === 2) return Buffer.from([0x00, 0x11]);
     };
 
     const status = vm.run();
 
     expect(memory.write.mock.calls[0][0]).toBe(0xf0);
-    expect(memory.write.mock.calls[0][1]).toBe(2);
-    expect(memory.write.mock.calls[0][2]).toStrictEqual(Buffer.from([0x00, 0x09]));
+    expect(memory.write.mock.calls[0][1]).toStrictEqual(Buffer.from([0x00, 0x09]));
     expect(memory.write.mock.calls[1][0]).toBe(0xf2);
-    expect(memory.write.mock.calls[1][1]).toBe(2);
-    expect(memory.write.mock.calls[1][2]).toStrictEqual(Buffer.from([0x00, 0x11]));
+    expect(memory.write.mock.calls[1][1]).toStrictEqual(Buffer.from([0x00, 0x11]));
     expect(memory.write.mock.calls[2][0]).toBe(0xf0);
-    expect(memory.write.mock.calls[2][1]).toBe(2);
-    expect(memory.write.mock.calls[2][2]).toStrictEqual(Buffer.from([0x00, 0x12]));
+    expect(memory.write.mock.calls[2][1]).toStrictEqual(Buffer.from([0x00, 0x12]));
     expect(status).toBe(0x12);
   });
 

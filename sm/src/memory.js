@@ -8,6 +8,14 @@ module.exports = class Memory {
   }
 
   read(addr, size) {
-    return this._memory.subarray(addr, addr + size);
+    // Deep copy read data to avoid sharing references to the Buffer
+    const result = Buffer.alloc(size);
+    this._memory.copy(result, 0, addr, addr + size);
+
+    return result;
+  }
+
+  write(addr, data) {
+    this._memory.set(data, addr);
   }
 };

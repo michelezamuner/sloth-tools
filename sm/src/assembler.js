@@ -8,6 +8,12 @@ module.exports = class Assembler {
       'exit_i': 0x00,
       'exit_r': 0x01,
       'set_i': 0x10,
+      'jmp_i': 0x20,
+      'jmp_r': 0x21,
+      'push_i': 0x30,
+      'push_r': 0x31,
+      'pop': 0x40,
+      'incr': 0x50,
       'sys': 0xff,
     };
   }
@@ -17,8 +23,8 @@ module.exports = class Assembler {
     const instructions = bytecode
       .split('\n')
       .map(l => l.trim())
-      .filter(l => l !== '')
       .map(l => l.split(';')[0].trim())
+      .filter(l => l !== '')
       ;
 
     for (const instruction of instructions) {

@@ -55,18 +55,18 @@ module.exports = class Vm {
   }
 
   _pushI() {
-    this._memory.write(this._stackPtr, 2, this._operands);
+    this._memory.write(this._stackPtr, this._operands);
     this._stackPtr += 2;
   }
 
   _pushR() {
-    this._memory.write(this._stackPtr, 2, this._registers[this._operands[0]]);
+    this._memory.write(this._stackPtr, this._registers[this._operands[0]]);
     this._stackPtr += 2;
   }
 
   _pop() {
-    this._registers[this._operands[0]] = this._memory.read(this._stackPtr, 2);
     this._stackPtr -= 2;
+    this._registers[this._operands[0]] = this._memory.read(this._stackPtr, 2);
   }
 
   _incr() {
