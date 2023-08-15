@@ -8,10 +8,17 @@ describe('parser', () => {
   });
 
   it('parses references', () => {
-    const lexemes = ['val'];
+    const lexemes = ['some.ref'];
     const ast = parser.parse(lexemes);
 
-    expect(ast).toStrictEqual({ obj: 'ref', id: 'val' });
+    expect(ast).toStrictEqual({ obj: 'ref', id: 'some.ref' });
+  });
+
+  it('parses scalar literals', () => {
+    const lexemes = ['0'];
+    const ast = parser.parse(lexemes);
+
+    expect(ast).toStrictEqual({ obj: 'val', val: '0' });
   });
 
   it('parses expressions', () => {
@@ -28,23 +35,25 @@ describe('parser', () => {
     });
   });
 
-  it('parses function literal', () => {
+  it('parses function literals', () => {
     const lexemes = ['arg1', 'arg2', '->', 'fun', 'arg1', 'arg2'];
     const ast = parser.parse(lexemes);
 
     expect(ast).toStrictEqual({
-      obj: 'fun',
-      args: [
-        { obj: 'ref', id: 'arg1' },
-        { obj: 'ref', id: 'arg2' },
-      ],
-      body: {
-        obj: 'expr',
-        fun: { obj: 'ref', id: 'fun' },
+      obj: 'val',
+      val: {
         args: [
           { obj: 'ref', id: 'arg1' },
           { obj: 'ref', id: 'arg2' },
         ],
+        body: {
+          obj: 'expr',
+          fun: { obj: 'ref', id: 'fun' },
+          args: [
+            { obj: 'ref', id: 'arg1' },
+            { obj: 'ref', id: 'arg2' },
+          ],
+        },
       },
     });
   });

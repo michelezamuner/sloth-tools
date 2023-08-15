@@ -1,7 +1,10 @@
 module.exports = class Parser {
   parse(lexemes) {
     if (lexemes.length === 1) {
-      return { obj: 'ref', id: lexemes[0] };
+      return isNaN(lexemes[0])
+        ? { obj: 'ref', id: lexemes[0] }
+        : { obj: 'val', val: lexemes[0] }
+      ;
     }
 
     if (lexemes.includes(':')) {
@@ -28,7 +31,7 @@ module.exports = class Parser {
     }
 
     if (lexemes.includes('->')) {
-      const ast = { obj: 'fun', args: [] };
+      const ast = { obj: 'val', val: { args: [] } };
 
       let isArgs = true;
       const bodyLexemes = [];
@@ -40,12 +43,12 @@ module.exports = class Parser {
         }
 
         if (isArgs) {
-          ast.args.push(this.parse([lexeme]));
+          ast.val.args.push(this.parse([lexeme]));
         } else {
           bodyLexemes.push(lexeme);
         }
       }
-      ast.body = this.parse(bodyLexemes);
+      ast.val.body = this.parse(bodyLexemes);
 
       return ast;
     }
