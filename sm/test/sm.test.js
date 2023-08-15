@@ -16,7 +16,7 @@ describe('sm', () => {
     expect.hasAssertions();
   });
 
-  it('calls procedure', () => {
+  it('calls local procedure', () => {
     const program = `
       push_i 0x00 0x09 ; return address
       push_i 0x00 0x11 ; call argument
@@ -43,7 +43,7 @@ describe('sm', () => {
     expect.hasAssertions();
   });
 
-  it('prints to stdout', () => {
+  it('calls native procedure', () => {
     const program = `
       push_i 0x00 0x01 ; stdout
       push_i 0x00 0x14 ; data start

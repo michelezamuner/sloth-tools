@@ -5,6 +5,7 @@ const Loader = require('../src/loader');
 const Vm = require('../src/vm');
 const Client = require('../src/client');
 
+const Add = require('../src/natives/add');
 const SysWrite = require('../src/natives/sys_write');
 
 const memory = new Memory();
@@ -12,6 +13,7 @@ const assembler = new Assembler();
 const loader = new Loader(memory);
 
 const vm = new Vm(memory);
+vm.native(new Add(memory));
 vm.native(new SysWrite(memory));
 
 const client = new Client(assembler, loader, vm);
