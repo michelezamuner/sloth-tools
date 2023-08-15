@@ -1,17 +1,17 @@
-const Parser = require('../src/parser');
+const ExprParser = require('../../src/parser/expr_parser');
 
-describe('parser', () => {
+describe('expression parser', () => {
   let parser = null;
 
   beforeEach(() => {
-    parser = new Parser();
+    parser = new ExprParser();
   });
 
-  it('parses references', () => {
-    const lexemes = ['some.ref'];
+  it('parses function references', () => {
+    const lexemes = ['my.fun'];
     const ast = parser.parse(lexemes);
 
-    expect(ast).toStrictEqual({ obj: 'ref', id: 'some.ref' });
+    expect(ast).toStrictEqual({ obj: 'ref', id: 'my.fun' });
   });
 
   it('parses scalar literals', () => {
@@ -31,6 +31,33 @@ describe('parser', () => {
       args: [
         { obj: 'ref', id: 'val1' },
         { obj: 'ref', id: 'val2' },
+      ],
+    });
+  });
+
+  it('parses expressions where functions are nested asts', () => {
+    const nestedAst = { obj: 'ast' };
+    const lexemes = [nestedAst, 'a'];
+    const ast = parser.parse(lexemes);
+
+    expect(ast).toStrictEqual({
+      obj: 'expr',
+      fun: { obj: 'ast' },
+      args: [{ obj: 'ref', id: 'a' }],
+    });
+  });
+
+  it('parses expressions where arguments are nested asts', () => {
+    const nestedAst = { obj: 'ast' };
+    const lexemes = ['f', 'a', nestedAst];
+    const ast = parser.parse(lexemes);
+
+    expect(ast).toStrictEqual({
+      obj: 'expr',
+      fun: { obj: 'ref', id: 'f' },
+      args: [
+        { obj: 'ref', id: 'a' },
+        { obj: 'ast' },
       ],
     });
   });

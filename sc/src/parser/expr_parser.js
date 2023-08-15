@@ -1,6 +1,10 @@
-module.exports = class Parser {
+module.exports = class ExprParser {
   parse(lexemes) {
     if (lexemes.length === 1) {
+      if (lexemes[0].obj) {
+        return lexemes[0];
+      }
+
       return isNaN(lexemes[0])
         ? { obj: 'ref', id: lexemes[0] }
         : { obj: 'val', val: lexemes[0] }
