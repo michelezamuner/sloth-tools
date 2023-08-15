@@ -14,7 +14,7 @@ module.exports = class Assembler {
       'push_r': 0x31,
       'pop': 0x40,
       'incr': 0x50,
-      'sys': 0xff,
+      'nat_i': 0xf0,
     };
   }
 

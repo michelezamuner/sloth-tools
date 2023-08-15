@@ -10,6 +10,7 @@ module.exports = class Vm {
       0x31: [1, 'pushR'],
       0x40: [1, 'pop'],
       0x50: [1, 'incr'],
+      0xf0: [3, 'natI'],
     };
     this._memory = memory;
     this._natives = {};
@@ -21,7 +22,7 @@ module.exports = class Vm {
   }
 
   native(native) {
-    this._natives[native.addr()] = native;
+    this._natives[native.name()] = native;
   }
 
   run() {
@@ -49,11 +50,11 @@ module.exports = class Vm {
   }
 
   _jmpI() {
-    this._jmp(this._operands.readUInt16BE());
+    this._addr = this._operands.readUInt16BE();
   }
 
   _jmpR() {
-    this._jmp(this._registers[this._operands[0]].readUInt16BE());
+    this._addr = this._registers[this._operands[0]].readUInt16BE();
   }
 
   _pushI() {
@@ -74,13 +75,11 @@ module.exports = class Vm {
     this._registers[this._operands[0]] = Buffer.from([(value & 0xff00) >>> 8, value & 0x00ff]);
   }
 
-  _jmp(addr) {
-    if (addr < 0xff00) {
-      this._addr = addr;
-
-      return;
-    }
-
-    this._natives[addr & 0x00ff].exec(this._registers);
+  _natI() {
+    const natNameAddr = this._operands.subarray(0, 2).readUInt16BE();
+    const natNameLength = this._operands[2];
+    const natNameBinary = this._memory.read(natNameAddr, natNameLength);
+    const natName = natNameBinary.toString('utf8');
+    this._natives[natName].exec();
   }
 };

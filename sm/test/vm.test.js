@@ -104,18 +104,20 @@ describe('vm', () => {
 
   it('calls native procedure', () => {
     memory.read = (addr, size) => {
-      if (addr === 0 && size === 1) return Buffer.from([0x20]); // jmp_i
-      if (addr === 1 && size === 2) return Buffer.from([0xff, 0x00]);  // native procedure address
-      if (addr === 3 && size === 1) return Buffer.from([0x40]); // pop
-      if (addr === 4 && size === 1) return Buffer.from([0x00]); // a
-      if (addr === 5 && size === 1) return Buffer.from([0x01]); // exit_r
-      if (addr === 6 && size === 1) return Buffer.from([0x00]); // a
+      if (addr === 0 && size === 1) return Buffer.from([0xf0]); // nat_i
+      if (addr === 1 && size === 3) return Buffer.from([0x00, 0x08, 0x07]);  // address and length of nat name
+      if (addr === 4 && size === 1) return Buffer.from([0x40]); // pop
+      if (addr === 5 && size === 1) return Buffer.from([0x00]); // a
+      if (addr === 6 && size === 1) return Buffer.from([0x01]); // exit_r
+      if (addr === 7 && size === 1) return Buffer.from([0x00]); // a
+      // "nat.fun"
+      if (addr === 8 && size === 7) return Buffer.from([0x6e, 0x61, 0x74, 0x2e, 0x66, 0x75, 0x6e]);
     };
     memory.pop = () => Buffer.from([0x00, 0x12]);
     // check must be done here because at the end of the execution
     // registers will have been changed by the next instructions
     const native = {
-      addr: () => 0x00,
+      name: () => 'nat.fun',
       exec: jest.fn(),
     };
 
