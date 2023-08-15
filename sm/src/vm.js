@@ -1,5 +1,5 @@
 module.exports = class Vm {
-  constructor(memory, system) {
+  constructor(memory) {
     this._opcodes = {
       0x00: [1, 'exitI'],
       0x01: [1, 'exitR'],
@@ -10,16 +10,18 @@ module.exports = class Vm {
       0x31: [1, 'pushR'],
       0x40: [1, 'pop'],
       0x50: [1, 'incr'],
-      0xff: [1, 'sys'],
     };
     this._memory = memory;
-    this._system = system;
+    this._natives = {};
     this._registers = [];
     this._addr = 0;
     this._opcode = null;
     this._operands = null;
     this._exitStatus = null;
-    this._stackPtr = 0xf0;
+  }
+
+  native(native) {
+    this._natives[native.addr()] = native;
   }
 
   run() {
@@ -47,26 +49,23 @@ module.exports = class Vm {
   }
 
   _jmpI() {
-    this._addr = this._operands.readUInt16BE();
+    this._jmp(this._operands.readUInt16BE());
   }
 
   _jmpR() {
-    this._addr = this._registers[this._operands[0]].readUInt16BE();
+    this._jmp(this._registers[this._operands[0]].readUInt16BE());
   }
 
   _pushI() {
-    this._memory.write(this._stackPtr, this._operands);
-    this._stackPtr += 2;
+    this._memory.push(this._operands);
   }
 
   _pushR() {
-    this._memory.write(this._stackPtr, this._registers[this._operands[0]]);
-    this._stackPtr += 2;
+    this._memory.push(this._registers[this._operands[0]]);
   }
 
   _pop() {
-    this._stackPtr -= 2;
-    this._registers[this._operands[0]] = this._memory.read(this._stackPtr, 2);
+    this._registers[this._operands[0]] = this._memory.pop();
   }
 
   _incr() {
@@ -75,7 +74,13 @@ module.exports = class Vm {
     this._registers[this._operands[0]] = Buffer.from([(value & 0xff00) >>> 8, value & 0x00ff]);
   }
 
-  _sys() {
-    this._system.call(this._operands[0], this._registers);
+  _jmp(addr) {
+    if (addr < 0xff00) {
+      this._addr = addr;
+
+      return;
+    }
+
+    this._natives[addr & 0x00ff].exec(this._registers);
   }
 };

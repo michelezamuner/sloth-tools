@@ -3,10 +3,9 @@ const Vm = require('../src/vm');
 describe('vm', () => {
   let vm = null;
   const memory = { write: jest.fn() };
-  const system = {};
 
   beforeEach(() => {
-    vm = new Vm(memory, system);
+    vm = new Vm(memory);
   });
 
   it('increments value', () => {
@@ -40,7 +39,6 @@ describe('vm', () => {
   });
 
   it('calls procedure', () => {
-    let call = 0;
     memory.read = (addr, size) => {
       if (addr === 0 && size === 1) return Buffer.from([0x30]); // push_i
       if (addr === 1 && size === 2) return Buffer.from([0x00, 0x09]); // return address
@@ -62,19 +60,21 @@ describe('vm', () => {
       if (addr === 20 && size === 1) return Buffer.from([0x00]); // a
       if (addr === 21 && size === 1) return Buffer.from([0x21]); // jmp_r
       if (addr === 22 && size === 1) return Buffer.from([0x01]); // b
-      if (addr === 0xf0 && size === 2 && call === 0) { call++; return Buffer.from([0x00, 0x09]); }
-      if (addr === 0xf0 && size === 2 && call === 1) return Buffer.from([0x00, 0x12]);
-      if (addr === 0xf2 && size === 2) return Buffer.from([0x00, 0x11]);
+    };
+    memory.push = jest.fn();
+    let call = 0;
+    memory.pop = () => {
+      call++;
+      if (call === 1) return Buffer.from([0x00, 0x11]);
+      if (call === 2) return Buffer.from([0x00, 0x09]);
+      if (call === 3) return Buffer.from([0x00, 0x12]);
     };
 
     const status = vm.run();
 
-    expect(memory.write.mock.calls[0][0]).toBe(0xf0);
-    expect(memory.write.mock.calls[0][1]).toStrictEqual(Buffer.from([0x00, 0x09]));
-    expect(memory.write.mock.calls[1][0]).toBe(0xf2);
-    expect(memory.write.mock.calls[1][1]).toStrictEqual(Buffer.from([0x00, 0x11]));
-    expect(memory.write.mock.calls[2][0]).toBe(0xf0);
-    expect(memory.write.mock.calls[2][1]).toStrictEqual(Buffer.from([0x00, 0x12]));
+    expect(memory.push.mock.calls[0][0]).toStrictEqual(Buffer.from([0x00, 0x09]));
+    expect(memory.push.mock.calls[1][0]).toStrictEqual(Buffer.from([0x00, 0x11]));
+    expect(memory.push.mock.calls[2][0]).toStrictEqual(Buffer.from([0x00, 0x12]));
     expect(status).toBe(0x12);
   });
 
@@ -102,22 +102,27 @@ describe('vm', () => {
     expect(status).toBe(0x12);
   });
 
-  it('calls system', () => {
+  it('calls native procedure', () => {
     memory.read = (addr, size) => {
-      if (addr === 0 && size === 1) return Buffer.from([0x10]); // set_i
-      if (addr === 1 && size === 3) return Buffer.from([0x00, 0x00, 0x12]);  // a 0x0012
-      if (addr === 4 && size === 1) return Buffer.from([0xff]); // sys
-      if (addr === 5 && size === 1) return Buffer.from([0x34]); // type of syscall
-      if (addr === 6 && size === 1) return Buffer.from([0x01]); // exit_r
-      if (addr === 7 && size === 1) return Buffer.from([0x00]); // a
+      if (addr === 0 && size === 1) return Buffer.from([0x20]); // jmp_i
+      if (addr === 1 && size === 2) return Buffer.from([0xff, 0x00]);  // native procedure address
+      if (addr === 3 && size === 1) return Buffer.from([0x40]); // pop
+      if (addr === 4 && size === 1) return Buffer.from([0x00]); // a
+      if (addr === 5 && size === 1) return Buffer.from([0x01]); // exit_r
+      if (addr === 6 && size === 1) return Buffer.from([0x00]); // a
     };
-    system.call = (type, registers) => {
-      if (type !== 0x34 && registers[0][1] !== 0x12) return null;
-      registers[0] = Buffer.from([0x00, 0x56]);
+    memory.pop = () => Buffer.from([0x00, 0x12]);
+    // check must be done here because at the end of the execution
+    // registers will have been changed by the next instructions
+    const native = {
+      addr: () => 0x00,
+      exec: jest.fn(),
     };
 
+    vm.native(native);
     const status = vm.run();
 
-    expect(status).toBe(0x56);
+    expect(native.exec).toBeCalled();
+    expect(status).toBe(0x12);
   });
 });
