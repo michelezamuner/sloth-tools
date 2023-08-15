@@ -2,13 +2,15 @@
 const Memory = require('../src/memory');
 const Assembler = require('../src/assembler');
 const Loader = require('../src/loader');
+const System = require('../src/system');
 const Vm = require('../src/vm');
 const Client = require('../src/client');
 
 const memory = new Memory();
 const assembler = new Assembler();
 const loader = new Loader(memory);
-const vm = new Vm(memory);
+const system = new System(memory);
+const vm = new Vm(memory, system);
 const client = new Client(assembler, loader, vm);
 
 client.exec();
