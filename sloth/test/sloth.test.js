@@ -15,4 +15,18 @@ describe('sloth', () => {
     }
     expect.hasAssertions();
   });
+
+  it('calls native function', () => {
+    const program = '_ : _ _ -> std.int.add 1 2';
+
+    fs.writeFileSync('/tmp/sloth_test', program);
+
+    try {
+      exec('bin/sloth /tmp/sloth_test');
+    } catch(e) {
+      expect(e.status).toBe(3);
+      expect(e.stdout.toString()).toBe('');
+    }
+    expect.hasAssertions();
+  });
 });

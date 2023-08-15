@@ -15,16 +15,6 @@ module.exports = class Lexer {
         continue;
       }
 
-      if (['.'].includes(char)) {
-        if (lexeme.length) {
-          lexemes.push(lexeme.join(''));
-          lexeme.length = 0;
-        }
-        lexemes.push(char);
-
-        continue;
-      }
-
       lexeme.push(char);
     }
 
