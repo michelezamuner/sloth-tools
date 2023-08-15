@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+npx sc $1
+npx sm out.sbc

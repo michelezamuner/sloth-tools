@@ -1,24 +1,22 @@
 {
-  "name": "sc",
+  "name": "sloth",
   "version": "0.0.1",
   "license": "MIT",
-  "bin": "./bin/sc",
+  "dependencies": {
+    "sm": "file:../sm",
+    "sc": "file:../sc"
+  },
   "devDependencies": {
-    "eslint": "^7.31.0",
     "jest": "^28.1.2"
   },
   "scripts": {
     "lint": "npx eslint .",
-    "test": "npx jest",
-    "coverage": "npx jest --coverage"
+    "test": "npx jest"
   },
   "jest": {
-    "roots": ["./src", "./test"],
+    "roots": ["./test"],
     "testEnvironment": "node",
-    "verbose": true,
-    "coverageDirectory": "/tmp",
-    "coveragePathIgnorePatterns": [],
-    "coverageReporters": ["text"]
+    "verbose": true
   },
   "eslintConfig": {
     "env": {
