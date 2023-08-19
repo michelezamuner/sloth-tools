@@ -63,4 +63,32 @@ describe('compiler', () => {
       0x73 0x74 0x64 0x2e 0x69 0x6e 0x74 0x2e 0x61 0x64 0x64
     `.split('\n').map(l => l.trim()).join('\n').trim());
   });
+
+  it('compiles program that references local value', () => {
+    const ast = {
+      '_': {
+        obj: 'val',
+        val: {
+          args: [
+            { obj: 'ref', id: '_', type: 'int' },
+            { obj: 'ref', id: '_', type: 'char[][]' },
+          ],
+          body: { obj: 'ref', id: 'v', type: 'int' },
+        },
+      },
+      'v': { obj: 'val', val: '2', type: 'int' },
+    };
+
+    const bytecode = compiler.parse(ast);
+
+    expect(bytecode).toBe(`
+      ; _
+      pop a
+      read_i b #{_+10}
+      push_r b
+      jmp_r a
+      ; v
+      0x00 0x02
+    `.split('\n').map(l => l.trim()).join('\n').trim());
+  });
 });

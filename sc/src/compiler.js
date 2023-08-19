@@ -10,6 +10,20 @@ module.exports = class Compiler {
       `.split('\n').map(l => l.trim()).join('\n').trim();
     }
 
+    if (main.body.obj === 'ref') {
+      const refAst = ast[main.body.id];
+
+      return `
+        ; _
+        pop a
+        read_i b #{_+10}
+        push_r b
+        jmp_r a
+        ; ${main.body.id}
+        0x00 ${this._hex(refAst.val)}
+      `.split('\n').map(l => l.trim()).join('\n').trim();
+    }
+
     const bytecode = ['; _', 'pop b'];
     for (const arg of main.body.args) {
       bytecode.push(`push_i 0x00 ${this._hex(arg.val)}`);
