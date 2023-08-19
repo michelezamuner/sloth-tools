@@ -7,7 +7,7 @@ module.exports = class ModuleParser {
     const ast = {};
 
     let currentDef = null;
-    let valLexemes = [];
+    const valLexemes = [];
     for (const i in lexemes) {
       const lexeme = lexemes[i];
 
@@ -20,7 +20,7 @@ module.exports = class ModuleParser {
           ast[currentDef] = this._innerParser.parse(valLexemes);
         }
         currentDef = lexeme;
-        valLexemes = [];
+        valLexemes.length = 0;
 
         continue;
       }

@@ -3,11 +3,11 @@ const fs = require('fs');
 
 describe('sloth', () => {
   afterEach(() => {
-    // fs.unlinkSync('out.sbc');
+    fs.unlinkSync('out.sbc');
   })
 
   it('exits with exit status', () => {
-    const program = '_ : _ _ -> 0x12';
+    const program = '_: _ _ -> 0x12';
 
     fs.writeFileSync('/tmp/sloth_test', program);
 
@@ -21,7 +21,7 @@ describe('sloth', () => {
   });
 
   it('calls native function', () => {
-    const program = '_ : _ _ -> std.int.add 1 2';
+    const program = '_: _ _ -> std.int.add 1 2';
 
     fs.writeFileSync('/tmp/sloth_test', program);
 
@@ -36,8 +36,8 @@ describe('sloth', () => {
 
   it('calls local function', () => {
     const program = `
-      _ : _ _ -> f 1 3
-      f : a b -> std.int.add a b
+      _: _ _ -> f 1 3
+      f: a b -> std.int.add a b
     `;
 
     fs.writeFileSync('/tmp/sloth_test', program);
