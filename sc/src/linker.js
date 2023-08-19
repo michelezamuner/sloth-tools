@@ -10,18 +10,33 @@ module.exports = class Linker {
   }
 
   _resolve(unit) {
+    const refMap = {};
+    let addr = 0;
+    for (const line of unit.split('\n')) {
+      if (line.startsWith(';')) {
+        refMap[line.substr(2)] = addr;
+
+        continue;
+      }
+      addr += line.split(' ').length + (line.indexOf('#{') === -1 ? 0 : 1);
+    }
+
     let resolvedUnit = unit;
     let resolved = false;
     let openIndex = -1;
     while (!resolved) {
-      openIndex = unit.indexOf('#{', openIndex + 1);
+      openIndex = resolvedUnit.indexOf('#{', openIndex + 1);
       if (openIndex === -1) {
         resolved = true;
         break;
       }
-      const closeIndex = unit.indexOf('}', openIndex);
-      const addr = 10 + +unit.substr(openIndex + 4, closeIndex - openIndex - 4);
-      resolvedUnit = unit.substr(0, openIndex) + `0x00 ${this._hex(addr)}` + unit.substr(closeIndex + 1);
+      const closeIndex = resolvedUnit.indexOf('}', openIndex);
+      const tag = resolvedUnit.substr(openIndex, closeIndex - openIndex + 1);
+      const match = tag.match(/#\{([^+]+)(\+(.+))?\}/);
+      const ref = match[1];
+      const refAddr = refMap[ref];
+      const addr = 10 + refAddr + (match[2] ? +match[2] : 0);
+      resolvedUnit = resolvedUnit.substr(0, openIndex) + `0x00 ${this._hex(addr)}` + resolvedUnit.substr(closeIndex + 1);
     }
 
     return resolvedUnit;
