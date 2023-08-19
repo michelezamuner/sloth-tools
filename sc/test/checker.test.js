@@ -13,10 +13,10 @@ describe('checker', () => {
         obj: 'val',
         val: {
           args: [
-            { obj: 'ref', id: 'argc' },
-            { obj: 'ref', id: 'argv' },
+            { obj: 'arg', arg: 'argc' },
+            { obj: 'arg', arg: 'argv' },
           ],
-          body: { obj: 'ref', id: '0' },
+          body: { obj: 'ref', ref: '0' },
         },
       },
     };
@@ -28,10 +28,10 @@ describe('checker', () => {
         obj: 'val',
         val: {
           args: [
-            { obj: 'ref', id: 'argc', type: 'int' },
-            { obj: 'ref', id: 'argv', type: 'char[][]' },
+            { obj: 'arg', arg: 'argc', type: 'int' },
+            { obj: 'arg', arg: 'argv', type: 'char[][]' },
           ],
-          body: { obj: 'ref', id: '0', type: 'int' },
+          body: { obj: 'ref', ref: '0', type: 'int' },
         },
       },
     });

@@ -11,7 +11,7 @@ describe('expression parser', () => {
     const lexemes = ['my.fun'];
     const ast = parser.parse(lexemes);
 
-    expect(ast).toStrictEqual({ obj: 'ref', id: 'my.fun' });
+    expect(ast).toStrictEqual({ obj: 'ref', ref: 'my.fun' });
   });
 
   it('parses scalar literals', () => {
@@ -27,10 +27,10 @@ describe('expression parser', () => {
 
     expect(ast).toStrictEqual({
       obj: 'expr',
-      fun: { obj: 'ref', id: 'fun' },
+      fun: { obj: 'ref', ref: 'fun' },
       args: [
-        { obj: 'ref', id: 'val1' },
-        { obj: 'ref', id: 'val2' },
+        { obj: 'ref', ref: 'val1' },
+        { obj: 'ref', ref: 'val2' },
       ],
     });
   });
@@ -43,7 +43,7 @@ describe('expression parser', () => {
     expect(ast).toStrictEqual({
       obj: 'expr',
       fun: { obj: 'ast' },
-      args: [{ obj: 'ref', id: 'a' }],
+      args: [{ obj: 'ref', ref: 'a' }],
     });
   });
 
@@ -54,9 +54,9 @@ describe('expression parser', () => {
 
     expect(ast).toStrictEqual({
       obj: 'expr',
-      fun: { obj: 'ref', id: 'f' },
+      fun: { obj: 'ref', ref: 'f' },
       args: [
-        { obj: 'ref', id: 'a' },
+        { obj: 'ref', ref: 'a' },
         { obj: 'ast' },
       ],
     });
@@ -70,15 +70,15 @@ describe('expression parser', () => {
       obj: 'val',
       val: {
         args: [
-          { obj: 'ref', id: 'arg1' },
-          { obj: 'ref', id: 'arg2' },
+          { obj: 'arg', arg: 'arg1' },
+          { obj: 'arg', arg: 'arg2' },
         ],
         body: {
           obj: 'expr',
-          fun: { obj: 'ref', id: 'fun' },
+          fun: { obj: 'ref', ref: 'fun' },
           args: [
-            { obj: 'ref', id: 'arg1' },
-            { obj: 'ref', id: 'arg2' },
+            { obj: 'ref', ref: 'arg1' },
+            { obj: 'ref', ref: 'arg2' },
           ],
         },
       },

@@ -13,10 +13,10 @@ describe('compiler', () => {
         obj: 'val',
         val: {
           args: [
-            { obj: 'ref', id: '_', type: 'int' },
-            { obj: 'ref', id: '_', type: 'char[][]' },
+            { obj: 'arg', arg: '_' },
+            { obj: 'arg', arg: '_' },
           ],
-          body: { obj: 'val', val: '0', type: 'int' },
+          body: { obj: 'val', val: '0' },
         }
       },
     };
@@ -36,15 +36,15 @@ describe('compiler', () => {
         obj: 'val',
         val: {
           args: [
-            { obj: 'ref', id: '_', type: 'int' },
-            { obj: 'ref', id: '_', type: 'char[][]' },
+            { obj: 'arg', arg: '_' },
+            { obj: 'arg', arg: '_' },
           ],
           body: {
             obj: 'expr',
-            fun: { obj: 'ref', id: 'std.int.add', type: 'int int -> int' },
+            fun: { obj: 'ref', ref: 'std.int.add', loc: 'native' },
             args: [
-              { obj: 'val', val: '1', type: 'int' },
-              { obj: 'val', val: '1', type: 'int' },
+              { obj: 'val', val: '1' },
+              { obj: 'val', val: '1' },
             ],
           },
         },
@@ -55,10 +55,12 @@ describe('compiler', () => {
 
     expect(bytecode).toBe(`
       ; _
+      push_i 0x00 0x01
+      push_i 0x00 0x01
+      nat_i #{_+18} 0x0b
+      pop a
       pop b
-      push_i 0x00 0x01
-      push_i 0x00 0x01
-      nat_i #{_+14} 0x0b
+      push_r a
       jmp_r b
       0x73 0x74 0x64 0x2e 0x69 0x6e 0x74 0x2e 0x61 0x64 0x64
     `.split('\n').map(l => l.trim()).join('\n').trim());
@@ -70,13 +72,13 @@ describe('compiler', () => {
         obj: 'val',
         val: {
           args: [
-            { obj: 'ref', id: '_', type: 'int' },
-            { obj: 'ref', id: '_', type: 'char[][]' },
+            { obj: 'arg', arg: '_', type: 'int' },
+            { obj: 'arg', arg: '_', type: 'char[][]' },
           ],
-          body: { obj: 'ref', id: 'v', type: 'int' },
+          body: { obj: 'ref', ref: 'v' },
         },
       },
-      'v': { obj: 'val', val: '2', type: 'int' },
+      'v': { obj: 'val', val: '2' },
     };
 
     const bytecode = compiler.parse(ast);
@@ -98,15 +100,15 @@ describe('compiler', () => {
         obj: 'val',
         val: {
           args: [
-            { obj: 'ref', id: '_', type: 'int' },
-            { obj: 'ref', id: '_', type: 'char[][]' },
+            { obj: 'arg', arg: '_' },
+            { obj: 'arg', arg: '_' },
           ],
           body: {
             obj: 'expr',
-            fun: { obj: 'ref', id: 'f', type: 'int int -> int' },
+            fun: { obj: 'ref', ref: 'f', loc: 'local' },
             args: [
-              { obj: 'val', val: '1', type: 'int' },
-              { obj: 'val', val: '2', type: 'int' },
+              { obj: 'val', val: '1' },
+              { obj: 'val', val: '2' },
             ],
           },
         },
@@ -115,15 +117,15 @@ describe('compiler', () => {
         obj: 'val',
         val: {
           args: [
-            { obj: 'ref', id: 'b', type: 'int' },
-            { obj: 'ref', id: 'a', type: 'int' },
+            { obj: 'arg', arg: 'b' },
+            { obj: 'arg', arg: 'a' },
           ],
           body: {
             obj: 'expr',
-            fun: { obj: 'ref', id: 'std.int.add', type: 'int int -> int' },
+            fun: { obj: 'ref', ref: 'std.int.add', loc: 'native' },
             args: [
-              { obj: 'ref', id: 'a', type: 'int' },
-              { obj: 'ref', id: 'b', type: 'int' },
+              { obj: 'ref', ref: 'a' },
+              { obj: 'ref', ref: 'b' },
             ],
           },
         },

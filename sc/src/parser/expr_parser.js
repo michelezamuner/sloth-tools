@@ -6,7 +6,7 @@ module.exports = class ExprParser {
       }
 
       return isNaN(lexemes[0])
-        ? { obj: 'ref', id: lexemes[0] }
+        ? { obj: 'ref', ref: lexemes[0] }
         : { obj: 'val', val: lexemes[0] }
       ;
     }
@@ -24,7 +24,7 @@ module.exports = class ExprParser {
         }
 
         if (isArgs) {
-          ast.val.args.push(this.parse([lexeme]));
+          ast.val.args.push({ obj: 'arg', arg: lexeme });
         } else {
           bodyLexemes.push(lexeme);
         }

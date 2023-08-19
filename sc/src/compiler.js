@@ -11,7 +11,7 @@ module.exports = class Compiler {
     }
 
     if (main.body.obj === 'ref') {
-      const refAst = ast[main.body.id];
+      const refAst = ast[main.body.ref];
 
       return `
         ; _
@@ -19,57 +19,78 @@ module.exports = class Compiler {
         read_i b #{_+10}
         push_r b
         jmp_r a
-        ; ${main.body.id}
+        ; ${main.body.ref}
         0x00 ${this._hex(refAst.val)}
       `.split('\n').map(l => l.trim()).join('\n').trim();
     }
 
-    if (ast[main.body.fun.id]) {
-      const refAst = ast[main.body.fun.id].val;
+    if (ast[main.body.fun.ref]) {
+      const mainBytecode = this._fun('_', main);
+      const funBytecode = this._fun(main.body.fun.ref, ast[main.body.fun.ref].val);
 
-      const bytecode = ['; _'];
-      bytecode.push(`push_i #{_+${main.body.args.length * 3 + 6}}`);
-      for (const arg of main.body.args) {
-        bytecode.push(`push_i 0x00 ${this._hex(arg.val)}`);
-      }
-      bytecode.push(`jmp_i #{${main.body.fun.id}}`);
-      bytecode.push('pop a');
-      bytecode.push('pop b');
-      bytecode.push('push_r a');
-      bytecode.push('jmp_r b');
-
-      bytecode.push(`; ${main.body.fun.id}`);
-      const argMap = {};
-      const reversedArgs = JSON.parse(JSON.stringify(refAst.args));
-      reversedArgs.reverse();
-      for (const i in reversedArgs) {
-        const reg = String.fromCharCode('a'.charCodeAt(0) + +i);
-        bytecode.push(`pop ${reg}`);
-        argMap[reversedArgs[i].id] = reg;
-      }
-      for (const arg of refAst.body.args) {
-        bytecode.push(`push_r ${argMap[arg.id]}`);
-      }
-      bytecode.push(`nat_i #{${main.body.fun.id}+${refAst.body.args.length * 4 + 12}} ${this._hex(refAst.body.fun.id.length)}`);
-      bytecode.push('pop a');
-      bytecode.push('pop b');
-      bytecode.push('push_r a');
-      bytecode.push('jmp_r b');
-      bytecode.push(refAst.body.fun.id.split('').map(c => c.charCodeAt(0)).map(c => this._hex(c)).join(' '));
-
-      return bytecode.join('\n');
+      return mainBytecode.concat(funBytecode).join('\n');
     }
 
-    const bytecode = ['; _', 'pop b'];
-    for (const arg of main.body.args) {
-      bytecode.push(`push_i 0x00 ${this._hex(arg.val)}`);
-    }
-
-    bytecode.push(`nat_i #{_+${main.body.args.length * 3 + 8}} ${this._hex(main.body.fun.id.length)}`);
-    bytecode.push('jmp_r b');
-    bytecode.push(main.body.fun.id.split('').map(c => c.charCodeAt(0)).map(c => this._hex(c)).join(' '));
+    const bytecode = this._fun('_', main);
 
     return bytecode.join('\n');
+  }
+
+  _fun(name, ast) {
+    let byteCount = 0;
+    const bytecode = [`; ${name}`];
+
+    const argMap = {};
+    const reversedArgs = JSON.parse(JSON.stringify(ast.args));
+    reversedArgs.reverse();
+    for (const i in reversedArgs) {
+      const reg = String.fromCharCode('a'.charCodeAt(0) + +i);
+      if (reversedArgs[i].arg !== '_') {
+        bytecode.push(`pop ${reg}`);
+        byteCount += 2;
+        argMap[reversedArgs[i].arg] = reg;
+      }
+    }
+
+    if (ast.body.fun.loc === 'local') {
+      let returnAddressDelta = byteCount;
+      for (const arg of ast.body.args) {
+        if (arg.ref && argMap[arg.ref]) {
+          returnAddressDelta += 2;
+        } else {
+          returnAddressDelta += 3;
+        }
+      }
+      bytecode.push(`push_i #{_+${returnAddressDelta + 6}}`);
+      byteCount += 3;
+    }
+
+    for (const arg of ast.body.args) {
+      if (arg.ref && argMap[arg.ref]) {
+        bytecode.push(`push_r ${argMap[arg.ref]}`);
+        byteCount += 2;
+      } else {
+        bytecode.push(`push_i 0x00 ${this._hex(arg.val)}`);
+        byteCount += 3;
+      }
+    }
+
+    if (ast.body.fun.loc === 'native') {
+      bytecode.push(`nat_i #{${name}+${byteCount + 12}} ${this._hex(ast.body.fun.ref.length)}`);
+    } else {
+      bytecode.push(`jmp_i #{${ast.body.fun.ref}}`);
+    }
+
+    bytecode.push('pop a');
+    bytecode.push('pop b');
+    bytecode.push('push_r a');
+    bytecode.push('jmp_r b');
+
+    if (ast.body.fun.loc === 'native') {
+      bytecode.push(ast.body.fun.ref.split('').map(c => c.charCodeAt(0)).map(c => this._hex(c)).join(' '));
+    }
+
+    return bytecode;
   }
 
   _hex(str) {
