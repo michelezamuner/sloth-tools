@@ -10,6 +10,7 @@ module.exports = class Vm {
       0x31: [1, 'pushR'],
       0x40: [1, 'pop'],
       0x50: [1, 'incr'],
+      0x60: [3, 'readI'],
       0xf0: [3, 'natI'],
     };
     this._memory = memory;
@@ -73,6 +74,10 @@ module.exports = class Vm {
     // @todo: handle overflows
     const value = this._registers[this._operands[0]].readUInt16BE() + 1;
     this._registers[this._operands[0]] = Buffer.from([(value & 0xff00) >>> 8, value & 0x00ff]);
+  }
+
+  _readI() {
+    this._registers[this._operands[0]] = this._memory.read(this._operands.subarray(1).readUInt16BE(), 2);
   }
 
   _natI() {

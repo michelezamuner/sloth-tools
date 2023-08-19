@@ -23,6 +23,20 @@ describe('vm', () => {
     expect(status).toBe(0x12);
   });
 
+  it('reads immediate address from memory', () => {
+    memory.read = (addr, size) => {
+      if (addr === 0 && size === 1) return Buffer.from([0x60]); // read_i
+      if (addr === 1 && size === 3) return Buffer.from([0x00, 0x00, 0x06]); // a read_address
+      if (addr === 4 && size === 1) return Buffer.from([0x01]); // exit_r
+      if (addr === 5 && size === 1) return Buffer.from([0x00]); // a
+      if (addr === 6 && size === 2) return Buffer.from([0x00, 0x12]); // exit value
+    };
+
+    const status = vm.run();
+
+    expect(status).toBe(0x12);
+  });
+
   it('jumps to different line', () => {
     memory.read = (addr, size) => {
       if (addr === 0 && size === 1) return Buffer.from([0x20]); // jmp_i
