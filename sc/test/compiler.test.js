@@ -11,7 +11,7 @@ describe('compiler', () => {
     const ast = {
       obj: 'def',
       id: '_',
-      val: {
+      def: {
         obj: 'val',
         val: {
           args: [
@@ -24,14 +24,19 @@ describe('compiler', () => {
     };
     const bytecode = compiler.parse(ast);
 
-    expect(bytecode).toBe('exit_i 0x00');
+    expect(bytecode).toBe(`
+      ; _
+      pop a
+      push_i 0x00 0x00
+      jmp_r a
+    `.split('\n').map(l => l.trim()).join('\n').trim());
   });
 
   it('compiles program calling native function', () => {
     const ast = {
       obj: 'def',
       id: '_',
-      val: {
+      def: {
         obj: 'val',
         val: {
           args: [
@@ -53,11 +58,12 @@ describe('compiler', () => {
     const bytecode = compiler.parse(ast);
 
     expect(bytecode).toBe(`
+      ; _
+      pop b
       push_i 0x00 0x01
       push_i 0x00 0x01
-      nat_i 0x00 0x0e 0x0b
-      pop a
-      exit_r a
+      nat_i #{_+14} 0x0b
+      jmp_r b
       0x73 0x74 0x64 0x2e 0x69 0x6e 0x74 0x2e 0x61 0x64 0x64
     `.split('\n').map(l => l.trim()).join('\n').trim());
   });

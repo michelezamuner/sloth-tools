@@ -29,7 +29,7 @@ module.exports = class ExprParser {
           valLexemes.push(lexeme);
         }
       }
-      ast.val = this.parse(valLexemes);
+      ast.def = this.parse(valLexemes);
 
       return ast;
     }

@@ -1,22 +1,22 @@
 module.exports = class Compiler {
   parse(ast) {
-    const mainDef = ast.val;
-    const main = mainDef.val;
-
+    const main = ast.def.val;
     if (main.body.obj === 'val') {
-      return `exit_i ${this._hex(main.body.val)}`;
+      return `
+        ; ${ast.id}
+        pop a
+        push_i 0x00 ${this._hex(main.body.val)}
+        jmp_r a
+      `.split('\n').map(l => l.trim()).join('\n').trim();
     }
 
-    let size = 0;
-    const bytecode = [];
+    const bytecode = ['; _', 'pop b'];
     for (const arg of main.body.args) {
       bytecode.push(`push_i 0x00 ${this._hex(arg.val)}`);
-      size += 3;
     }
 
-    bytecode.push(`nat_i 0x00 ${this._hex(size + 8)} ${this._hex(main.body.fun.id.length)}`);
-    bytecode.push('pop a');
-    bytecode.push('exit_r a');
+    bytecode.push(`nat_i #{${ast.id}+${main.body.args.length * 3 + 8}} ${this._hex(main.body.fun.id.length)}`);
+    bytecode.push('jmp_r b');
     bytecode.push(main.body.fun.id.split('').map(c => c.charCodeAt(0)).map(c => this._hex(c)).join(' '));
 
     return bytecode.join('\n');

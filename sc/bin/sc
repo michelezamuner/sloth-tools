@@ -4,6 +4,7 @@ const NestingParser = require('../src/parser/nesting_parser');
 const ExprParser = require('../src/parser/expr_parser');
 const Checker = require('../src/checker');
 const Compiler = require('../src/compiler');
+const Linker = require('../src/linker');
 const Cli = require('../src/cli');
 
 const cli = new Cli();
@@ -11,5 +12,6 @@ cli.pipe(new Lexer());
 cli.pipe(new NestingParser(new ExprParser()));
 cli.pipe(new Checker());
 cli.pipe(new Compiler());
+cli.pipe(new Linker());
 
 cli.run();

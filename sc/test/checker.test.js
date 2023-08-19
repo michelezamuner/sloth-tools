@@ -11,7 +11,7 @@ describe('checker', () => {
     const ast = {
       obj: 'def',
       id: '_',
-      val: {
+      def: {
         obj: 'val',
         val: {
           args: [
@@ -27,7 +27,7 @@ describe('checker', () => {
     expect(output).toStrictEqual({
       obj: 'def',
       id: '_',
-      val: {
+      def: {
         obj: 'val',
         val: {
           args: [

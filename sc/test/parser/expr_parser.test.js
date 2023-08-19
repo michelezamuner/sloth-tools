@@ -92,7 +92,7 @@ describe('expression parser', () => {
     expect(ast).toStrictEqual({
       obj: 'def',
       id: 'res',
-      val: {
+      def: {
         obj: 'expr',
         fun: { obj: 'ref', id: 'fun' },
         args: [
