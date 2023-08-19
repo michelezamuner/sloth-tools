@@ -1,4 +1,4 @@
-module.exports = class NestingParser {
+module.exports = class GroupParser {
   constructor(innerParser) {
     this._innerParser = innerParser;
   }

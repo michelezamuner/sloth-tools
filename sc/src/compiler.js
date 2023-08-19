@@ -55,7 +55,7 @@ module.exports = class Compiler {
       bytecode.push('pop b');
       bytecode.push('push_r a');
       bytecode.push('jmp_r b');
-      bytecode.push(refAst.body.fun.id.split(''.map(c => c.charCodeAt(0)).map(c => this._hex(c)).join(' ')));
+      bytecode.push(refAst.body.fun.id.split('').map(c => c.charCodeAt(0)).map(c => this._hex(c)).join(' '));
 
       return bytecode.join('\n');
     }

@@ -1,11 +1,11 @@
-const NestingParser = require('../../src/parser/nesting_parser');
+const GroupParser = require('../../src/parser/group_parser');
 
-describe('nesting parser', () => {
+describe('group parser', () => {
   let parser = null;
   const innerParser = {};
 
   beforeEach(() => {
-    parser = new NestingParser(innerParser);
+    parser = new GroupParser(innerParser);
   });
 
   it('parses code with no nestings', () => {

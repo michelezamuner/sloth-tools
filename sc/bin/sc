@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 const Lexer = require('../src/lexer');
-const NestingParser = require('../src/parser/nesting_parser');
+const ModuleParser = require('../src/parser/module_parser');
+const GroupParser = require('../src/parser/group_parser');
 const ExprParser = require('../src/parser/expr_parser');
 const Checker = require('../src/checker');
 const Compiler = require('../src/compiler');
@@ -9,7 +10,7 @@ const Cli = require('../src/cli');
 
 const cli = new Cli();
 cli.pipe(new Lexer());
-cli.pipe(new NestingParser(new ExprParser()));
+cli.pipe(new ModuleParser(new GroupParser(new ExprParser())));
 cli.pipe(new Checker());
 cli.pipe(new Compiler());
 cli.pipe(new Linker());

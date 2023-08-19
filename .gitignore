@@ -1,2 +1,3 @@
 *.sbc
 *.sloth
+!.git_hooks/
