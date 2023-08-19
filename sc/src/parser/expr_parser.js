@@ -12,24 +12,29 @@ module.exports = class ExprParser {
     }
 
     if (lexemes.includes(':')) {
-      const ast = { obj: 'def' };
+      const ast = {};
 
-      let isRef = true;
-      const valLexemes = [];
-      for (const lexeme of lexemes) {
+      let currentDef = null;
+      let valLexemes = [];
+      for (const i in lexemes) {
+        const lexeme = lexemes[i];
         if (lexeme === ':') {
-          isRef = false;
+          continue;
+        }
+
+        if (lexemes[+i+1] === ':') {
+          if (valLexemes.length) {
+            ast[currentDef] = this.parse(valLexemes);
+          }
+          currentDef = lexeme;
+          valLexemes = [];
 
           continue;
         }
 
-        if (isRef) {
-          ast.id = lexeme;
-        } else {
-          valLexemes.push(lexeme);
-        }
+        valLexemes.push(lexeme);
       }
-      ast.def = this.parse(valLexemes);
+      ast[currentDef] = this.parse(valLexemes);
 
       return ast;
     }

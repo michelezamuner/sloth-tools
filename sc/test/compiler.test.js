@@ -9,9 +9,7 @@ describe('compiler', () => {
 
   it('compiles program that exits with a constant value', () => {
     const ast = {
-      obj: 'def',
-      id: '_',
-      def: {
+      '_': {
         obj: 'val',
         val: {
           args: [
@@ -34,9 +32,7 @@ describe('compiler', () => {
 
   it('compiles program calling native function', () => {
     const ast = {
-      obj: 'def',
-      id: '_',
-      def: {
+      '_': {
         obj: 'val',
         val: {
           args: [

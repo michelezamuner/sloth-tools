@@ -9,9 +9,7 @@ describe('checker', () => {
 
   it('parses the main function', () => {
     const ast = {
-      obj: 'def',
-      id: '_',
-      def: {
+      '_': {
         obj: 'val',
         val: {
           args: [
@@ -22,12 +20,11 @@ describe('checker', () => {
         },
       },
     };
+
     const output = checker.parse(ast);
 
     expect(output).toStrictEqual({
-      obj: 'def',
-      id: '_',
-      def: {
+      '_': {
         obj: 'val',
         val: {
           args: [

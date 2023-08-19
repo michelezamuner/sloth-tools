@@ -85,21 +85,20 @@ describe('expression parser', () => {
     });
   });
 
-  it('parses definitions', () => {
-    const lexemes = ['res', ':', 'fun', 'val1', 'val2'];
+  it('parses modules', () => {
+    const lexemes = ['r1', ':', 'fun', 'a', 'b', 'r2', ':', '12'];
     const ast = parser.parse(lexemes);
 
     expect(ast).toStrictEqual({
-      obj: 'def',
-      id: 'res',
-      def: {
+      'r1': {
         obj: 'expr',
         fun: { obj: 'ref', id: 'fun' },
         args: [
-          { obj: 'ref', id: 'val1' },
-          { obj: 'ref', id: 'val2' },
+          { obj: 'ref', id: 'a' },
+          { obj: 'ref', id: 'b' },
         ],
       },
+      'r2': { obj: 'val', val: '12' },
     });
   });
 });
