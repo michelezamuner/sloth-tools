@@ -1,12 +1,16 @@
 module.exports = class Linker {
   parse(unit) {
-    return `
-      push_i 0x00 0x06
-      jmp_i 0x00 0x0a
-      pop a
-      exit_r a
-      ${this._resolve(unit)}
-    `.split('\n').map(l => l.trim()).join('\n').trim();
+    if (unit.indexOf('; _') !== -1) {
+      return `
+        push_i 0x00 0x06
+        jmp_i 0x00 0x0a
+        pop a
+        exit_r a
+        ${this._resolve(unit)}
+      `.split('\n').map(l => l.trim()).join('\n').trim();
+    }
+
+    return unit;
   }
 
   _resolve(unit) {

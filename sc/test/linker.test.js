@@ -35,8 +35,9 @@ describe('linker', () => {
       pop b
       push_i 0x00 0x01
       push_i 0x00 0x01
-      nat_i #{_+14} 0x0b
+      nat_i #{$} 0x0b
       jmp_r b
+      ; $
       0x73 0x74 0x64 0x2e 0x69 0x6e 0x74 0x2e 0x61 0x64 0x64
     `.split('\n').map(l => l.trim()).join('\n').trim();
 
@@ -53,6 +54,7 @@ describe('linker', () => {
       push_i 0x00 0x01
       nat_i 0x00 0x18 0x0b
       jmp_r b
+      ; $
       0x73 0x74 0x64 0x2e 0x69 0x6e 0x74 0x2e 0x61 0x64 0x64
     `.split('\n').map(l => l.trim()).join('\n').trim());
   });
@@ -73,11 +75,12 @@ describe('linker', () => {
       pop b
       push_r a
       push_r b
-      nat_i #{f+20} 0x0b
+      nat_i #{$} 0x0b
       pop a
       pop b
       push_r a
       jmp_r b
+      ; $
       0x73 0x74 0x64 0x2e 0x69 0x6e 0x74 0x2e 0x61 0x64 0x64
     `.split('\n').map(l => l.trim()).join('\n').trim();
 
@@ -107,7 +110,22 @@ describe('linker', () => {
       pop b
       push_r a
       jmp_r b
+      ; $
       0x73 0x74 0x64 0x2e 0x69 0x6e 0x74 0x2e 0x61 0x64 0x64
+    `.split('\n').map(l => l.trim()).join('\n').trim());
+  });
+
+  it('links library that exports type definitions', () => {
+    const unit = `
+      ; @ t: v
+      ; @ u: w
+    `.split('\n').map(l => l.trim()).join('\n').trim();
+
+    const program = linker.parse(unit);
+
+    expect(program).toBe(`
+      ; @ t: v
+      ; @ u: w
     `.split('\n').map(l => l.trim()).join('\n').trim());
   });
 });

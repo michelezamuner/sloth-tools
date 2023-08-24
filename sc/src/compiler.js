@@ -1,42 +1,36 @@
 module.exports = class Compiler {
   parse(ast) {
-    const main = ast['_'].val;
-    if (main.body.obj === 'val') {
-      return `
-        ; _
-        pop a
-        push_i 0x00 ${this._hex(main.body.val)}
-        jmp_r a
-      `.split('\n').map(l => l.trim()).join('\n').trim();
+    const dataSegment = [];
+    let bytecode = [];
+
+    for (const name in ast) {
+      if (name.startsWith('@')) {
+        bytecode = bytecode.concat([`; @ ${name.substring(2)}: ${ast[name]}`]);
+
+        continue;
+      }
+
+      const def = ast[name];
+
+      if (def.obj !== 'val') continue;
+
+      if (!def.val.body) {
+        bytecode = bytecode.concat([`; ${name}`, `0x00 ${this._hex(def.val)}`]);
+
+        continue;
+      }
+
+      bytecode = bytecode.concat(this._fun(name, def.val, dataSegment));
     }
 
-    if (main.body.obj === 'ref') {
-      const refAst = ast[main.body.ref];
-
-      return `
-        ; _
-        pop a
-        read_i b #{_+10}
-        push_r b
-        jmp_r a
-        ; ${main.body.ref}
-        0x00 ${this._hex(refAst.val)}
-      `.split('\n').map(l => l.trim()).join('\n').trim();
+    if (dataSegment.length) {
+      bytecode = bytecode.concat(['; $'], dataSegment);
     }
-
-    if (ast[main.body.fun.ref]) {
-      const mainBytecode = this._fun('_', main);
-      const funBytecode = this._fun(main.body.fun.ref, ast[main.body.fun.ref].val);
-
-      return mainBytecode.concat(funBytecode).join('\n');
-    }
-
-    const bytecode = this._fun('_', main);
 
     return bytecode.join('\n');
   }
 
-  _fun(name, ast) {
+  _fun(name, ast, dataSegment) {
     let byteCount = 0;
     const bytecode = [`; ${name}`];
 
@@ -52,16 +46,35 @@ module.exports = class Compiler {
       }
     }
 
+    if (ast.body.obj === 'val' && !ast.body.val.obj) {
+      bytecode.push('pop a');
+      bytecode.push(`push_i 0x00 ${this._hex(ast.body.val)}`);
+      bytecode.push('jmp_r a');
+
+      return bytecode;
+    }
+
+    if (ast.body.obj === 'ref') {
+      bytecode.push('pop a');
+      bytecode.push(`read_i b #{${ast.body.ref}}`);
+      bytecode.push('push_r b');
+      bytecode.push('jmp_r a');
+
+      return bytecode;
+    }
+
     if (ast.body.fun.loc === 'local') {
       let returnAddressDelta = byteCount;
       for (const arg of ast.body.args) {
         if (arg.ref && argMap[arg.ref]) {
           returnAddressDelta += 2;
-        } else {
+        } else if (arg.ref) {
+          returnAddressDelta += 6;
+        } else if (arg.val) {
           returnAddressDelta += 3;
         }
       }
-      bytecode.push(`push_i #{_+${returnAddressDelta + 6}}`);
+      bytecode.push(`push_i #{${name}+${returnAddressDelta + 6}}`);
       byteCount += 3;
     }
 
@@ -69,14 +82,18 @@ module.exports = class Compiler {
       if (arg.ref && argMap[arg.ref]) {
         bytecode.push(`push_r ${argMap[arg.ref]}`);
         byteCount += 2;
-      } else {
+      } else if (arg.ref) {
+        // @todo: mix values, refs, and args
+        bytecode.push(`read_i a #{${arg.ref}}`);
+        bytecode.push('push_r a');
+      } else if (arg.val) {
         bytecode.push(`push_i 0x00 ${this._hex(arg.val)}`);
         byteCount += 3;
       }
     }
 
     if (ast.body.fun.loc === 'native') {
-      bytecode.push(`nat_i #{${name}+${byteCount + 12}} ${this._hex(ast.body.fun.ref.length)}`);
+      bytecode.push(`nat_i #{$} ${this._hex(ast.body.fun.ref.length)}`);
     } else {
       bytecode.push(`jmp_i #{${ast.body.fun.ref}}`);
     }
@@ -87,7 +104,7 @@ module.exports = class Compiler {
     bytecode.push('jmp_r b');
 
     if (ast.body.fun.loc === 'native') {
-      bytecode.push(ast.body.fun.ref.split('').map(c => c.charCodeAt(0)).map(c => this._hex(c)).join(' '));
+      dataSegment.push(ast.body.fun.ref.split('').map(c => c.charCodeAt(0)).map(c => this._hex(c)).join(' '));
     }
 
     return bytecode;

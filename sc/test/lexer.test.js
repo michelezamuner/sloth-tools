@@ -48,4 +48,18 @@ describe('lexer', () => {
 
     expect(lexemes).toStrictEqual(['res', ':', 'fun', 'val1', 'val2']);
   });
+
+  it('parses type applications', () => {
+    const code = '@ _ _ -> std.sys.proc.exit_status _: _ _ -> 0';
+    const lexemes = lexer.parse(code);
+
+    expect(lexemes).toStrictEqual(['@', '_', '_', '->', 'std.sys.proc.exit_status', '_', ':', '_', '_', '->', '0']);
+  });
+
+  it('parses type definitions', () => {
+    const code = '@ std.sys.proc.exit_status: std.num.uint8';
+    const lexemes = lexer.parse(code);
+
+    expect(lexemes).toStrictEqual(['@', 'std.sys.proc.exit_status', ':', 'std.num.uint8']);
+  });
 });
