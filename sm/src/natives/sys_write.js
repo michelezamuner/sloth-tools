@@ -5,7 +5,7 @@ module.exports = class SysWrite {
     this._memory = memory;
   }
 
-  name() { return 'std.sys.write'; }
+  id() { return 0xf2; }
 
   exec() {
     const length = this._memory.pop().readUInt16BE();

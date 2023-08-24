@@ -11,7 +11,7 @@ module.exports = class Vm {
       0x40: [1, 'pop'],
       0x50: [1, 'incr'],
       0x60: [3, 'readI'],
-      0xf0: [3, 'natI'],
+      0xf0: [1, 'natI'],
     };
     this._memory = memory;
     this._natives = {};
@@ -23,7 +23,7 @@ module.exports = class Vm {
   }
 
   native(native) {
-    this._natives[native.name()] = native;
+    this._natives[native.id()] = native;
   }
 
   run() {
@@ -81,10 +81,6 @@ module.exports = class Vm {
   }
 
   _natI() {
-    const natNameAddr = this._operands.subarray(0, 2).readUInt16BE();
-    const natNameLength = this._operands[2];
-    const natNameBinary = this._memory.read(natNameAddr, natNameLength);
-    const natName = natNameBinary.toString('utf8');
-    this._natives[natName].exec();
+    this._natives[this._operands.readUInt8()].exec();
   }
 };

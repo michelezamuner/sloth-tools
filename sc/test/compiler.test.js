@@ -85,13 +85,11 @@ describe('compiler', () => {
       ; _
       push_i 0x00 0x01
       push_i 0x00 0x01
-      nat_i #{$} 0x0b
+      nat_i 0x10
       pop a
       pop b
       push_r a
       jmp_r b
-      ; $
-      0x73 0x74 0x64 0x2e 0x69 0x6e 0x74 0x2e 0x61 0x64 0x64
     `.split('\n').map(l => l.trim()).join('\n').trim());
   });
 
@@ -150,13 +148,11 @@ describe('compiler', () => {
       pop b
       push_r a
       push_r b
-      nat_i #{$} 0x0b
+      nat_i 0x10
       pop a
       pop b
       push_r a
       jmp_r b
-      ; $
-      0x73 0x74 0x64 0x2e 0x69 0x6e 0x74 0x2e 0x61 0x64 0x64
     `.split('\n').map(l => l.trim()).join('\n').trim());
   });
 
@@ -247,7 +243,7 @@ describe('compiler', () => {
       pop b
       push_r a
       push_r b
-      nat_i #{$} 0x0b
+      nat_i 0x10
       pop a
       pop b
       push_r a
@@ -256,8 +252,6 @@ describe('compiler', () => {
       0x00 0x01
       ; b
       0x00 0x02
-      ; $
-      0x73 0x74 0x64 0x2e 0x69 0x6e 0x74 0x2e 0x61 0x64 0x64
     `.split('\n').map(l => l.trim()).join('\n').trim());
   });
 

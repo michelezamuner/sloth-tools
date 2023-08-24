@@ -1,6 +1,12 @@
 module.exports = class Compiler {
+  constructor() {
+    this._natives = {
+      'std.int.add': 0x10,
+      'std.sys.write': 0xf2,
+    };
+  }
+
   parse(ast) {
-    const dataSegment = [];
     let bytecode = [];
 
     for (const name in ast) {
@@ -20,17 +26,13 @@ module.exports = class Compiler {
         continue;
       }
 
-      bytecode = bytecode.concat(this._fun(name, def.val, dataSegment));
-    }
-
-    if (dataSegment.length) {
-      bytecode = bytecode.concat(['; $'], dataSegment);
+      bytecode = bytecode.concat(this._fun(name, def.val));
     }
 
     return bytecode.join('\n');
   }
 
-  _fun(name, ast, dataSegment) {
+  _fun(name, ast) {
     let byteCount = 0;
     const bytecode = [`; ${name}`];
 
@@ -93,7 +95,7 @@ module.exports = class Compiler {
     }
 
     if (ast.body.fun.loc === 'native') {
-      bytecode.push(`nat_i #{$} ${this._hex(ast.body.fun.ref.length)}`);
+      bytecode.push(`nat_i ${this._hex(this._natives[ast.body.fun.ref])}`);
     } else {
       bytecode.push(`jmp_i #{${ast.body.fun.ref}}`);
     }
@@ -102,10 +104,6 @@ module.exports = class Compiler {
     bytecode.push('pop b');
     bytecode.push('push_r a');
     bytecode.push('jmp_r b');
-
-    if (ast.body.fun.loc === 'native') {
-      dataSegment.push(ast.body.fun.ref.split('').map(c => c.charCodeAt(0)).map(c => this._hex(c)).join(' '));
-    }
 
     return bytecode;
   }

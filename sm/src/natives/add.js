@@ -3,7 +3,7 @@ module.exports = class Add {
     this._memory = memory;
   }
 
-  name() { return 'std.int.add'; }
+  id() { return 0x10; }
 
   exec() {
     const first = this._memory.pop().readUInt16BE();
