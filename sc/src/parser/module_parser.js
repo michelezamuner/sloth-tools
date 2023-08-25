@@ -23,13 +23,13 @@ module.exports = class ModuleParser {
       if (block[1] === ':') {
         ast[block[0]] = this._innerParser.parse(block.slice(2));
         if (currentTypeApplication) {
-          ast[block[0]].type = currentTypeApplication.slice(1).join(' ');
+          ast[block[0]].type = currentTypeApplication.slice(1).join(' ').replace(' ,', ',');
           currentTypeApplication = null;
         }
       }
       if (block[0] === '@') {
         if (block[2] === ':') {
-          ast[`@ ${block[1]}`] = block.slice(3).join(' ');
+          ast[`@ ${block[1]}`] = block.slice(3).join(' ').replace(' ,', ',');
         } else {
           currentTypeApplication = block;
         }

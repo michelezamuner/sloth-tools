@@ -23,9 +23,9 @@ module.exports = class ExprParser {
           continue;
         }
 
-        if (isArgs) {
+        if (isArgs && lexeme !== ',') {
           ast.val.args.push({ obj: 'arg', arg: lexeme });
-        } else {
+        } else if (!isArgs) {
           bodyLexemes.push(lexeme);
         }
       }

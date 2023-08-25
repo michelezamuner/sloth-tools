@@ -3,7 +3,7 @@ const fs = require('fs');
 
 describe('sc', () => {
   it('compiles program', () => {
-    const program = '_ : _ _ -> 0';
+    const program = '_ : _, _ -> 0';
 
     fs.writeFileSync('/tmp/sc_test', program);
 

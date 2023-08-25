@@ -1,11 +1,6 @@
-module.exports = class Compiler {
-  constructor() {
-    this._natives = {
-      'std.int.add': 0x10,
-      'std.sys.write': 0xf2,
-    };
-  }
+const natives = require('./natives.json');
 
+module.exports = class Compiler {
   parse(ast) {
     let bytecode = [];
 
@@ -95,7 +90,7 @@ module.exports = class Compiler {
     }
 
     if (ast.body.fun.loc === 'native') {
-      bytecode.push(`nat_i ${this._hex(this._natives[ast.body.fun.ref])}`);
+      bytecode.push(`nat_i ${this._hex(natives[ast.body.fun.ref])}`);
     } else {
       bytecode.push(`jmp_i #{${ast.body.fun.ref}}`);
     }

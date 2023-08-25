@@ -26,12 +26,12 @@ module.exports = class Lexer {
         continue;
       }
 
-      if (char === ':') {
+      if (char === ':' || char === ',') {
         if (lexeme.length) {
           lexemes.push(lexeme.join(''));
           lexeme.length = 0;
         }
-        lexemes.push(':');
+        lexemes.push(char);
 
         continue;
       }

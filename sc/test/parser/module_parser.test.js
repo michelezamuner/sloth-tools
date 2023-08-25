@@ -54,30 +54,30 @@ describe('module parser', () => {
   });
 
   it('parses module with type application', () => {
-    const lexemes = ['@', 'n', 'n', '->', 'n', 'f', ':', 'a', 'b', '->', 'c'];
+    const lexemes = ['@', 'n', ',', 'n', '->', 'n', 'f', ':', 'a', ',', 'b', '->', 'c'];
     innerParser.parse = _l => {
-      if (JSON.stringify(_l) === JSON.stringify(['a', 'b', '->', 'c'])) return { obj: 'ast' };
+      if (JSON.stringify(_l) === JSON.stringify(['a', ',', 'b', '->', 'c'])) return { obj: 'ast' };
     };
 
     const result = parser.parse(lexemes);
 
     expect(result).toStrictEqual({
-      'f': { obj: 'ast', type: 'n n -> n' },
+      'f': { obj: 'ast', type: 'n, n -> n' },
     });
   });
 
   it('parses module with multiple type applications', () => {
-    const lexemes = ['@', 'n', 'n', '->', 'n', 'f', ':', 'a', 'b', '->', 'c', '@', 'm', 'm', '->', 'm', 'g', ':', 'd', 'e', '->', 'f'];
+    const lexemes = ['@', 'n', ',', 'n', '->', 'n', 'f', ':', 'a', ',', 'b', '->', 'c', '@', 'm', ',', 'm', '->', 'm', 'g', ':', 'd', ',', 'e', '->', 'f'];
     innerParser.parse = _l => {
-      if (JSON.stringify(_l) === JSON.stringify(['a', 'b', '->', 'c'])) return { obj: 'ast1' };
-      if (JSON.stringify(_l) === JSON.stringify(['d', 'e', '->', 'f'])) return { obj: 'ast2' };
+      if (JSON.stringify(_l) === JSON.stringify(['a', ',', 'b', '->', 'c'])) return { obj: 'ast1' };
+      if (JSON.stringify(_l) === JSON.stringify(['d', ',', 'e', '->', 'f'])) return { obj: 'ast2' };
     };
 
     const result = parser.parse(lexemes);
 
     expect(result).toStrictEqual({
-      'f': { obj: 'ast1', type: 'n n -> n' },
-      'g': { obj: 'ast2', type: 'm m -> m' },
+      'f': { obj: 'ast1', type: 'n, n -> n' },
+      'g': { obj: 'ast2', type: 'm, m -> m' },
     });
   });
 

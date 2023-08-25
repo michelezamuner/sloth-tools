@@ -22,17 +22,17 @@ describe('lexer', () => {
   });
 
   it('parses function literals', () => {
-    const code = 'arg1 arg2 -> fun arg1 arg2';
+    const code = 'arg1, arg2 -> fun arg1 arg2';
     const lexemes = lexer.parse(code);
 
-    expect(lexemes).toStrictEqual(['arg1', 'arg2', '->', 'fun', 'arg1', 'arg2']);
+    expect(lexemes).toStrictEqual(['arg1', ',', 'arg2', '->', 'fun', 'arg1', 'arg2']);
   });
 
   it('parses function literals without white space around the arrow', () => {
-    const code = 'arg1 arg2->fun arg1 arg2';
+    const code = 'arg1, arg2->fun arg1 arg2';
     const lexemes = lexer.parse(code);
 
-    expect(lexemes).toStrictEqual(['arg1', 'arg2', '->', 'fun', 'arg1', 'arg2']);
+    expect(lexemes).toStrictEqual(['arg1', ',', 'arg2', '->', 'fun', 'arg1', 'arg2']);
   });
 
   it('parses definitions', () => {
@@ -50,10 +50,10 @@ describe('lexer', () => {
   });
 
   it('parses type applications', () => {
-    const code = '@ _ _ -> std.sys.proc.exit_status _: _ _ -> 0';
+    const code = '@ _, _ -> std.sys.proc.exit_status _: _ _ -> 0';
     const lexemes = lexer.parse(code);
 
-    expect(lexemes).toStrictEqual(['@', '_', '_', '->', 'std.sys.proc.exit_status', '_', ':', '_', '_', '->', '0']);
+    expect(lexemes).toStrictEqual(['@', '_', ',', '_', '->', 'std.sys.proc.exit_status', '_', ':', '_', '_', '->', '0']);
   });
 
   it('parses type definitions', () => {

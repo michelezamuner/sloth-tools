@@ -1,12 +1,8 @@
-module.exports = class RefResolver {
-  constructor() {
-    this._natives = [
-      'std.int.add',
-    ];
-  }
+const natives = require('../natives.json');
 
+module.exports = class RefResolver {
   resolve(ast, locals = []) {
-    if (this._natives.includes(ast.ref)) {
+    if (natives[ast.ref]) {
       ast.loc = 'native';
     }
 
