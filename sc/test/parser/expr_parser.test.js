@@ -63,7 +63,7 @@ describe('expression parser', () => {
   });
 
   it('parses function literals', () => {
-    const lexemes = ['arg1', ',', 'arg2', '->', 'fun', 'arg1', 'arg2'];
+    const lexemes = ['arg1', 'arg2', '->', 'fun', 'arg1', 'arg2'];
     const ast = parser.parse(lexemes);
 
     expect(ast).toStrictEqual({

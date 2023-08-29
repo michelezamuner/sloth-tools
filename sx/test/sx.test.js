@@ -7,12 +7,12 @@ describe('sloth', () => {
   })
 
   it('exits with exit status', () => {
-    const program = '_: _, _ -> 0x12';
+    const program = '_ := _ _ -> 0x12';
 
     fs.writeFileSync('/tmp/sloth_test', program);
 
     try {
-      exec('bin/sloth /tmp/sloth_test');
+      exec('bin/sx /tmp/sloth_test');
     } catch(e) {
       expect(e.status).toBe(0x12);
       expect(e.stdout.toString()).toBe('');
@@ -22,14 +22,14 @@ describe('sloth', () => {
 
   it('references local value', () => {
     const program = `
-      _: _, _ -> v
-      v: 2
+      _ := _ _ -> v
+      v := 2
     `;
 
     fs.writeFileSync('/tmp/sloth_test', program);
 
     try {
-      exec('bin/sloth /tmp/sloth_test');
+      exec('bin/sx /tmp/sloth_test');
     } catch(e) {
       expect(e.status).toBe(2);
       expect(e.stdout.toString()).toBe('');
@@ -38,12 +38,12 @@ describe('sloth', () => {
   });
 
   it('calls native function', () => {
-    const program = '_: _, _ -> std.int.add 1 2';
+    const program = '_ := _ _ -> std.int.add 1 2';
 
     fs.writeFileSync('/tmp/sloth_test', program);
 
     try {
-      exec('bin/sloth /tmp/sloth_test');
+      exec('bin/sx /tmp/sloth_test');
     } catch(e) {
       expect(e.status).toBe(3);
       expect(e.stdout.toString()).toBe('');
@@ -53,14 +53,14 @@ describe('sloth', () => {
 
   it('calls local function', () => {
     const program = `
-      _: _, _ -> f 1 3
-      f: a, b -> std.int.add a b
+      _ := _ _ -> f 1 3
+      f := a b -> std.int.add a b
     `;
 
     fs.writeFileSync('/tmp/sloth_test', program);
 
     try {
-      exec('bin/sloth /tmp/sloth_test');
+      exec('bin/sx /tmp/sloth_test');
     } catch (e) {
       expect(e.status).toBe(4);
       expect(e.stdout.toString()).toBe('');
