@@ -5,8 +5,8 @@ module.exports = class Compiler {
     let bytecode = [];
 
     for (const name in ast) {
-      if (name.startsWith('@')) {
-        bytecode = bytecode.concat([`; @ ${name.substring(2)}: ${ast[name]}`]);
+      if (ast[name].obj === 'type') {
+        bytecode = bytecode.concat([`; ${name} :: ${ast[name].type}`]);
 
         continue;
       }

@@ -7,8 +7,15 @@ module.exports = class ModuleParser {
     const blocks = [];
     const block = [];
 
+    let isTypeApplication = false;
     for (const i in lexemes) {
-      if (block.length && this._isStartOfBlock(lexemes, i)) {
+      if (lexemes[+i+1] === ':') {
+        isTypeApplication = true;
+      } else if (isTypeApplication && (lexemes[+i+1] === '::')) {
+        isTypeApplication = false;
+      }
+
+      if (block.length && (lexemes[+i+1] === '::' || lexemes[+i+1] === ':' || (!isTypeApplication && lexemes[+i+1] === ':='))) {
         blocks.push(JSON.parse(JSON.stringify(block)));
         block.length = 0;
       }
@@ -18,34 +25,22 @@ module.exports = class ModuleParser {
 
     const ast = {};
 
-    let currentTypeApplication = null;
     for (const block of blocks) {
       if (block[1] === ':=') {
         ast[block[0]] = this._innerParser.parse(block.slice(2));
-        if (currentTypeApplication) {
-          ast[block[0]].type = currentTypeApplication.slice(1).join(' ');
-          currentTypeApplication = null;
-        }
       }
-      if (block[0] === '@') {
-        if (block[2] === ':=') {
-          ast[`@ ${block[1]}`] = block.slice(3).join(' ');
-        } else {
-          currentTypeApplication = block;
-        }
+      if (block[1] === '::') {
+        ast[block[0]] = { obj: 'type', type: block.slice(2).join(' ') };
+      }
+      if (block[1] === ':') {
+        const innerAstStart = block.indexOf(':=') + 1;
+        const innerAst = this._innerParser.parse(block.slice(innerAstStart));
+        innerAst.type = block.slice(2, innerAstStart - 1).join(' ');
+
+        ast[block[0]] = innerAst;
       }
     }
 
     return ast;
-  }
-
-  _isStartOfBlock(lexemes, i) {
-    if (lexemes[i] === '@') {
-      return true;
-    }
-
-    if (lexemes[+i-1] !== '@' && lexemes[+i+1] === ':=') {
-      return true;
-    }
   }
 };

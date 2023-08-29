@@ -256,13 +256,16 @@ describe('compiler', () => {
   });
 
   it('compiles library that exports type definitions', () => {
-    const ast = { '@ t': 'v', '@ u': 'w' };
+    const ast = {
+      't': { obj: 'type', type: 'v' },
+      'u': { obj: 'type', type: 'w' },
+    };
 
     const bytecode = compiler.parse(ast);
 
     expect(bytecode).toBe(`
-      ; @ t: v
-      ; @ u: w
+      ; t :: v
+      ; u :: w
     `.split('\n').map(l => l.trim()).join('\n').trim());
   });
 });

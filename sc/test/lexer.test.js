@@ -50,16 +50,16 @@ describe('lexer', () => {
   });
 
   it('parses type applications', () => {
-    const code = '@ _ _ -> std.sys.proc.exit_status _:= _ _ -> 0';
+    const code = '_: _ _ -> std.sys.proc.exit_status := _ _ -> 0';
     const lexemes = lexer.parse(code);
 
-    expect(lexemes).toStrictEqual(['@', '_', '_', '->', 'std.sys.proc.exit_status', '_', ':=', '_', '_', '->', '0']);
+    expect(lexemes).toStrictEqual(['_', ':', '_', '_', '->', 'std.sys.proc.exit_status', ':=', '_', '_', '->', '0']);
   });
 
   it('parses type definitions', () => {
-    const code = '@ std.sys.proc.exit_status:= std.num.uint8';
+    const code = 'std.sys.proc.exit_status :: std.num.uint8';
     const lexemes = lexer.parse(code);
 
-    expect(lexemes).toStrictEqual(['@', 'std.sys.proc.exit_status', ':=', 'std.num.uint8']);
+    expect(lexemes).toStrictEqual(['std.sys.proc.exit_status', '::', 'std.num.uint8']);
   });
 });

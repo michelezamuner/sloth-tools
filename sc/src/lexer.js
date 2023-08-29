@@ -37,6 +37,28 @@ module.exports = class Lexer {
         continue;
       }
 
+      if (char === ':' && code.charAt(i + 1) === ':') {
+        if (lexeme.length) {
+          lexemes.push(lexeme.join(''));
+          lexeme.length = 0;
+        }
+        i++;
+        lexemes.push('::');
+
+        continue;
+      }
+
+      if (char === ':') {
+        if (lexeme.length) {
+          lexemes.push(lexeme.join(''));
+          lexeme.length = 0;
+        }
+        i++;
+        lexemes.push(':');
+
+        continue;
+      }
+
       lexeme.push(char);
     }
 
