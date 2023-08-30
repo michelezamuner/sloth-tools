@@ -1,20 +1,30 @@
 #!/usr/bin/env node
+
+const fs = require('fs');
+
 const Lexer = require('../src/lexer');
 const ModuleParser = require('../src/parser/module_parser');
 const GroupParser = require('../src/parser/group_parser');
 const ExprParser = require('../src/parser/expr_parser');
 const RefResolver = require('../src/resolver/ref_resolver');
 const Resolver = require('../src/resolver/resolver');
+const Loader = require('../src/loader');
 const Checker = require('../src/checker');
 const Compiler = require('../src/compiler');
 const Linker = require('../src/linker');
 const Cli = require('../src/cli');
 
+const loaderRoots = process.argv
+  .slice(3)
+  .filter(arg => arg.startsWith('--lib='))
+  .map(arg => arg.substring(6))
+  ;
+
 const cli = new Cli();
 cli.pipe(new Lexer());
 cli.pipe(new ModuleParser(new GroupParser(new ExprParser())));
 cli.pipe(new Resolver(new RefResolver));
-cli.pipe(new Checker());
+cli.pipe(new Checker(new Loader(fs, loaderRoots)));
 cli.pipe(new Compiler());
 cli.pipe(new Linker());
 

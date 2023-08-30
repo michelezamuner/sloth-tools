@@ -4,7 +4,8 @@
   "license": "MIT",
   "dependencies": {
     "sm": "file:../sm",
-    "sc": "file:../sc"
+    "sc": "file:../sc",
+    "slib": "file:../slib"
   },
   "devDependencies": {
     "jest": "^28.1.2"

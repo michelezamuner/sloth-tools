@@ -1,7 +1,7 @@
 const exec = require('child_process').execSync;
 const fs = require('fs');
 
-describe('sloth', () => {
+describe('sx', () => {
   afterAll(() => {
     fs.unlinkSync('out.sbc');
   })
@@ -9,10 +9,10 @@ describe('sloth', () => {
   it('exits with exit status', () => {
     const program = '_ := _ _ -> 0x12';
 
-    fs.writeFileSync('/tmp/sloth_test', program);
+    fs.writeFileSync('/tmp/sx_test', program);
 
     try {
-      exec('bin/sx /tmp/sloth_test');
+      exec('bin/sx /tmp/sx_test');
     } catch(e) {
       expect(e.status).toBe(0x12);
       expect(e.stdout.toString()).toBe('');
@@ -26,10 +26,10 @@ describe('sloth', () => {
       v := 2
     `;
 
-    fs.writeFileSync('/tmp/sloth_test', program);
+    fs.writeFileSync('/tmp/sx_test', program);
 
     try {
-      exec('bin/sx /tmp/sloth_test');
+      exec('bin/sx /tmp/sx_test');
     } catch(e) {
       expect(e.status).toBe(2);
       expect(e.stdout.toString()).toBe('');
@@ -38,12 +38,12 @@ describe('sloth', () => {
   });
 
   it('calls native function', () => {
-    const program = '_ := _ _ -> std.int.add 1 2';
+    const program = '_ := _ _ -> std.uint8.add 1 2';
 
-    fs.writeFileSync('/tmp/sloth_test', program);
+    fs.writeFileSync('/tmp/sx_test', program);
 
     try {
-      exec('bin/sx /tmp/sloth_test');
+      exec('bin/sx /tmp/sx_test');
     } catch(e) {
       expect(e.status).toBe(3);
       expect(e.stdout.toString()).toBe('');
@@ -54,13 +54,13 @@ describe('sloth', () => {
   it('calls local function', () => {
     const program = `
       _ := _ _ -> f 1 3
-      f := a b -> std.int.add a b
+      f := a b -> std.uint8.add a b
     `;
 
-    fs.writeFileSync('/tmp/sloth_test', program);
+    fs.writeFileSync('/tmp/sx_test', program);
 
     try {
-      exec('bin/sx /tmp/sloth_test');
+      exec('bin/sx /tmp/sx_test');
     } catch (e) {
       expect(e.status).toBe(4);
       expect(e.stdout.toString()).toBe('');

@@ -64,7 +64,7 @@ describe('compiler', () => {
         ],
         body: {
           obj: 'expr',
-          fun: { obj: 'ref', ref: 'std.int.add', loc: 'native' },
+          fun: { obj: 'ref', ref: 'std.uint8.add', loc: 'native' },
           args: [
             { obj: 'val', val: '1' },
             { obj: 'val', val: '1' },
@@ -112,7 +112,7 @@ describe('compiler', () => {
         ],
         body: {
           obj: 'expr',
-          fun: { obj: 'ref', ref: 'std.int.add', loc: 'native' },
+          fun: { obj: 'ref', ref: 'std.uint8.add', loc: 'native' },
           args: [
             { obj: 'ref', ref: 'a' },
             { obj: 'ref', ref: 'b' },
@@ -186,7 +186,7 @@ describe('compiler', () => {
         ],
         body: {
           obj: 'expr',
-          fun: { obj: 'ref', ref: 'std.int.add', loc: 'native' },
+          fun: { obj: 'ref', ref: 'std.uint8.add', loc: 'native' },
           args: [
             { obj: 'ref', ref: 'a' },
             { obj: 'ref', ref: 'b' },

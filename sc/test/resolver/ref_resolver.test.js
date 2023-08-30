@@ -8,11 +8,11 @@ describe('ref resolver', () => {
   });
 
   it('resolves native references', () => {
-    const ast = { obj: 'ref', ref: 'std.int.add' };
+    const ast = { obj: 'ref', ref: 'std.uint8.add' };
 
     const result = resolver.resolve(ast);
 
-    expect(result).toStrictEqual({ obj: 'ref', ref: 'std.int.add', loc: 'native' });
+    expect(result).toStrictEqual({ obj: 'ref', ref: 'std.uint8.add', loc: 'native' });
   });
 
   it('resolves local references', () => {
