@@ -12,7 +12,7 @@ module.exports = class ExprParser {
     }
 
     if (lexemes.includes('->')) {
-      const ast = { obj: 'val', val: { args: [] } };
+      const ast = { obj: 'fun', args: [] };
 
       let isArgs = true;
       const bodyLexemes = [];
@@ -24,12 +24,12 @@ module.exports = class ExprParser {
         }
 
         if (isArgs) {
-          ast.val.args.push({ obj: 'arg', arg: lexeme });
+          ast.args.push({ obj: 'arg', arg: lexeme });
         } else {
           bodyLexemes.push(lexeme);
         }
       }
-      ast.val.body = this.parse(bodyLexemes);
+      ast.body = this.parse(bodyLexemes);
 
       return ast;
     }

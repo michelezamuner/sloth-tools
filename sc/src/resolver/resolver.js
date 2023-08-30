@@ -5,8 +5,12 @@ module.exports = class Resolver {
 
   parse(ast, locals = []) {
     if (ast.obj === 'val') {
-      if (ast.val.body && ast.val.body.fun && ast.val.body.fun.obj === 'ref') {
-        ast.val.body.fun = this._refResolver.resolve(ast.val.body.fun, locals);
+      return ast;
+    }
+
+    if (ast.obj === 'fun') {
+      if (ast.body.obj === 'expr' && ast.body.fun.obj === 'ref') {
+        ast.body.fun = this._refResolver.resolve(ast.body.fun, locals);
       }
 
       return ast;

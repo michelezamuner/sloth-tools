@@ -67,20 +67,18 @@ describe('expression parser', () => {
     const ast = parser.parse(lexemes);
 
     expect(ast).toStrictEqual({
-      obj: 'val',
-      val: {
+      obj: 'fun',
+      args: [
+        { obj: 'arg', arg: 'arg1' },
+        { obj: 'arg', arg: 'arg2' },
+      ],
+      body: {
+        obj: 'expr',
+        fun: { obj: 'ref', ref: 'fun' },
         args: [
-          { obj: 'arg', arg: 'arg1' },
-          { obj: 'arg', arg: 'arg2' },
+          { obj: 'ref', ref: 'arg1' },
+          { obj: 'ref', ref: 'arg2' },
         ],
-        body: {
-          obj: 'expr',
-          fun: { obj: 'ref', ref: 'fun' },
-          args: [
-            { obj: 'ref', ref: 'arg1' },
-            { obj: 'ref', ref: 'arg2' },
-          ],
-        },
       },
     });
   });

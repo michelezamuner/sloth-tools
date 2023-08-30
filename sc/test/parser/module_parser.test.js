@@ -34,25 +34,6 @@ describe('module parser', () => {
     });
   });
 
-  it('parses module with single type definition', () => {
-    const lexemes = ['n', '::', 'std.num'];
-
-    const result = parser.parse(lexemes);
-
-    expect(result).toStrictEqual({ 'n': { obj: 'type', type: 'std.num' } });
-  });
-
-  it('parses module with multiple type definitions', () => {
-    const lexemes = ['a', '::', 'b', 'c', '::', 'd'];
-
-    const result = parser.parse(lexemes);
-
-    expect(result).toStrictEqual({
-      'a': { obj: 'type', type: 'b' },
-      'c': { obj: 'type', type: 'd' },
-    });
-  });
-
   it('parses module with type application', () => {
     const lexemes = ['f', ':', 'n', 'n', '->', 'n', ':=', 'a', 'b', '->', 'c'];
     innerParser.parse = _l => {
@@ -81,20 +62,55 @@ describe('module parser', () => {
     });
   });
 
-  it('parses module with type definitions and type applications', () => {
-    const lexemes = ['t1', '::', 't0', 'v', ':', 'n', ':=', '0', 't3', '::', 't2', 'w', ':=', 'a', 'b'];
+  it('parses module with definitions where some have type applications', () => {
+    const lexemes = ['v', ':', 'n', ':=', '0', 'w', ':=', '1', 'f', ':', 'n', 'n', '->', 'n', ':=', 'a', 'b', '->', 'c'];
     innerParser.parse = _l => {
       if (JSON.stringify(_l) === JSON.stringify(['0'])) return { obj: 'ast1' };
-      if (JSON.stringify(_l) === JSON.stringify(['a', 'b'])) return 'ast2';
+      if (JSON.stringify(_l) === JSON.stringify(['1'])) return 'ast2';
+      if (JSON.stringify(_l) === JSON.stringify(['a', 'b', '->', 'c'])) return { obj: 'ast3' };
     };
 
     const result = parser.parse(lexemes);
 
     expect(result).toStrictEqual({
-      't1': { obj: 'type', type: 't0' },
       'v': { obj: 'ast1', type: 'n' },
-      't3': { obj: 'type', type: 't2' },
       'w': 'ast2',
+      'f': { obj: 'ast3', type: 'n n -> n' },
     });
+  });
+
+  it('parses type definitions', () => {
+    const lexemes = ['T', ':=', 'V'];
+
+    const result = parser.parse(lexemes);
+
+    expect(result).toStrictEqual({ 'T': 'V' });
+  });
+
+  it('parses type definitions and value definitions', () => {
+    const lexemes = ['T', ':=', 'V', 'v', ':=', '0', 'w', ':', 'T', ':=', '1'];
+    innerParser.parse = _l => {
+      if (JSON.stringify(_l) === JSON.stringify(['0'])) return 'ast1';
+      if (JSON.stringify(_l) === JSON.stringify(['1'])) return { obj: 'ast2' };
+    };
+
+    const result = parser.parse(lexemes);
+
+    expect(result).toStrictEqual({
+      'T': 'V',
+      'v': 'ast1',
+      'w': { obj: 'ast2', type: 'T' },
+    });
+  });
+
+  it('underscore is not treated as a type', () => {
+    const lexemes = ['_', ':=', '_', '_', '->', '0'];
+    innerParser.parse = _l => {
+      if (JSON.stringify(_l) === JSON.stringify(['_', '_', '->', '0'])) return 'ast';
+    };
+
+    const result = parser.parse(lexemes);
+
+    expect(result).toStrictEqual({ '_': 'ast' });
   });
 });

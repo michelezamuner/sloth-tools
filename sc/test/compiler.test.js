@@ -10,14 +10,12 @@ describe('compiler', () => {
   it('compiles program returning constant value', () => {
     const ast = {
       '_': {
-        obj: 'val',
-        val: {
-          args: [
-            { obj: 'arg', arg: '_' },
-            { obj: 'arg', arg: '_' },
-          ],
-          body: { obj: 'val', val: '0' },
-        }
+        obj: 'fun',
+        args: [
+          { obj: 'arg', arg: '_' },
+          { obj: 'arg', arg: '_' },
+        ],
+        body: { obj: 'val', val: '0' },
       },
     };
     const bytecode = compiler.parse(ast);
@@ -33,14 +31,12 @@ describe('compiler', () => {
   it('compiles program referencing local value', () => {
     const ast = {
       '_': {
-        obj: 'val',
-        val: {
-          args: [
-            { obj: 'arg', arg: '_', type: 'int' },
-            { obj: 'arg', arg: '_', type: 'char[][]' },
-          ],
-          body: { obj: 'ref', ref: 'v' },
-        },
+        obj: 'fun',
+        args: [
+          { obj: 'arg', arg: '_' },
+          { obj: 'arg', arg: '_' },
+        ],
+        body: { obj: 'ref', ref: 'v' },
       },
       'v': { obj: 'val', val: '2' },
     };
@@ -61,20 +57,18 @@ describe('compiler', () => {
   it('compiles program calling native function', () => {
     const ast = {
       '_': {
-        obj: 'val',
-        val: {
+        obj: 'fun',
+        args: [
+          { obj: 'arg', arg: '_' },
+          { obj: 'arg', arg: '_' },
+        ],
+        body: {
+          obj: 'expr',
+          fun: { obj: 'ref', ref: 'std.int.add', loc: 'native' },
           args: [
-            { obj: 'arg', arg: '_' },
-            { obj: 'arg', arg: '_' },
+            { obj: 'val', val: '1' },
+            { obj: 'val', val: '1' },
           ],
-          body: {
-            obj: 'expr',
-            fun: { obj: 'ref', ref: 'std.int.add', loc: 'native' },
-            args: [
-              { obj: 'val', val: '1' },
-              { obj: 'val', val: '1' },
-            ],
-          },
         },
       },
     };
@@ -96,37 +90,33 @@ describe('compiler', () => {
   it('compiles program calling local function', () => {
     const ast = {
       '_': {
-        obj: 'val',
-        val: {
+        obj: 'fun',
+        args: [
+          { obj: 'arg', arg: '_' },
+          { obj: 'arg', arg: '_' },
+        ],
+        body: {
+          obj: 'expr',
+          fun: { obj: 'ref', ref: 'f', loc: 'local' },
           args: [
-            { obj: 'arg', arg: '_' },
-            { obj: 'arg', arg: '_' },
+            { obj: 'val', val: '1' },
+            { obj: 'val', val: '2' },
           ],
-          body: {
-            obj: 'expr',
-            fun: { obj: 'ref', ref: 'f', loc: 'local' },
-            args: [
-              { obj: 'val', val: '1' },
-              { obj: 'val', val: '2' },
-            ],
-          },
         },
       },
       'f': {
-        obj: 'val',
-        val: {
+        obj: 'fun',
+        args: [
+          { obj: 'arg', arg: 'b' },
+          { obj: 'arg', arg: 'a' },
+        ],
+        body: {
+          obj: 'expr',
+          fun: { obj: 'ref', ref: 'std.int.add', loc: 'native' },
           args: [
-            { obj: 'arg', arg: 'b' },
-            { obj: 'arg', arg: 'a' },
+            { obj: 'ref', ref: 'a' },
+            { obj: 'ref', ref: 'b' },
           ],
-          body: {
-            obj: 'expr',
-            fun: { obj: 'ref', ref: 'std.int.add', loc: 'native' },
-            args: [
-              { obj: 'ref', ref: 'a' },
-              { obj: 'ref', ref: 'b' },
-            ],
-          },
         },
       },
     };
@@ -159,54 +149,48 @@ describe('compiler', () => {
   it('compiles program referencing multiple local functions and values', () => {
     const ast = {
       '_': {
-        obj: 'val',
-        val: {
+        obj: 'fun',
+        args: [
+          { obj: 'arg', arg: '_' },
+          { obj: 'arg', arg: '_' },
+        ],
+        body: {
+          obj: 'expr',
+          fun: { obj: 'ref', ref: 'f1', loc: 'local' },
           args: [
-            { obj: 'arg', arg: '_' },
-            { obj: 'arg', arg: '_' },
+            { obj: 'ref', ref: 'a' },
+            { obj: 'ref', ref: 'b' },
           ],
-          body: {
-            obj: 'expr',
-            fun: { obj: 'ref', ref: 'f1', loc: 'local' },
-            args: [
-              { obj: 'ref', ref: 'a' },
-              { obj: 'ref', ref: 'b' },
-            ],
-          },
         },
       },
       'f1': {
-        obj: 'val',
-        val: {
+        obj: 'fun',
+        args: [
+          { obj: 'arg', arg: 'a' },
+          { obj: 'arg', arg: 'b' },
+        ],
+        body: {
+          obj: 'expr',
+          fun: { obj: 'ref', ref: 'f2', loc: 'local' },
           args: [
-            { obj: 'arg', arg: 'a' },
-            { obj: 'arg', arg: 'b' },
+            { obj: 'ref', ref: 'a' },
+            { obj: 'ref', ref: 'b' },
           ],
-          body: {
-            obj: 'expr',
-            fun: { obj: 'ref', ref: 'f2', loc: 'local' },
-            args: [
-              { obj: 'ref', ref: 'a' },
-              { obj: 'ref', ref: 'b' },
-            ],
-          },
         },
       },
       'f2': {
-        obj: 'val',
-        val: {
+        obj: 'fun',
+        args: [
+          { obj: 'arg', arg: 'b' },
+          { obj: 'arg', arg: 'a' },
+        ],
+        body: {
+          obj: 'expr',
+          fun: { obj: 'ref', ref: 'std.int.add', loc: 'native' },
           args: [
-            { obj: 'arg', arg: 'b' },
-            { obj: 'arg', arg: 'a' },
+            { obj: 'ref', ref: 'a' },
+            { obj: 'ref', ref: 'b' },
           ],
-          body: {
-            obj: 'expr',
-            fun: { obj: 'ref', ref: 'std.int.add', loc: 'native' },
-            args: [
-              { obj: 'ref', ref: 'a' },
-              { obj: 'ref', ref: 'b' },
-            ],
-          },
         },
       },
       'a': { obj: 'val', val: '1' },
@@ -257,15 +241,15 @@ describe('compiler', () => {
 
   it('compiles library that exports type definitions', () => {
     const ast = {
-      't': { obj: 'type', type: 'v' },
-      'u': { obj: 'type', type: 'w' },
+      'T': 'V',
+      'U': 'W',
     };
 
     const bytecode = compiler.parse(ast);
 
     expect(bytecode).toBe(`
-      ; t :: v
-      ; u :: w
+      ; T: V
+      ; U: W
     `.split('\n').map(l => l.trim()).join('\n').trim());
   });
 });

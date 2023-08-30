@@ -10,14 +10,12 @@ describe('checker', () => {
   it('parses the main function', () => {
     const ast = {
       '_': {
-        obj: 'val',
-        val: {
-          args: [
-            { obj: 'arg', arg: 'argc' },
-            { obj: 'arg', arg: 'argv' },
-          ],
-          body: { obj: 'ref', ref: '0' },
-        },
+        obj: 'fun',
+        args: [
+          { obj: 'arg', arg: 'argc' },
+          { obj: 'arg', arg: 'argv' },
+        ],
+        body: { obj: 'ref', ref: '0' },
       },
     };
 
@@ -25,14 +23,12 @@ describe('checker', () => {
 
     expect(output).toStrictEqual({
       '_': {
-        obj: 'val',
-        val: {
-          args: [
-            { obj: 'arg', arg: 'argc', type: 'int' },
-            { obj: 'arg', arg: 'argv', type: 'char[][]' },
-          ],
-          body: { obj: 'ref', ref: '0', type: 'int' },
-        },
+        obj: 'fun',
+        args: [
+          { obj: 'arg', arg: 'argc', type: 'int' },
+          { obj: 'arg', arg: 'argv', type: 'char[][]' },
+        ],
+        body: { obj: 'ref', ref: '0', type: 'int' },
       },
     });
   });

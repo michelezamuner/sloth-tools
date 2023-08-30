@@ -5,23 +5,21 @@ module.exports = class Compiler {
     let bytecode = [];
 
     for (const name in ast) {
-      if (ast[name].obj === 'type') {
-        bytecode = bytecode.concat([`; ${name} :: ${ast[name].type}`]);
+      const def = ast[name];
+
+      if (!def.obj) {
+        bytecode = bytecode.concat([`; ${name}: ${def}`]);
 
         continue;
       }
 
-      const def = ast[name];
-
-      if (def.obj !== 'val') continue;
-
-      if (!def.val.body) {
+      if (def.obj === 'val') {
         bytecode = bytecode.concat([`; ${name}`, `0x00 ${this._hex(def.val)}`]);
 
         continue;
       }
 
-      bytecode = bytecode.concat(this._fun(name, def.val));
+      bytecode = bytecode.concat(this._fun(name, def));
     }
 
     return bytecode.join('\n');

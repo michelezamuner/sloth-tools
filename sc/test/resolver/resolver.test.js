@@ -8,22 +8,59 @@ describe('resolver', () => {
     resolver = new Resolver(refResolver);
   });
 
-  it('resolves function reference', () => {
+  it('resolves single value', () => {
+    const ast = {
+      'v': { obj: 'val', val: '0' },
+    };
+
+    const result = resolver.parse(ast);
+
+    expect(result).toStrictEqual({
+      'v': { obj: 'val', val: '0' },
+    });
+  });
+
+  it('resolves function returning value', () => {
     const ast = {
       '_': {
-        obj: 'val',
-        val: {
+        obj: 'fun',
+        args: [
+          { obj: 'arg', arg: '_' },
+          { obj: 'arg', arg: '_' },
+        ],
+        body: { obj: 'val', val: '0' },
+      },
+    };
+
+    const result = resolver.parse(ast);
+
+    expect(result).toStrictEqual({
+      '_': {
+        obj: 'fun',
+        args: [
+          { obj: 'arg', arg: '_' },
+          { obj: 'arg', arg: '_' },
+        ],
+        body: { obj: 'val', val: '0' },
+      },
+    });
+  });
+
+  it('resolves function calling function reference', () => {
+    const ast = {
+      '_': {
+        obj: 'fun',
+        args: [
+          { obj: 'arg', arg: '_' },
+          { obj: 'arg', arg: '_' },
+        ],
+        body: {
+          obj: 'expr',
+          fun: { obj: 'ref', ref: 'ref' },
           args: [
-            { obj: 'arg', arg: '_' },
-            { obj: 'arg', arg: '_' },
+            { obj: 'val', val: '1' },
+            { obj: 'val', val: '2' },
           ],
-          body: {
-            fun: { obj: 'ref', ref: 'ref' },
-            args: [
-              { obj: 'val', val: '1' },
-              { obj: 'val', val: '2' },
-            ],
-          },
         },
       },
     };
@@ -33,19 +70,18 @@ describe('resolver', () => {
 
     expect(result).toStrictEqual({
       '_': {
-        obj: 'val',
-        val: {
+        obj: 'fun',
+        args: [
+          { obj: 'arg', arg: '_' },
+          { obj: 'arg', arg: '_' },
+        ],
+        body: {
+          obj: 'expr',
+          fun: 'resolved',
           args: [
-            { obj: 'arg', arg: '_' },
-            { obj: 'arg', arg: '_' },
+            { obj: 'val', val: '1' },
+            { obj: 'val', val: '2' },
           ],
-          body: {
-            fun: 'resolved',
-            args: [
-              { obj: 'val', val: '1' },
-              { obj: 'val', val: '2' },
-            ],
-          },
         },
       },
     });
