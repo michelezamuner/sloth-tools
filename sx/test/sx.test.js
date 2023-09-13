@@ -67,4 +67,22 @@ describe('sx', () => {
     }
     expect.hasAssertions();
   });
+
+  it('uses aliases', () => {
+    const program = `
+      _ := _ _ -> f 1 3
+      f :: g
+      g := a b -> std.uint8.add a b
+    `;
+
+    fs.writeFileSync('/tmp/sx_test', program);
+
+    try {
+      exec('bin/sx /tmp/sx_test');
+    } catch (e) {
+      expect(e.status).toBe(4);
+      expect(e.stdout.toString()).toBe('');
+    }
+    expect.hasAssertions();
+  });
 });

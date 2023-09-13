@@ -8,7 +8,7 @@ describe('module parser', () => {
     parser = new ModuleParser(innerParser);
   });
 
-  it('parses module with single definition', () => {
+  it('parses single definition', () => {
     const lexemes = ['v', ':=', 'a', 'b', 'c'];
     innerParser.parse = _l => JSON.stringify(_l) === JSON.stringify(['a', 'b', 'c']) ? 'ast' : null;
 
@@ -17,7 +17,7 @@ describe('module parser', () => {
     expect(result).toStrictEqual({ 'v': 'ast' });
   });
 
-  it('parses module with multiple definitions', () => {
+  it('parses multiple definitions', () => {
     const lexemes = ['u', ':=', '0', 'v', ':=', '1', 'z', ':=', '2'];
     innerParser.parse = _l => {
       if (JSON.stringify(_l) === JSON.stringify(['0'])) return 'ast0';
@@ -34,7 +34,7 @@ describe('module parser', () => {
     });
   });
 
-  it('parses module with type application', () => {
+  it('parses single type application', () => {
     const lexemes = ['f', ':', 'n', 'n', '->', 'n', ':=', 'a', 'b', '->', 'c'];
     innerParser.parse = _l => {
       if (JSON.stringify(_l) === JSON.stringify(['a', 'b', '->', 'c'])) return { obj: 'ast' };
@@ -47,7 +47,7 @@ describe('module parser', () => {
     });
   });
 
-  it('parses module with multiple type applications', () => {
+  it('parses multiple type applications', () => {
     const lexemes = ['f', ':', 'n', 'n', '->', 'n', ':=', 'a', 'b', '->', 'c', 'g', ':', 'm', 'm', '->', 'm', ':=', 'd', 'e', '->', 'f'];
     innerParser.parse = _l => {
       if (JSON.stringify(_l) === JSON.stringify(['a', 'b', '->', 'c'])) return { obj: 'ast1' };
@@ -62,7 +62,7 @@ describe('module parser', () => {
     });
   });
 
-  it('parses module with definitions where some have type applications', () => {
+  it('parses definitions where only some have type applications', () => {
     const lexemes = ['v', ':', 'n', ':=', '0', 'w', ':=', '1', 'f', ':', 'n', 'n', '->', 'n', ':=', 'a', 'b', '->', 'c'];
     innerParser.parse = _l => {
       if (JSON.stringify(_l) === JSON.stringify(['0'])) return { obj: 'ast1' };
@@ -103,7 +103,7 @@ describe('module parser', () => {
     });
   });
 
-  it('underscore is not treated as a type', () => {
+  it('parses underscore as a function', () => {
     const lexemes = ['_', ':=', '_', '_', '->', '0'];
     innerParser.parse = _l => {
       if (JSON.stringify(_l) === JSON.stringify(['_', '_', '->', '0'])) return 'ast';
@@ -112,5 +112,18 @@ describe('module parser', () => {
     const result = parser.parse(lexemes);
 
     expect(result).toStrictEqual({ '_': 'ast' });
+  });
+
+  it('parses aliases', () => {
+    const lexemes = ['a', '::', 'b', 'c', '::', 'd', 'f', ':=', '_', '_', '->', 'a', 'c'];
+    innerParser.parse = _l => {
+      if (JSON.stringify(_l) === JSON.stringify(['_', '_', '->', 'b', 'd'])) return 'ast';
+    };
+
+    const result = parser.parse(lexemes);
+
+    expect(result).toStrictEqual({
+      'f' : 'ast',
+    });
   });
 });
