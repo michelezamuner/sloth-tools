@@ -70,9 +70,8 @@ describe('sx', () => {
 
   it('uses aliases', () => {
     const program = `
-      _ := _ _ -> f 1 3
-      f :: g
-      g := a b -> std.uint8.add a b
+      add :: std.uint8.add
+      _ := _ _ -> add 1 3
     `;
 
     fs.writeFileSync('/tmp/sx_test', program);
