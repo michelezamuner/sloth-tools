@@ -1,11 +1,8 @@
 {
-  "name": "sc",
+  "name": "sl-alpha",
   "version": "0.0.1",
   "license": "MIT",
-  "bin": "./bin/sc",
-  "dependencies": {
-    "sl-alpha": "file:../sl-alpha"
-  },
+  "main": "main.js",
   "devDependencies": {
     "eslint": "^7.31.0",
     "jest": "^28.1.2"
