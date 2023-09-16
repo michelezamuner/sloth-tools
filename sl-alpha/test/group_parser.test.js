@@ -1,4 +1,4 @@
-const GroupParser = require('../../src/parser/group_parser');
+const GroupParser = require('../src/group_parser');
 
 describe('group parser', () => {
   let parser = null;

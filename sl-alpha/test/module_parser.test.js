@@ -1,4 +1,4 @@
-const ModuleParser = require('../../src/parser/module_parser');
+const ModuleParser = require('../src/module_parser');
 
 describe('module parser', () => {
   let parser = null;
