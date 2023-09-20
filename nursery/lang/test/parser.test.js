@@ -9,8 +9,7 @@ describe('parser', () => {
     expect(ast).toStrictEqual({
       obj: 'rel',
       id: 'a',
-      arg: ':b',
-      val: ':c',
+      rel: { ':b': ':c'},
     });
   });
 
@@ -35,8 +34,7 @@ describe('parser', () => {
       {
         obj: 'rel',
         id: 'a',
-        arg: ':b',
-        val: ':c',
+        rel: { ':b': ':c' },
       },
       {
         obj: 'app',
@@ -55,8 +53,7 @@ describe('parser', () => {
       {
         obj: 'rel',
         id: '#rel_0',
-        arg: ':b',
-        val: ':c',
+        rel: { ':b': ':c' },
       },
       {
         obj: 'app',
@@ -65,4 +62,16 @@ describe('parser', () => {
       },
     ]);
   })
+
+  it('parses relation with match of single value', () => {
+    const tokens = ['rel', 'a', 'of', 'v', 'is', 'match', 'v', 'in', ':b', 'is', ':c', ',', ':d', 'is', ':e'];
+
+    const ast = parse(tokens);
+
+    expect(ast).toStrictEqual({
+      obj: 'rel',
+      id: 'a',
+      rel: { ':b': ':c', ':d': ':e' },
+    });
+  });
 });

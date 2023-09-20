@@ -5,8 +5,7 @@ describe('interpreter', () => {
     const ast = {
       obj: 'rel',
       id: 'a',
-      arg: ':b',
-      val: ':c',
+      rel: { ':b': ':c' },
     };
 
     const result = run(ast);
@@ -14,8 +13,7 @@ describe('interpreter', () => {
     expect(result).toStrictEqual({
       obj: 'rel',
       id: 'a',
-      arg: ':b',
-      val: ':c',
+      rel: { ':b': ':c' },
     });
   });
 
@@ -24,8 +22,7 @@ describe('interpreter', () => {
       {
         obj: 'rel',
         id: 'a',
-        arg: ':b',
-        val: ':c',
+        rel: { ':b': ':c' },
       },
       {
         obj: 'app',
@@ -44,14 +41,7 @@ describe('interpreter', () => {
       {
         obj: 'rel',
         id: 'a',
-        arg: ':a',
-        val: ':b',
-      },
-      {
-        obj: 'rel',
-        id: 'a',
-        arg: ':b',
-        val: ':c',
+        rel: { ':a': ':b', ':b': ':c' },
       },
     ];
 
