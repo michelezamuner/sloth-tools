@@ -5,16 +5,21 @@ const run = ast => {
     return ast;
   }
 
+  let result = null;
+
   for (const expr of ast) {
     if (expr.obj === 'rel') {
-      ctx[expr.id] = expr;
+      if (!ctx[expr.id]) {
+        ctx[expr.id] = {};
+      }
+      ctx[expr.id][expr.arg] = expr.val;
     }
     if (expr.obj === 'app') {
-      const rel = ctx[expr.rel];
-
-      return rel.val;
+      result = ctx[expr.rel][expr.arg];
     }
   }
+
+  return result;
 };
 
 module.exports = {
