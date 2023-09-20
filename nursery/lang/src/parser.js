@@ -1,14 +1,49 @@
-const parse = tokens => {
+let lastRelId = -1;
+
+const parseGroups = tokens => {
+  const parsedTokens = [];
+
+  let isGroup = false;
+  const group = [];
+
+  for (const token of tokens) {
+    if (token === '(') {
+      isGroup = true;
+
+      continue;
+    }
+
+    if (token === ')') {
+      parsedTokens.push(parseExpr(group));
+      isGroup = false;
+
+      continue;
+    }
+
+    if (isGroup) {
+      group.push(token);
+
+      continue;
+    }
+
+    parsedTokens.push(token);
+  }
+
+  return parsedTokens;
+};
+
+const parseExpr = tokens => {
   const exprs = [];
+
   let start = 0;
   let sepId = tokens.indexOf(';');
 
   while (sepId !== -1) {
-    exprs.push(parse(tokens.slice(start, sepId)));
+    exprs.push(parseExpr(tokens.slice(start, sepId)));
     start = sepId + 1;
-    sepId = tokens.indexOf(';', sepId + 1);
+    sepId = tokens.indexOf(';', start);
     if (sepId === -1) {
-      exprs.push(parse(tokens.slice(start)));
+      exprs.push(parseExpr(tokens.slice(start)));
     }
   }
 
@@ -19,10 +54,21 @@ const parse = tokens => {
   if (tokens[0] === 'rel') {
     return {
       obj: 'rel',
-      id: tokens[1],
-      arg: tokens[3],
-      val: tokens[5],
+      id: tokens[2] === 'of' ? tokens[1] : `#rel_${++lastRelId}`,
+      arg: tokens[2] === 'of' ? tokens[3] : tokens[2],
+      val: tokens[2] === 'of' ? tokens[5] : tokens[4],
     }
+  }
+
+  if (typeof tokens[0] === 'object') {
+    exprs.push(tokens[0]);
+    exprs.push({
+      obj: 'app',
+      rel: tokens[0].id,
+      arg: tokens[2],
+    });
+
+    return exprs;
   }
 
   return {
@@ -33,5 +79,5 @@ const parse = tokens => {
 };
 
 module.exports = {
-  parse: parse,
+  parse: tokens => parseExpr(parseGroups(tokens)),
 };

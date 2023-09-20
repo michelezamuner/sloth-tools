@@ -45,4 +45,24 @@ describe('parser', () => {
       },
     ]);
   });
+
+  it('parses nested application', () => {
+    const tokens = ['(', 'rel', 'of', ':b', 'is', ':c', ')', 'of', ':b'];
+
+    const ast = parse(tokens);
+
+    expect(ast).toStrictEqual([
+      {
+        obj: 'rel',
+        id: '#rel_0',
+        arg: ':b',
+        val: ':c',
+      },
+      {
+        obj: 'app',
+        rel: '#rel_0',
+        arg: ':b',
+      },
+    ]);
+  })
 });
