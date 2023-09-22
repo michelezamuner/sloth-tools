@@ -39,6 +39,7 @@
     },
     "globals": {
       "__dirname": "readonly",
+      "console": "readonly",
       "process": "readonly",
       "jest": "readonly",
       "describe": "readonly",

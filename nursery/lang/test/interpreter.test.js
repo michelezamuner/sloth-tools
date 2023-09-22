@@ -1,7 +1,7 @@
 const run = require('../src/interpreter').run;
 
 describe('interpreter', () => {
-  it('evaluates relation definition', () => {
+  it('evaluates relation', () => {
     const ast = {
       obj: 'rel',
       id: 'a',
@@ -34,6 +34,29 @@ describe('interpreter', () => {
     const result = run(ast);
 
     expect(result).toStrictEqual(':c');
+  });
+
+  it('evaluates multiple relations', () => {
+    const ast = [
+      {
+        obj: 'rel',
+        id: 'a',
+        rel: { ':b': ':c' },
+      },
+      {
+        obj: 'rel',
+        id: 'd',
+        rel: { ':e': ':f' },
+      },
+    ];
+
+    const result = run(ast);
+
+    expect(result).toStrictEqual({
+      obj: 'rel',
+      id: 'd',
+      rel: { ':e': ':f' },
+    });
   });
 
   it('evaluates application of relation with multiple values', () => {

@@ -13,7 +13,26 @@ describe('parser', () => {
     });
   });
 
-  it('parses single application', () => {
+  it('parses definitions of different relations', () => {
+    const tokens = ['rel', 'a', 'of', ':b', 'is', ':c', ';', 'rel', 'd', 'of', ':e', 'is', ':f'];
+
+    const ast = parse(tokens);
+
+    expect(ast).toStrictEqual([
+      {
+        obj: 'rel',
+        id: 'a',
+        rel: { ':b': ':c'},
+      },
+      {
+        obj: 'rel',
+        id: 'd',
+        rel: { ':e': ':f'},
+      }
+    ]);
+  });
+
+  it('parses application', () => {
     const tokens = ['a', 'of', ':b'];
 
     const ast = parse(tokens);
@@ -61,7 +80,7 @@ describe('parser', () => {
         arg: ':b',
       },
     ]);
-  })
+  });
 
   it('parses relation with match of single value', () => {
     const tokens = ['rel', 'a', 'of', 'v', 'is', 'match', 'v', 'in', ':b', 'is', ':c', ',', ':d', 'is', ':e'];

@@ -7,4 +7,4 @@ const tokens = tokenize(code);
 const ast = parse(tokens);
 const output = run(ast);
 
-console.log(output);
+console.log(output.obj === 'rel' ? `rel \`${output.id}\`` : output);

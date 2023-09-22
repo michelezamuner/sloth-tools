@@ -6,7 +6,7 @@ module.exports = {
     for (let i in code) {
       let char = code[i];
       if (char === '\n' && code[+i+1].trim() !== '') {
-        char = ';'
+        char = ';';
       }
 
       if (!isComment && char === '#') {
@@ -34,7 +34,7 @@ module.exports = {
           tokens.push(token.join(''));
           token.length = 0;
         }
-        tokens.push(char)
+        tokens.push(char);
 
         continue;
       }

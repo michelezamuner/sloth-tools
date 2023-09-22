@@ -5,6 +5,7 @@ const run = ast => {
 
   const ctx = {};
   let result = null;
+  let lastExpr = null;
 
   for (const expr of ast) {
     if (expr.obj === 'rel') {
@@ -13,9 +14,10 @@ const run = ast => {
     if (expr.obj === 'app') {
       result = ctx[expr.rel][expr.arg];
     }
+    lastExpr = expr;
   }
 
-  return result;
+  return result || lastExpr;
 };
 
 module.exports = {

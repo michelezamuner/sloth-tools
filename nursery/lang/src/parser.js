@@ -62,6 +62,7 @@ const parseExpr = tokens => {
       let rel = rels.find(r => r.id === expr.id);
       if (!rel) {
         rel = { obj: 'rel', id: expr.id, rel: {} };
+        rels.push(rel);
       }
       rel.rel = { ...rel.rel, ...expr.rel };
     } else {
