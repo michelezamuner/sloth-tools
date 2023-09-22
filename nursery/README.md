@@ -25,19 +25,12 @@ In the previous syntax, the term `a` is a reference to a relation, and not a rel
 A relation can be applied to multiple values:
 
 ```sloth
-rel a of :b is :c
-rel a of :d is :e
-```
-
-This can be written as a single definition by using a match:
-
-```sloth
 rel a of v is match v in
   :b is :c,
   :d is :e
 ```
 
-Here `v` is not another relation, but a reference to an unknown value. In fact, any of the following applications will match the previous definition:
+here `v` is not another relation, but a reference to an unknown value. In fact, any of the following applications will match the previous definition:
 
 ```sloth
 a of :b # evaluated to :c
@@ -45,13 +38,6 @@ a of :d # evaluated to :e
 ```
 
 For example, we can define the "not" relation for boolean values like this:
-
-```sloth
-rel not of :false is :true
-rel not of :true is :false
-```
-
-or, using the match:
 
 ```sloth
 rel not of v is match v in
@@ -62,17 +48,14 @@ rel not of v is match v in
 In order to define the "and" relation, which works with two arguments, we can split it into two sub-relations first:
 
 ```sloth
-rel and_false of :false is :false
-rel and_false of :true is :false
-rel and_true of :false is :false
-rel and_true of :true is :true
+rel and_false of v is match v in :false is :false, :true is :false
+rel and_true of v is match v in :false is :false, :true is :true
 ```
 
 and then we can refer to these two sub-relations in order to define the real "and" relation:
 
 ```sloth
-rel and of :false is :and_false
-rel and of :true is :and_true
+rel and of v is match v in :false is :and_false, :true is :and_true
 ```
 
 Now we can use `and` like this:
@@ -87,7 +70,7 @@ which can be simplified with the following syntax:
 and of :true, :true # evaluates to :true
 ```
 
-However, we can use anonymous relations and matches in order to avoid defining explicit sub-relations:
+We can use anonymous relations in order to avoid defining explicit sub-relations:
 
 ```sloth
 rel and of v is match v in

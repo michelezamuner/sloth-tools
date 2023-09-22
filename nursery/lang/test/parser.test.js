@@ -1,7 +1,7 @@
 const parse = require('../src/parser').parse;
 
 describe('parser', () => {
-  it('parses single relation definition', () => {
+  it('parses single relation', () => {
     const tokens = ['rel', 'a', 'of', ':b', 'is', ':c'];
 
     const ast = parse(tokens);
@@ -13,23 +13,16 @@ describe('parser', () => {
     });
   });
 
-  it('parses definitions of different relations', () => {
-    const tokens = ['rel', 'a', 'of', ':b', 'is', ':c', ';', 'rel', 'd', 'of', ':e', 'is', ':f'];
+  it('parses anonymous relation', () => {
+    const tokens = ['rel', 'of', ':b', 'is', ':c'];
 
     const ast = parse(tokens);
 
-    expect(ast).toStrictEqual([
-      {
-        obj: 'rel',
-        id: 'a',
-        rel: { ':b': ':c'},
-      },
-      {
-        obj: 'rel',
-        id: 'd',
-        rel: { ':e': ':f'},
-      }
-    ]);
+    expect(ast).toStrictEqual({
+      obj: 'rel',
+      id: '#rel_0',
+      rel: { ':b': ':c'},
+    });
   });
 
   it('parses application', () => {
@@ -44,16 +37,21 @@ describe('parser', () => {
     });
   });
 
-  it('parses mix of expressions', () => {
-    const tokens = ['rel', 'a', 'of', ':b', 'is', ':c', ';', 'a', 'of', ':b'];
+  it('parses multiple expressions', () => {
+    const tokens = ['rel', 'of', ':a', 'is', ':b', ';', 'rel', 'of', ':c', 'is', ':d', ';', 'a', 'of', ':b'];
 
     const ast = parse(tokens);
 
     expect(ast).toStrictEqual([
       {
         obj: 'rel',
-        id: 'a',
-        rel: { ':b': ':c' },
+        id: '#rel_0',
+        rel: { ':a': ':b'},
+      },
+      {
+        obj: 'rel',
+        id: '#rel_1',
+        rel: { ':c': ':d'},
       },
       {
         obj: 'app',
@@ -61,6 +59,12 @@ describe('parser', () => {
         arg: ':b',
       },
     ]);
+  });
+
+  it('prevents from defining multiple relations with the same name', () => {
+    const tokens = ['rel', 'a', 'of', ':b', 'is', ':c', ';', 'rel', 'a', 'of', ':c', 'is', ':d'];
+
+    expect(() => parse(tokens)).toThrow('Relation `a` is defined multiple times');
   });
 
   it('parses nested application', () => {
@@ -82,7 +86,7 @@ describe('parser', () => {
     ]);
   });
 
-  it('parses relation with match of single value', () => {
+  it('parses relation matching single value', () => {
     const tokens = ['rel', 'a', 'of', 'v', 'is', 'match', 'v', 'in', ':b', 'is', ':c', ',', ':d', 'is', ':e'];
 
     const ast = parse(tokens);

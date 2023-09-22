@@ -1,80 +1,61 @@
-let lastRelId = -1;
+const parse = tokens => {
+  let lastRel = { id: -1 };
 
-const parseGroups = tokens => {
-  const parsedTokens = [];
-
-  let isGroup = false;
-  const group = [];
-
+  const groups = [[]];
+  let groupId = 0;
   for (const token of tokens) {
     if (token === '(') {
-      isGroup = true;
+      groupId++;
+      groups[groupId] = [];
 
       continue;
     }
 
     if (token === ')') {
-      parsedTokens.push(parseExpr(group));
-      isGroup = false;
+      const parsedGroup = parseExpr(groups[groupId], lastRel);
+      groupId--;
+      groups[groupId].push(parsedGroup);
 
       continue;
     }
 
-    if (isGroup) {
-      group.push(token);
-
-      continue;
-    }
-
-    parsedTokens.push(token);
+    groups[groupId].push(token);
   }
 
-  return parsedTokens;
+  return parseExpr(groups[0], lastRel);
 };
 
-const parseExpr = tokens => {
-  const rels = [];
-  const apps = [];
+const parseExpr = (tokens, lastRel) => {
+  const exprs = [];
 
   let start = 0;
   let sepId = tokens.indexOf(';');
 
   while (sepId !== -1) {
-    const expr = parseExpr(tokens.slice(start, sepId));
-    if (expr.obj === 'rel') {
-      let rel = rels.find(r => r.id === expr.id);
-      if (!rel) {
-        rel = { obj: 'rel', id: expr.id, rel: {} };
-        rels.push(rel);
-      }
-      rel.rel = { ...rel.rel, ...expr.rel };
-    } else {
-      apps.push(expr);
+    const expr = parseExpr(tokens.slice(start, sepId), lastRel);
+    if (expr.obj === 'rel' && exprs.find(e => e.id === expr.id)) {
+      throw `Relation \`${expr.id}\` is defined multiple times`;
     }
+    exprs.push(expr);
 
     start = sepId + 1;
     sepId = tokens.indexOf(';', start);
   }
 
-  if (rels.length || apps.length) {
-    const expr = parseExpr(tokens.slice(start));
-    if (expr.obj === 'rel') {
-      let rel = rels.find(r => r.id === expr.id);
-      if (!rel) {
-        rel = { obj: 'rel', id: expr.id, rel: {} };
-        rels.push(rel);
-      }
-      rel.rel = { ...rel.rel, ...expr.rel };
-    } else {
-      apps.push(expr);
+  if (exprs.length) {
+    const expr = parseExpr(tokens.slice(start), lastRel);
+    if (expr.obj === 'rel' && exprs.find(e => e.id === expr.id)) {
+      throw `Relation \`${expr.id}\` is defined multiple times`;
     }
+    exprs.push(expr);
 
-    return [...rels, ...apps];
+    return exprs;
   }
 
   if (tokens[0] === 'rel') {
     const hasId = tokens[2] === 'of';
-    const id = hasId ? tokens[1] : `#rel_${++lastRelId}`;
+    lastRel.id++;
+    const id = hasId ? tokens[1] : `#rel_${lastRel.id}`;
     const rel = {};
     const matchId = tokens.indexOf('match');
     if (matchId === -1) {
@@ -115,14 +96,14 @@ const parseExpr = tokens => {
   }
 
   if (typeof tokens[0] === 'object') {
-    apps.push(tokens[0]);
-    apps.push({
+    exprs.push(tokens[0]);
+    exprs.push({
       obj: 'app',
       rel: tokens[0].id,
       arg: tokens[2],
     });
 
-    return apps;
+    return exprs;
   }
 
   return {
@@ -133,5 +114,5 @@ const parseExpr = tokens => {
 };
 
 module.exports = {
-  parse: tokens => parseExpr(parseGroups(tokens)),
+  parse: parse,
 };
