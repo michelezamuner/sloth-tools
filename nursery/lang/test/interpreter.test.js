@@ -2,11 +2,11 @@ const run = require('../src/interpreter').run;
 
 describe('interpreter', () => {
   it('evaluates relation', () => {
-    const ast = {
+    const ast = [{
       obj: 'rel',
       id: 'a',
       rel: { ':b': ':c' },
-    };
+    }];
 
     const result = run(ast);
 
@@ -30,6 +30,43 @@ describe('interpreter', () => {
         arg: ':b',
       },
     ];
+
+    const result = run(ast);
+
+    expect(result).toStrictEqual(':c');
+  });
+
+  it('evaluates application of anonymous relation', () => {
+    const ast = [{
+      obj: 'app',
+      rel: {
+        obj: 'rel',
+        rel: { ':b': ':c' },
+      },
+      arg: ':b',
+    }];
+
+    const result = run(ast);
+
+    expect(result).toStrictEqual(':c');
+  });
+
+  it('evaluates compound applications', () => {
+    const ast = [{
+      obj: 'app',
+      rel: {
+        obj: 'app',
+        rel: {
+          obj: 'rel',
+          rel: { ':a': {
+            obj: 'rel',
+            rel: { ':b': ':c' },
+          }},
+        },
+        arg: ':a',
+      },
+      arg: ':b',
+    }];
 
     const result = run(ast);
 

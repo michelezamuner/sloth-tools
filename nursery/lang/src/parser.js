@@ -1,20 +1,74 @@
-const parse = tokens => {
-  let lastRel = { id: -1 };
+const parseMatch = tokens => {
+  const rels = {};
+  let state = 'key';
+  let currentKey = null;
+  for (const token of tokens) {
+    if (token === 'is' || token === ',') {
+      continue;
+    }
 
+    if (state === 'key') {
+      currentKey = token;
+      state = 'val';
+
+      continue;
+    }
+
+    if (state === 'val') {
+      rels[currentKey] = token;
+      state = 'key';
+    }
+  }
+
+  return rels;
+};
+
+const parseRelVal = tokens => {
+  if (tokens[0] === 'match') {
+    return parseMatch(tokens.slice(3));
+  }
+
+  return tokens[0];
+};
+
+const parseRel = tokens => {
+  const hasName = tokens[2] === 'of';
+  const key = hasName ? tokens[3] : tokens[2];
+  const val = parseRelVal(hasName ? tokens.slice(5) : tokens.slice(4));
+
+  const rel = { obj: 'rel' };
+  if (hasName) {
+    rel.id = tokens[1];
+  }
+  rel.rel = typeof val === 'object' && val.obj !== 'rel' ? val : { [key]: val };
+
+  return rel;
+};
+
+const parseApp = tokens => {
+  return { obj: 'app', rel: tokens[0], arg: tokens[2] };
+};
+
+const parseExpr = tokens => {
+  return tokens[0] === 'rel' ? parseRel(tokens) : parseApp(tokens);
+};
+
+const parseLine = tokens => {
   const groups = [[]];
   let groupId = 0;
+
   for (const token of tokens) {
     if (token === '(') {
       groupId++;
-      groups[groupId] = [];
+      groups.push([]);
 
       continue;
     }
 
     if (token === ')') {
-      const parsedGroup = parseExpr(groups[groupId], lastRel);
+      const group = parseExpr(groups[groupId]);
       groupId--;
-      groups[groupId].push(parsedGroup);
+      groups[groupId].push(group);
 
       continue;
     }
@@ -22,97 +76,30 @@ const parse = tokens => {
     groups[groupId].push(token);
   }
 
-  return parseExpr(groups[0], lastRel);
+  return parseExpr(groups[0]);
 };
 
-const parseExpr = (tokens, lastRel) => {
+const parseLines = tokens => {
   const exprs = [];
-
   let start = 0;
-  let sepId = tokens.indexOf(';');
+  let sepId;
 
-  while (sepId !== -1) {
-    const expr = parseExpr(tokens.slice(start, sepId), lastRel);
-    if (expr.obj === 'rel' && exprs.find(e => e.id === expr.id)) {
-      throw `Relation \`${expr.id}\` is defined multiple times`;
-    }
-    exprs.push(expr);
-
-    start = sepId + 1;
+  do {
     sepId = tokens.indexOf(';', start);
-  }
-
-  if (exprs.length) {
-    const expr = parseExpr(tokens.slice(start), lastRel);
-    if (expr.obj === 'rel' && exprs.find(e => e.id === expr.id)) {
-      throw `Relation \`${expr.id}\` is defined multiple times`;
+    const line = sepId === -1
+      ? tokens.slice(start)
+      : tokens.slice(start, sepId);
+    const expr = parseLine(line);
+    if (expr.id && exprs.find(e => e.id === expr.id)) {
+      throw `Relation \`${expr.id}\` is already defined`;
     }
-    exprs.push(expr);
+    exprs.push(parseLine(line));
+    start = sepId + 1;
+  } while (sepId !== -1);
 
-    return exprs;
-  }
-
-  if (tokens[0] === 'rel') {
-    const hasId = tokens[2] === 'of';
-    lastRel.id++;
-    const id = hasId ? tokens[1] : `#rel_${lastRel.id}`;
-    const rel = {};
-    const matchId = tokens.indexOf('match');
-    if (matchId === -1) {
-      const key = hasId ? tokens[3] : tokens[2];
-      const val = hasId ? tokens[5] : tokens[4];
-      rel[key] = val;
-    } else {
-      const relList = tokens.slice(matchId + 3);
-      let state = 'key';
-      let key = null;
-      for (const token of relList) {
-        if (token === 'is') {
-          state = 'val';
-
-          continue;
-        }
-
-        if (token === ',') {
-          state = 'key';
-
-          continue;
-        }
-
-        if (state === 'key') {
-          key = token;
-
-          continue;
-        }
-
-        if (state === 'val') {
-          rel[key] = token;
-          key = null;
-        }
-      }
-    }
-
-    return { obj: 'rel', id: id, rel: rel };
-  }
-
-  if (typeof tokens[0] === 'object') {
-    exprs.push(tokens[0]);
-    exprs.push({
-      obj: 'app',
-      rel: tokens[0].id,
-      arg: tokens[2],
-    });
-
-    return exprs;
-  }
-
-  return {
-    obj: 'app',
-    rel: tokens[0],
-    arg: tokens[2],
-  };
+  return exprs;
 };
 
 module.exports = {
-  parse: parse,
+  parse: parseLines,
 };

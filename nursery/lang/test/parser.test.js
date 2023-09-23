@@ -6,11 +6,11 @@ describe('parser', () => {
 
     const ast = parse(tokens);
 
-    expect(ast).toStrictEqual({
+    expect(ast).toStrictEqual([{
       obj: 'rel',
       id: 'a',
       rel: { ':b': ':c'},
-    });
+    }]);
   });
 
   it('parses anonymous relation', () => {
@@ -18,11 +18,10 @@ describe('parser', () => {
 
     const ast = parse(tokens);
 
-    expect(ast).toStrictEqual({
+    expect(ast).toStrictEqual([{
       obj: 'rel',
-      id: '#rel_0',
       rel: { ':b': ':c'},
-    });
+    }]);
   });
 
   it('parses application', () => {
@@ -30,11 +29,11 @@ describe('parser', () => {
 
     const ast = parse(tokens);
 
-    expect(ast).toStrictEqual({
+    expect(ast).toStrictEqual([{
       obj: 'app',
       rel: 'a',
       arg: ':b',
-    });
+    }]);
   });
 
   it('parses multiple expressions', () => {
@@ -45,12 +44,10 @@ describe('parser', () => {
     expect(ast).toStrictEqual([
       {
         obj: 'rel',
-        id: '#rel_0',
         rel: { ':a': ':b'},
       },
       {
         obj: 'rel',
-        id: '#rel_1',
         rel: { ':c': ':d'},
       },
       {
@@ -61,29 +58,47 @@ describe('parser', () => {
     ]);
   });
 
-  it('prevents from defining multiple relations with the same name', () => {
-    const tokens = ['rel', 'a', 'of', ':b', 'is', ':c', ';', 'rel', 'a', 'of', ':c', 'is', ':d'];
-
-    expect(() => parse(tokens)).toThrow('Relation `a` is defined multiple times');
-  });
-
-  it('parses nested application', () => {
+  it('parses application of anonymous relation', () => {
     const tokens = ['(', 'rel', 'of', ':b', 'is', ':c', ')', 'of', ':b'];
 
     const ast = parse(tokens);
 
-    expect(ast).toStrictEqual([
-      {
+    expect(ast).toStrictEqual([{
+      obj: 'app',
+      rel: {
         obj: 'rel',
-        id: '#rel_0',
         rel: { ':b': ':c' },
       },
-      {
+      arg: ':b',
+    }]);
+  });
+
+  it('prevents from defining multiple relations with the same name', () => {
+    const tokens = ['rel', 'a', 'of', ':b', 'is', ':c', ';', 'rel', 'a', 'of', ':c', 'is', ':d'];
+
+    expect(() => parse(tokens)).toThrow('Relation `a` is already defined');
+  });
+
+  it('parses compound applications', () => {
+    const tokens = ['(', '(', 'rel', 'of', ':a', 'is', '(', 'rel', 'of', ':b', 'is', ':c', ')', ')', 'of', ':a', ')', 'of', ':b'];
+
+    const ast = parse(tokens);
+
+    expect(ast).toStrictEqual([{
+      obj: 'app',
+      rel: {
         obj: 'app',
-        rel: '#rel_0',
-        arg: ':b',
+        rel: {
+          obj: 'rel',
+          rel: { ':a': {
+            obj: 'rel',
+            rel: { ':b': ':c' },
+          }},
+        },
+        arg: ':a',
       },
-    ]);
+      arg: ':b',
+    }]);
   });
 
   it('parses relation matching single value', () => {
@@ -91,10 +106,10 @@ describe('parser', () => {
 
     const ast = parse(tokens);
 
-    expect(ast).toStrictEqual({
+    expect(ast).toStrictEqual([{
       obj: 'rel',
       id: 'a',
       rel: { ':b': ':c', ':d': ':e' },
-    });
+    }]);
   });
 });

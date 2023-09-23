@@ -1,9 +1,18 @@
-const run = ast => {
-  if (!Array.isArray(ast)) {
-    return ast;
+const evalApp = (app, ctx) => {
+  if (!app.rel.obj) {
+    return ctx[app.rel][app.arg];
   }
 
-  const ctx = {};
+  if (app.rel.obj === 'rel') {
+    return app.rel.rel[app.arg];
+  }
+
+  const rel = run([app.rel], ctx);
+
+  return rel.rel[app.arg];
+};
+
+const run = (ast, ctx = {}) => {
   let result = null;
   let lastExpr = null;
 
@@ -12,7 +21,7 @@ const run = ast => {
       ctx[expr.id] = expr.rel;
     }
     if (expr.obj === 'app') {
-      result = ctx[expr.rel][expr.arg];
+      result = evalApp(expr, ctx);
     }
     lastExpr = expr;
   }

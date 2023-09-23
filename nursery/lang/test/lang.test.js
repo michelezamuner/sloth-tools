@@ -14,15 +14,15 @@ describe('lang', () => {
 
     const output = exec(`bin/lang -e '${code}'`);
 
-    expect(output.toString().trim()).toBe('rel `#rel_0`');
+    expect(output.toString().trim()).toBe('rel');
   });
 
   it('evaluates multiple expressions', () => {
-    const code = 'rel of :a is :b; rel of :c is :d; rel of :e is :f';
+    const code = 'rel a of :a is :b; rel b of :b is :c; rel c of :c is :d';
 
     const output = exec(`bin/lang -e '${code}'`);
 
-    expect(output.toString().trim()).toBe('rel `#rel_2`');
+    expect(output.toString().trim()).toBe('rel `c`');
   });
 
   it('applies named relation', () => {
@@ -35,6 +35,14 @@ describe('lang', () => {
 
   it('applies anonymous relation', () => {
     const code = '(rel of :b is :c) of :b';
+
+    const output = exec(`bin/lang -e '${code}'`);
+
+    expect(output.toString().trim()).toBe(':c');
+  });
+
+  it('evaluate compound application', () => {
+    const code = '((rel of :a is (rel of :b is :c)) of :a) of :b';
 
     const output = exec(`bin/lang -e '${code}'`);
 
