@@ -7,9 +7,9 @@ const evalApp = (app, ctx) => {
     return app.rel.rel[app.arg];
   }
 
-  const rel = run([app.rel], ctx);
+  const subApp = run([app.rel], ctx);
 
-  return rel.rel[app.arg];
+  return subApp.rel ? subApp.rel[app.arg] : ctx[subApp][app.arg];
 };
 
 const run = (ast, ctx = {}) => {

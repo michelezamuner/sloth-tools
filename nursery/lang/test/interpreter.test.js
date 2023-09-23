@@ -52,21 +52,25 @@ describe('interpreter', () => {
   });
 
   it('evaluates compound applications', () => {
-    const ast = [{
-      obj: 'app',
-      rel: {
+    const ast = [
+      {
+        obj: 'rel',
+        id: 'rel',
+        rel: { ':b': ':c' },
+      },
+      {
         obj: 'app',
         rel: {
-          obj: 'rel',
-          rel: { ':a': {
+          obj: 'app',
+          rel: {
             obj: 'rel',
-            rel: { ':b': ':c' },
-          }},
+            rel: { ':a': 'rel' },
+          },
+          arg: ':a',
         },
-        arg: ':a',
-      },
-      arg: ':b',
-    }];
+        arg: ':b',
+      }
+    ];
 
     const result = run(ast);
 
