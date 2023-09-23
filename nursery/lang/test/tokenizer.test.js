@@ -65,6 +65,24 @@ describe('tokenizer', () => {
     expect(tokens).toStrictEqual(['a', 'of', ':b', ';', 'c', 'of', ':d']);
   });
 
+  it('ignores empty lines and comment lines', () => {
+    const code = `
+
+# some comment
+# on multiple lines
+
+rel a of :b is :c
+
+# other comment
+
+a of :b
+    `;
+
+    const tokens = tokenize(code);
+
+    expect(tokens).toStrictEqual(['rel', 'a', 'of', ':b', 'is', ':c', ';', 'a', 'of', ':b']);
+  });
+
   it('parses exclusive matches', () => {
     const code = 'rel f of :u|:v is :b';
 

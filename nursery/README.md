@@ -77,7 +77,7 @@ rel and of v is match v in
   :false is (rel of w is match w in
     :false is :false,
     :true is :false
-    )
+    ),
   :true is (rel of v is match v in
     :false is :false,
     :true is :true

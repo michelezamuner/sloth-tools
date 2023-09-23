@@ -3,18 +3,26 @@ module.exports = {
     const tokens = [];
     const token = [];
     let isComment = false;
+    let maybeNewline = false;
     for (let i in code) {
       let char = code[i];
-      if (char === '\n' && code[+i+1].trim() !== '') {
-        char = ';';
+      if (char === '\n') {
+        maybeNewline = true;
       }
 
       if (!isComment && char === '#') {
         isComment = true;
+
+        continue;
       }
 
-      if (isComment && char === ';') {
+      if (isComment && (char === ';' || char === '\n')) {
         isComment = false;
+        if (char === ';') {
+          tokens.push(';');
+        }
+
+        continue;
       }
 
       if (isComment) {
@@ -22,11 +30,21 @@ module.exports = {
       }
 
       if (char.trim() === '') {
+        if (maybeNewline && char !== '\n') {
+          maybeNewline = false;
+        }
         if (token.length) {
           tokens.push(token.join(''));
           token.length = 0;
         }
         continue;
+      }
+
+      if (maybeNewline) {
+        if (tokens.length && tokens[tokens.length - 1] !== ';') {
+          tokens.push(';');
+        }
+        maybeNewline = false;
       }
 
       if (['(', ')', ';', ',', '|'].includes(char)) {
