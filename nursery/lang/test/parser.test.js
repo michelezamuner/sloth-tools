@@ -101,7 +101,7 @@ describe('parser', () => {
     }]);
   });
 
-  it('parses relation matching single value', () => {
+  it('parses relation matching value', () => {
     const tokens = ['rel', 'a', 'of', 'v', 'is', 'match', 'v', 'in', ':b', 'is', ':c', ',', ':d', 'is', ':e'];
 
     const ast = parse(tokens);

@@ -49,14 +49,6 @@ describe('tokenizer', () => {
     expect(tokens).toStrictEqual(['a', 'of', ':b']);
   });
 
-  it('parses matches', () => {
-    const code = 'rel a of v is match v in :b is :c, :d is :e';
-
-    const tokens = tokenize(code);
-
-    expect(tokens).toStrictEqual(['rel', 'a', 'of', 'v', 'is', 'match', 'v', 'in', ':b', 'is', ':c', ',', ':d', 'is', ':e']);
-  });
-
   it('ignores comments', () => {
     const code = 'a of :b #comment; c of :d #another comment';
 
@@ -81,6 +73,14 @@ a of :b
     const tokens = tokenize(code);
 
     expect(tokens).toStrictEqual(['rel', 'a', 'of', ':b', 'is', ':c', ';', 'a', 'of', ':b']);
+  });
+
+  it('parses matches', () => {
+    const code = 'rel a of v is match v in :b is :c, :d is :e';
+
+    const tokens = tokenize(code);
+
+    expect(tokens).toStrictEqual(['rel', 'a', 'of', 'v', 'is', 'match', 'v', 'in', ':b', 'is', ':c', ',', ':d', 'is', ':e']);
   });
 
   it('parses exclusive matches', () => {

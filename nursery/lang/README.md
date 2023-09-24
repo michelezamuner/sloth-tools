@@ -76,12 +76,10 @@ We can use anonymous relations in order to avoid defining explicit sub-relations
 rel and of v is match v in
   :false is (rel of w is match w in
     :false is :false,
-    :true is :false
-    ),
+    :true is :false),
   :true is (rel of v is match v in
     :false is :false,
-    :true is :true
-  )
+    :true is :true)
 ```
 
 For this we can use the following simplified syntax:
@@ -90,7 +88,7 @@ For this we can use the following simplified syntax:
 rel and of v, w is match v, w in
   :false, :false is :false,
   :false, :true is :false,
-  :true, :false, is :false,
+  :true, :false is :false,
   :true, :true is :true
 ```
 
@@ -108,11 +106,10 @@ which means that any of `:u, :v` and `:v, :u` is evaluated to `:z`.
 Additionally, we can match to any remaining value with `_` like this:
 
 ```sloth
-rel f of a, b is match a, b in (
+rel f of a, b is match a, b in
   :u, :u is :x,
   :u, _ is :y,
   _, :v is :z
-)
 ```
 
 which means that only if `a` and `b` are exactly `:u` both, the result will be `:x`, but if `a` is `:u` and `b` is any value, the result is `:y`, while if `b` is `:v` and `a` is any value, the result is `:z`.
@@ -120,7 +117,7 @@ which means that only if `a` and `b` are exactly `:u` both, the result will be `
 We can define addition of 8-bit integers like this:
 
 ```sloth
-rel add of a, b is match a, b in (
+rel add of a, b is match a, b in
   :0, :0 is :0,
   :0, :1 | :1, :0 is :1,
   :0, :2 | :2, :0 is :2,
@@ -137,7 +134,6 @@ rel add of a, b is match a, b in (
   ...
   :127, :127 is :254,
   :127, :128 | :128, :127 is :255
-)
 ```
 
 In the same way we can define subtraction `sub`. In order to define multiplication, on the other hand, we can combine the two relations `add` and `sub` we just defined:

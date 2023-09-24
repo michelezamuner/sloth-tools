@@ -32,9 +32,11 @@ const parseRelVal = tokens => {
 };
 
 const parseRel = tokens => {
-  const hasName = tokens[2] === 'of';
-  const key = hasName ? tokens[3] : tokens[2];
-  const val = parseRelVal(hasName ? tokens.slice(5) : tokens.slice(4));
+  const keyStartId = tokens.indexOf('of');
+  const valStartId = tokens.indexOf('is');
+  const hasName = keyStartId === 2;
+  const key = tokens.slice(keyStartId + 1, valStartId)[0];
+  const val = parseRelVal(tokens.slice(valStartId + 1));
 
   const rel = { obj: 'rel' };
   if (hasName) {
