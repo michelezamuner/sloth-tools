@@ -7,7 +7,3 @@ exports.create = (type, ...args) => {
   case exports.RET: return { type: exports.RET, ...ret.create(...args) };
   }
 };
-
-exports.type = (stmt) => stmt.type;
-
-exports.ret = ret;

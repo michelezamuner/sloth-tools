@@ -7,7 +7,3 @@ exports.create = (type, ...args) => {
   case exports.REF: return { type: exports.REF, ...ref.create(...args) };
   }
 };
-
-exports.type = (expr) => expr.type;
-
-exports.ref = ref;
