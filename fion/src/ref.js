@@ -1,1 +1,1 @@
-exports.create = (id) => ({ id: id });
+exports.create = id => ({ id: id });

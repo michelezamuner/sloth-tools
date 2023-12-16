@@ -1,3 +1,3 @@
-exports.create = (funs) => ({ funs: funs });
+const fun = require('./fun');
 
-exports.funs = (ast) => ast.funs;
+exports.create = funs => ({ funs: Object.entries(funs).map(([f, d]) => fun.create(f, d)) });

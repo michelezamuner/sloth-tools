@@ -1,3 +1,3 @@
-exports.create = (expr) => ({ expr: expr });
+const expr = require('./expr');
 
-exports.expr = (ret) => ret.expr;
+exports.create = e => ({ expr: expr.create(e) });
