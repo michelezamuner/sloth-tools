@@ -1,3 +1,3 @@
 # Maponos
 
-Compiles a Sloth AST into Sloth bytecode.
+Compiler from Sloth AST into Sloth bytecode.

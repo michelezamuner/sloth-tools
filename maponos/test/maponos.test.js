@@ -1,6 +1,6 @@
 const { compile } = require('../src/lib');
 const { ast } = require('fion');
-const { byte } = require('./tools');
+const { parse } = require('fedelm');
 
 describe('maponos', () => {
   it('produces program that exits with constant', () => {
@@ -8,7 +8,7 @@ describe('maponos', () => {
 
     const object = compile(a);
 
-    expect(object).toStrictEqual(byte(`
+    expect(object).toStrictEqual(parse(`
       exit_i 0x12
     `));
   });

@@ -1,6 +1,6 @@
 # Fion
 
-Provides the AST definition for Sloth, and a set of tools for libraries that need to work with this AST definition.
+Sloth AST definition.
 
 ## Values and references
 

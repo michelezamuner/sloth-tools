@@ -1,12 +1,8 @@
 {
-  "name": "maponos",
+  "name": "fedelm",
   "version": "0.0.1",
   "license": "MIT",
   "main": "src/lib.js",
-  "dependencies": {
-    "fedelm": "file:../fedelm",
-    "fion": "file:../fion"
-  },
   "devDependencies": {
     "eslint": "^7.31.0",
     "jest": "^28.1.2"
@@ -42,14 +38,14 @@
       "space-before-function-paren": ["error", "never"]
     },
     "globals": {
+      "Buffer": "readonly",
       "__dirname": "readonly",
       "process": "readonly",
       "jest": "readonly",
       "describe": "readonly",
       "it": "readonly",
       "expect": "readonly",
-      "beforeEach": "readonly",
-      "Buffer": "readonly"
+      "beforeEach": "readonly"
     }
   }
 }
