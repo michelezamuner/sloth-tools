@@ -1,10 +1,5 @@
-const instructions = {
-  0x00: { mnemonic: 'exit_i', operands: 1 },
-};
-
-const opcodes = Object.fromEntries(Object.entries(instructions).map(([opcode, description]) => [description.mnemonic, opcode]));
-
 exports.instruction = opcode => instructions[opcode];
+exports.bytecode = mnemonic => opcodes[mnemonic];
 
 exports.parse = code => {
   const chars = code.trim().split(/\s+/).filter(c => c !== '');
@@ -29,3 +24,9 @@ exports.parse = code => {
 
   return Buffer.from(bytecode);
 };
+
+const instructions = {
+  0x00: { mnemonic: 'exit_i', operands: 1 },
+};
+
+const opcodes = Object.fromEntries(Object.entries(instructions).map(([opcode, description]) => [description.mnemonic, parseInt(opcode)]));

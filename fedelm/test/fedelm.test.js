@@ -1,8 +1,12 @@
-const { instruction, parse } = require('../src/lib');
+const { bytecode, instruction, parse } = require('../src/lib');
 
 describe('fedelm', () => {
   it('provides instruction description by opcode', () => {
     expect(instruction(0x00)).toStrictEqual({ mnemonic: 'exit_i', operands: 1 });
+  });
+
+  it('provides bytecode from mnemonic', () => {
+    expect(bytecode('exit_i')).toBe(0x00);
   });
 
   it('parses empty code', () => {
