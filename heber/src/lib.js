@@ -1,6 +1,8 @@
 const memory = require('./memory');
 const executor = require('./executor');
 
+exports.memory = memory;
+
 exports.run = mem => {
   const opcode = memory.read(mem, 0).readUInt8();
   const operands = memory.read(mem, 1);
