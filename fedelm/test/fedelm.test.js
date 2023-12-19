@@ -1,13 +1,17 @@
-const { mnemonics, parse } = require('../src/lib');
+const { instruction, parse } = require('../src/lib');
 
 describe('fedelm', () => {
-  it('provides mnemonics for opcodes', () => {
-    expect(mnemonics(0x00)).toBe('exit_i');
+  it('provides instruction description by opcode', () => {
+    expect(instruction(0x00)).toStrictEqual({ mnemonic: 'exit_i', operands: 1 });
   });
 
-  it('parses code with mnemonics into bytecode', () => {
+  it('parses empty code', () => {
     expect(parse('    ')).toStrictEqual(Buffer.from([]));
-    expect(parse('exit_i')).toStrictEqual(Buffer.from([0x00]));
-    expect(parse('exit_i exit_i')).toStrictEqual(Buffer.from([0x00, 0x00]));
+  });
+
+  it('parses exit_i instruction', () => {
+    expect(parse('exit_i 0x12')).toStrictEqual(Buffer.from([0x00, 0x12]));
+    expect(() => parse('exit_i')).toThrow('Instruction \'exit_i\' expects 1 operands');
+    expect(() => parse('exit_i exit_i')).toThrow('Instruction \'exit_i\' expects 1 operands');
   });
 });
