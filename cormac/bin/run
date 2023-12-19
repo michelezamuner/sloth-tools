@@ -1,0 +1,7 @@
+#!/usr/bin/env node
+
+const { exec } = require('etan');
+const { parse } = require('../src/parser');
+const config = { memory: 0xff };
+
+exec(process, parse, config);
