@@ -3,13 +3,14 @@ const { ast } = require('fion');
 const { parse } = require('fedelm');
 
 describe('maponos', () => {
-  it('produces program that exits with constant', () => {
-    const a = ast.create({ 'main': { 'RET': [ 'REF', '0x12' ] } });
+  it('compiles main function returning a byte', () => {
+    const a = ast.create({ 'main': { 'RET': [ 'BYTE', 0x12 ] } });
 
-    const object = compile(a);
+    const bytecode = compile(a);
 
-    expect(object).toStrictEqual(parse(`
-      exit_i 0x12
+    expect(bytecode).toStrictEqual(parse(`
+      set_i a 0x00 0x12
+      exit a
     `));
   });
 });

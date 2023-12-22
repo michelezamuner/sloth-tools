@@ -5,8 +5,8 @@ const expr = require('../src/expr');
 describe('ast', () => {
   it('creates ast', () => {
     const a = ast.create({
-      'f': {'RET': ['REF', '0x00']},
-      'g': {'RET': ['REF', '0x00']},
+      'f': {'RET': ['BYTE', 0x00]},
+      'g': {'RET': ['BYTE', 0x00]},
     });
 
     expect(a).toStrictEqual({
@@ -16,7 +16,7 @@ describe('ast', () => {
           stmts: [
             {
               type: stmt.RET,
-              expr: { type: expr.REF, id: '0x00' },
+              expr: { type: expr.BYTE, val: Buffer.from([0x00]) },
             },
           ],
         },
@@ -25,7 +25,7 @@ describe('ast', () => {
           stmts: [
             {
               type: stmt.RET,
-              expr: { type: expr.REF, id: '0x00' },
+              expr: { type: expr.BYTE, val: Buffer.from([0x00]) },
             },
           ],
         },

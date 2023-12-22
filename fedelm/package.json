@@ -18,7 +18,16 @@
     "verbose": true,
     "coverageDirectory": "/tmp",
     "coveragePathIgnorePatterns": [],
-    "coverageReporters": ["text"]
+    "coverageReporters": ["text"],
+    "bail": true,
+    "coverageThreshold": {
+      "global": {
+        "branches": 100,
+        "function": 100,
+        "lines": 100,
+        "statements": 100
+      }
+    }
   },
   "eslintConfig": {
     "env": {

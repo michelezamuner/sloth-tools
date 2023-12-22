@@ -1,21 +1,34 @@
-const { bytecode, instruction, parse } = require('../src/lib');
+const { code, instruction, parse } = require('../src/lib');
+const instructions = require('../src/instructions.json');
+const registers = require('../src/registers.json');
 
 describe('fedelm', () => {
-  it('provides instruction description by opcode', () => {
-    expect(instruction(0x00)).toStrictEqual({ mnemonic: 'exit_i', operands: 1 });
+  it('provides instructions by opcode', () => {
+    for (const inst of instructions) {
+      expect(instruction(+inst.code)).toStrictEqual({ mnemonic: inst.mnemonic, operands: inst.operands });
+    }
   });
 
-  it('provides bytecode from mnemonic', () => {
-    expect(bytecode('exit_i')).toBe(0x00);
+  it('provides bytecode from mnemonics', () => {
+    for (const inst of instructions) {
+      expect(code(inst.mnemonic)).toBe(+inst.code);
+    }
+    for (const register of registers) {
+      expect(code(register.mnemonic)).toBe(+register.code);
+    }
   });
 
   it('parses empty code', () => {
     expect(parse('    ')).toStrictEqual(Buffer.from([]));
   });
 
-  it('parses exit_i instruction', () => {
-    expect(parse('exit_i 0x12')).toStrictEqual(Buffer.from([0x00, 0x12]));
-    expect(() => parse('exit_i')).toThrow('Instruction \'exit_i\' expects 1 operands');
-    expect(() => parse('exit_i exit_i')).toThrow('Instruction \'exit_i\' expects 1 operands');
+  it('parses instruction', () => {
+    expect(parse('set_i a 0x12 0x34')).toStrictEqual(Buffer.from([code('set_i'), code('a'), 0x12, 0x34]));
+    expect(() => parse('set_i')).toThrow('Instruction \'set_i\' expects 3 bytes operands');
+    expect(() => parse('set_i a')).toThrow('Instruction \'set_i\' expects 3 bytes operands');
+    expect(() => parse('set_i a 0x12')).toThrow('Instruction \'set_i\' expects 3 bytes operands');
+    expect(() => parse('set_i 0x00 0x12 0x34')).toThrow('Instruction \'set_i\' expects operand 0 to be a register');
+    expect(() => parse('set_i a a 0x34')).toThrow('Instruction \'set_i\' expects operand 1 to be a value');
+    expect(() => parse('set_i a 0x12 a')).toThrow('Instruction \'set_i\' expects operand 2 to be a value');
   });
 });

@@ -1,0 +1,6 @@
+[
+  { "code": "0x00", "mnemonic": "a" },
+  { "code": "0x01", "mnemonic": "b" },
+  { "code": "0x02", "mnemonic": "c" },
+  { "code": "0x03", "mnemonic": "d" }
+]

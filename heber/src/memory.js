@@ -1,6 +1,18 @@
-exports.create = size => Buffer.alloc(size);
-exports.load = (memory, code) => code.copy(memory, 0);
-exports.read = (memory, addr) => read(memory, addr, 1);
+exports.create = size => ({
+  registers: [
+    Buffer.alloc(registerSize), // 'a'
+    Buffer.alloc(registerSize), // 'b'
+    Buffer.alloc(registerSize), // 'c'
+    Buffer.alloc(registerSize), // 'd'
+  ],
+  static: Buffer.alloc(size)
+});
+exports.load = (memory, code) => code.copy(memory.static, 0);
+exports.read = (memory, addr, size = 1) => read(memory.static, addr.readUInt16BE(), size);
+exports.get = (memory, addr) => read(memory.registers[addr], 0, registerSize);
+exports.set = (memory, addr, val) => val.copy(memory.registers[addr]);
+
+const registerSize = 2;
 
 /**
   * @function
@@ -13,8 +25,5 @@ exports.read = (memory, addr) => read(memory, addr, 1);
   * @return {Buffer}
   */
 function read(memory, addr, size) {
-  const result = Buffer.alloc(size);
-  memory.copy(result, 0, addr, addr + size);
-
-  return result;
+  return Buffer.from(memory.buffer.slice(addr, addr + size));
 }

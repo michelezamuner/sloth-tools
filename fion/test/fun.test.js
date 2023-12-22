@@ -4,13 +4,13 @@ const expr = require('../src/expr');
 
 describe('fun', () => {
   it('creates function definition', () => {
-    const f = fun.create('f', { 'RET': [ 'REF', '0x00' ] });
+    const f = fun.create('f', { 'RET': [ 'BYTE', 0x00 ] });
 
     expect(f).toStrictEqual({
       name: 'f',
       stmts: [{
         type: stmt.RET,
-        expr: { type: expr.REF, id: '0x00' },
+        expr: { type: expr.BYTE, val: Buffer.from([0x00]) },
       }],
     });
   });

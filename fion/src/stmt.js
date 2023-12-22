@@ -1,4 +1,4 @@
-const ret = require('./ret');
+const ret = require('./stmt/ret');
 
 exports.RET = 'RET';
 

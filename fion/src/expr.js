@@ -1,9 +1,15 @@
-const ref = require('./ref');
+const byte = require('./expr/byte');
+const incr = require('./expr/incr');
 
-exports.REF = 'REF';
+exports.BYTE = 'BYTE';
+exports.INCR = 'INCR';
 
-exports.create = ([type, ...args]) => {
+exports.create = args => _create(args);
+
+function _create([type, ...args]) {
   switch(type) {
-  case exports.REF: return { type: exports.REF, ...ref.create(...args) };
+  case exports.BYTE: return { type: exports.BYTE, ...byte.create(...args) };
+  case exports.INCR: return { type: exports.INCR, ...incr.create(...args, _create) };
+  default: throw `Invalid expression '${type}'`;
   }
-};
+}
