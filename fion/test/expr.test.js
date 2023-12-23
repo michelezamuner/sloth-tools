@@ -1,29 +1,41 @@
 const expr = require('../src/expr');
 
 describe('expr', () => {
-  it('creates byte expression', () => {
-    const ref = expr.create(['BYTE', 0x12]);
+  it('creates byte', () => {
+    const e = expr.create(['BYTE', 0x12]);
 
-    expect(ref).toStrictEqual({ type: expr.BYTE, val: Buffer.from([0x12]) });
+    expect(e).toStrictEqual({ type: expr.BYTE, val: Buffer.from([0x12]) });
   });
 
-  it('creates increment expression from dsl', () => {
-    const incr = expr.create(['INCR', ['BYTE', 0x12]]);
+  it('creates reference', () => {
+    const e = expr.create(['REF', 'ref']);
 
-    expect(incr).toStrictEqual({
-      type: expr.INCR,
-      expr: { type: expr.BYTE, val: Buffer.from([0x12]) },
-    });
+    expect(e).toStrictEqual({ type: expr.REF, ref: 'ref' });
   });
 
-  it('creates increment expression from ast', () => {
+  it('creates native reference', () => {
+    const e = expr.create(['REF', 'INCR']);
+
+    expect(e).toStrictEqual({ type: expr.REF, ref: 'INCR' });
+  });
+
+  it('errors on invalid native reference', () => {
+    expect(() => expr.create(['REF', 'INVALID'])).toThrow('Invalid native reference \'INVALID\'');
+  });
+
+  it('creates fun call', () => {
+    const eDsl = expr.create(['CALL', ['REF', 'fun'], ['BYTE', 0x12]]);
+    const ref = expr.create(['REF', 'fun']);
     const byte = expr.create(['BYTE', 0x12]);
-    const incr = expr.create(['INCR', byte]);
+    const eAst = expr.create(['CALL', ref, byte]);
+    const expected = {
+      type: expr.CALL,
+      fun: { type: expr.REF, ref: 'fun' },
+      args: [{ type: expr.BYTE, val: Buffer.from([0x12]) }],
+    };
 
-    expect(incr).toStrictEqual({
-      type: expr.INCR,
-      expr: { type: expr.BYTE, val: Buffer.from([0x12]) },
-    });
+    expect(eDsl).toStrictEqual(expected);
+    expect(eAst).toStrictEqual(expected);
   });
 
   it('errors on invalid expression', () => {

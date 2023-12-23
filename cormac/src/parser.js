@@ -1,9 +1,9 @@
 const { ast } = require('fion');
 const lexer = require('./lexer');
-const expr = require('./parser/expr');
+const parser = require('./parser/group');
 
 exports.parse = code => {
   const lexemes = lexer.parse(code);
 
-  return ast.create({ 'main': { 'RET':  expr.parse(lexemes)} });
+  return ast.create({ 'main': { 'RET':  parser.parse(lexemes)} });
 };

@@ -1,3 +1,3 @@
 # Etan
 
-CLI application for Sloth tools.
+CLI application for the Heber compiler.

@@ -1,3 +1,3 @@
 # Heber
 
-Virtual machine for the Sloth architecture.
+Virtual machine for the Fedelm architecture.

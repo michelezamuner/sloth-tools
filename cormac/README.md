@@ -1,3 +1,3 @@
 # Cormac
 
-High-level language for the Sloth AST.
+Language for the Fion AST.

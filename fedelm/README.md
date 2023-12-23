@@ -1,3 +1,3 @@
 # Fedelm
 
-Sloth architecture.
+Virtual machine architecture definition.

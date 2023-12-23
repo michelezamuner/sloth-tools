@@ -1,6 +1,6 @@
 # Fion
 
-Sloth AST definition.
+AST definition.
 
 ## Values and references
 

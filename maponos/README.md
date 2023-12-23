@@ -1,3 +1,3 @@
 # Maponos
 
-Compiler from Sloth AST into Sloth bytecode.
+Compiler from the Fion AST to the Fedelm architecture.
