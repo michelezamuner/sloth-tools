@@ -1,6 +1,7 @@
 const { exec } = require('../src/lib');
 const { parse } = require('./parser');
 const fs = require('fs');
+const stream = require('stream');
 
 describe('etan', () => {
   it('execute source file', () => {
@@ -42,6 +43,32 @@ describe('etan', () => {
     exec(process, parse, config);
 
     expect(process.exit).toBeCalledWith(0x12);
+  });
+
+  it('executes code in the repl', async() => {
+    const outputs = [];
+    const inputs = ['0x12\n', ':q\n', null];
+    let readInput = 0;
+    const process = {
+      argv: [null, null, '--repl'],
+      stdin: new stream.Readable({
+        read() {
+          this.push(inputs[readInput++]);
+        }
+      }),
+      stdout: new stream.Writable({
+        write(chunk, encoding, next) {
+          outputs.push(chunk.toString());
+          next();
+        }
+      }),
+      exit: jest.fn(),
+    };
+    const config = { memory: 0xff };
+
+    await exec(process, parse, config);
+
+    expect(outputs).toStrictEqual(['> ', '18\n', '> ']);
   });
 
   it('errors if invalid option', () => {
