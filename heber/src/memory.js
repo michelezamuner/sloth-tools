@@ -5,12 +5,24 @@ exports.create = size => ({
     Buffer.alloc(registerSize), // 'c'
     Buffer.alloc(registerSize), // 'd'
   ],
-  static: Buffer.alloc(size)
+  stackPtr: size,
+  data: Buffer.alloc(size)
 });
-exports.load = (memory, code) => code.copy(memory.static, 0);
-exports.read = (memory, addr, size = 1) => read(memory.static, addr.readUInt16BE(), size);
+exports.load = (memory, code) => code.copy(memory.data, 0);
+exports.read = (memory, addr, size = 1) => read(memory.data, addr.readUInt16BE(), size);
 exports.get = (memory, addr) => read(memory.registers[addr], 0, registerSize);
 exports.set = (memory, addr, val) => val.copy(memory.registers[addr]);
+exports.push = (memory, val) => {
+  const newStackPtr = memory.stackPtr - registerSize;
+  val.copy(memory.data, newStackPtr);
+  memory.stackPtr = newStackPtr;
+};
+exports.pop = memory => {
+  const stackPtr = memory.stackPtr;
+  memory.stackPtr += registerSize;
+
+  return read(memory.data, stackPtr, registerSize);
+};
 
 const registerSize = 2;
 

@@ -2,5 +2,8 @@
   { "mnemonic": "exit_i", "code": "0x00", "operands": "v" },
   { "mnemonic": "exit", "code": "0x01", "operands": "r" },
   { "mnemonic": "set_i", "code": "0x10", "operands": "rvv" },
-  { "mnemonic": "incr", "code": "0x50", "operands": "r" }
+  { "mnemonic": "set", "code": "0x11", "operands": "rr" },
+  { "mnemonic": "incr", "code": "0x50", "operands": "r" },
+  { "mnemonic": "push", "code": "0x31", "operands": "r" },
+  { "mnemonic": "pop", "code": "0x40", "operands": "r" }
 ]

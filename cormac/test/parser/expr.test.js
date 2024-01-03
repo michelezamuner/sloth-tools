@@ -3,16 +3,16 @@ const lexer = require('../../src/lexer');
 const { expr } = require('fion');
 
 describe('expr parser', () => {
-  it('parses ast', () => {
-    const lexemes = [ expr.create(['BYTE', 0x12]) ];
+  it('parses byte', () => {
+    const lexemes = lexer.parse('0x12');
 
     const ast = parse(lexemes);
 
     expect(ast).toStrictEqual(expr.create(['BYTE', 0x12]));
   });
 
-  it('parses byte', () => {
-    const lexemes = lexer.parse('0x12');
+  it('parses byte ast', () => {
+    const lexemes = [ expr.create(['BYTE', 0x12]) ];
 
     const ast = parse(lexemes);
 

@@ -24,4 +24,16 @@ describe('cormac', () => {
     }
     expect.hasAssertions();
   });
+
+  it('uses variables', () => {
+    const code = 'a := 0x11; a = a++; a';
+
+    try {
+      exec(`bin/run --eval "${code}"`);
+    } catch (e) {
+      expect(e.status).toBe(0x12);
+      expect(e.stdout.toString()).toBe('');
+    }
+    expect.hasAssertions();
+  });
 });

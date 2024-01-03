@@ -1,5 +1,5 @@
 const { code } = require('fedelm');
-const { create, load, read, set, get } = require('../src/memory');
+const { create, load, read, set, get, push, pop } = require('../src/memory');
 
 describe('memory', () => {
   it('loads and reads bytes', () => {
@@ -30,5 +30,12 @@ describe('memory', () => {
 
     set(memory, code('d'), Buffer.from([0xde, 0xf0]));
     expect(get(memory, code('d'))).toStrictEqual(Buffer.from([0xde, 0xf0]));
+  });
+
+  it('handles stack', () => {
+    const memory = create(0xf);
+
+    push(memory, Buffer.from([0x12, 0x34]));
+    expect(pop(memory)).toStrictEqual(Buffer.from([0x12, 0x34]));
   });
 });

@@ -4,7 +4,7 @@ const expr = require('../src/expr');
 
 describe('fun', () => {
   it('creates function definition', () => {
-    const f = fun.create('f', { 'RET': [ 'BYTE', 0x00 ] });
+    const f = fun.create('f', [['RET', [ 'BYTE', 0x00 ]]]);
 
     expect(f).toStrictEqual({
       name: 'f',

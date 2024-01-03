@@ -5,8 +5,8 @@ const expr = require('../src/expr');
 describe('ast', () => {
   it('creates ast', () => {
     const a = ast.create({
-      'f': {'RET': ['BYTE', 0x00]},
-      'g': {'RET': ['BYTE', 0x00]},
+      'f': [['RET', ['BYTE', 0x00]]],
+      'g': [['RET', ['BYTE', 0x00]]],
     });
 
     expect(a).toStrictEqual({

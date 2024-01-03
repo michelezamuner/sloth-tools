@@ -1,7 +1,7 @@
 const { parse } = require('../src/lexer');
 
 describe('lexer', () => {
-  it('parses single identifier', () => {
+  it('parses identifiers', () => {
     const code = 'var';
 
     const lexemes = parse(code);
@@ -17,19 +17,35 @@ describe('lexer', () => {
     expect(lexemes).toStrictEqual(['var', '++']);
   });
 
-  it('parses empty function call', () => {
-    const code = 'fun()';
-
-    const lexemes = parse(code);
-
-    expect(lexemes).toStrictEqual(['fun', '(', ')']);
-  });
-
-  it('parses function call with single argument', () => {
-    const code = 'fun(var)';
+  it('parses parenthesis', () => {
+    const code = 'fun ( var )';
 
     const lexemes = parse(code);
 
     expect(lexemes).toStrictEqual(['fun', '(', 'var', ')']);
+  });
+
+  it('parses declaration', () => {
+    const code = 'a := 1';
+
+    const lexemes = parse(code);
+
+    expect(lexemes).toStrictEqual(['a', ':=', '1']);
+  });
+
+  it('parses assignment', () => {
+    const code = 'a = 1';
+
+    const lexemes = parse(code);
+
+    expect(lexemes).toStrictEqual(['a', '=', '1']);
+  });
+
+  it('parses statements separator', () => {
+    const code = 'a; b; c';
+
+    const lexemes = parse(code);
+
+    expect(lexemes).toStrictEqual(['a', ';', 'b', ';', 'c']);
   });
 });

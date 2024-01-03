@@ -19,6 +19,12 @@ describe('expr', () => {
     expect(e).toStrictEqual({ type: expr.REF, ref: 'INCR' });
   });
 
+  it('creates variable', () => {
+    const e = expr.create(['VAR', 'a']);
+
+    expect(e).toStrictEqual({ type: expr.VAR, var: 'a' });
+  });
+
   it('errors on invalid native reference', () => {
     expect(() => expr.create(['REF', 'INVALID'])).toThrow('Invalid native reference \'INVALID\'');
   });

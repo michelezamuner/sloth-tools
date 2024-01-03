@@ -1,8 +1,16 @@
-const expr = require('./expr');
-const { code } = require('fedelm');
+const { parse } = require('fedelm');
+const stmt = require('./stmt');
 
 exports.compile = ast => {
-  const exprCode = expr.compile(ast.funs[0].stmts[0].expr);
+  const elems = [];
+  for (const s of ast.funs[0].stmts) {
+    elems.push(stmt.compile(s));
+  }
 
-  return Buffer.concat([exprCode, Buffer.from([code('exit'), code('a')])]);
+  elems.push(parse(`
+    pop a
+    exit a
+  `));
+
+  return Buffer.concat(elems);
 };

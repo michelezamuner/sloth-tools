@@ -31,4 +31,8 @@ describe('fedelm', () => {
     expect(() => parse('set_i a a 0x34')).toThrow('Instruction \'set_i\' expects operand 1 to be a value');
     expect(() => parse('set_i a 0x12 a')).toThrow('Instruction \'set_i\' expects operand 2 to be a value');
   });
+
+  it('errors if invalid instruction', () => {
+    expect(() => parse('invalid')).toThrow('Invalid instruction \'invalid\'');
+  });
 });

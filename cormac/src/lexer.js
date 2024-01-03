@@ -5,7 +5,22 @@ exports.parse = code => {
   const chars = code.split('');
   for (let i = 0; i < chars.length; i++) {
     const char = chars[i];
-    if (char === '+' && chars[+i+1] === '+') {
+
+    if (char.trim() === '') {
+      flush(lexemes, lexeme);
+      continue;
+
+    }
+
+    if (char === ';') {
+      flush(lexemes, lexeme);
+      lexeme.push(char);
+      flush(lexemes, lexeme);
+
+      continue;
+    }
+
+    if (['++', ':='].includes(`${char}${chars[+i+1]}`)) {
       flush(lexemes, lexeme);
       lexeme.push(char);
       lexeme.push(chars[+i+1]);
