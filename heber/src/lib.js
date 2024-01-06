@@ -15,7 +15,7 @@ exports.run = mem => {
     ip += instructionLength;
     ipBytes.writeUInt16BE(ip);
 
-    if (result.exit) {
+    if (result.exit !== undefined) {
       return result.exit;
     }
   }

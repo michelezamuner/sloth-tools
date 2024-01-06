@@ -47,7 +47,7 @@ describe('etan', () => {
 
   it('executes code in the repl', async() => {
     const outputs = [];
-    const inputs = ['0x12\n', ':q\n', null];
+    const inputs = ['a 0x12\n', 'exit a\n', ':q\n', null];
     let readInput = 0;
     const process = {
       argv: [null, null, '--repl'],
@@ -68,7 +68,7 @@ describe('etan', () => {
 
     await exec(process, parse, config);
 
-    expect(outputs).toStrictEqual(['> ', '18\n', '> ']);
+    expect(outputs).toStrictEqual(['> ', '0\n', '> ', '18\n', '> ']);
   });
 
   it('errors if invalid option', () => {

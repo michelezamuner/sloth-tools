@@ -5,6 +5,7 @@
   "main": "src/lib.js",
   "dependencies": {
     "fion": "file:../fion",
+    "fedelm": "file:../fedelm",
     "heber": "file:../heber",
     "maponos": "file:../maponos"
   },

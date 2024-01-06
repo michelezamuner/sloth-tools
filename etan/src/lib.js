@@ -1,6 +1,6 @@
-const { run } = require('./run');
-const fs = require('fs');
-const readline = require('readline');
+const eval_ = require('./eval');
+const file = require('./file');
+const repl = require('./repl');
 
 exports.exec = async(process, parse, config) => {
   if (process.argv[2].startsWith('--')) {
@@ -12,28 +12,11 @@ exports.exec = async(process, parse, config) => {
 
 async function execOption(process, parse, config) {
   const option = process.argv[2];
-  const value = process.argv[3];
+  const code = process.argv[3];
 
   switch (option) {
-  case '--eval': {
-    const status = run(value, parse, config);
-
-    return process.exit(status);
-  }
-  case '--repl': {
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    process.stdout.write('> ');
-    for await(const code of rl) {
-      if (code === ':q') {
-        rl.close();
-        break;
-      }
-      const result = run(code, parse, config);
-      process.stdout.write(`${result}\n`);
-      process.stdout.write('> ');
-    }
-    break;
-  }
+  case '--eval': return process.exit(eval_.exec(code, parse, config));
+  case '--repl': return await repl.exec(process, parse, config);
   default:
     process.stderr.write(`Invalid option '${option}'\n`);
 
@@ -42,15 +25,13 @@ async function execOption(process, parse, config) {
 }
 
 function execFile(process, parse, config) {
-  const file = process.argv[2];
-  if (!fs.existsSync(file)) {
-    process.stderr.write(`Invalid source file '${file}'\n`);
+  const f = process.argv[2];
+
+  try {
+    return process.exit(file.exec(f, parse, config));
+  } catch(e) {
+    process.stderr.write(e);
 
     return process.exit(1);
   }
-
-  const code = fs.readFileSync(file, 'utf-8');
-  const status = run(code, parse, config);
-
-  return process.exit(status);
 }

@@ -4,13 +4,13 @@ const memory = require('../src/memory');
 
 describe('heber', () => {
   it('returns program exit status', () => {
-    const code = parse('exit_i 0x12');
+    const code = parse('exit_i 0x00');
     const mem = memory.create(0xff);
     memory.load(mem, code);
 
     const status = run(mem);
 
-    expect(status).toBe(0x12);
+    expect(status).toBe(0x00);
   });
 
   it('executes instructions in sequence', () => {
