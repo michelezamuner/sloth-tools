@@ -2,6 +2,12 @@
 
 const { exec } = require('etan');
 const { parse } = require('../src/parser');
-const config = { memory: 0xff };
+const { consume } = require('../src/consumer');
 
-exec(process, parse, config);
+const config = {
+  parse: parse,
+  consume: consume,
+  memory: 0xff
+};
+
+exec(process, config);

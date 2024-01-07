@@ -1,5 +1,5 @@
 const { exec } = require('../src/lib');
-const { parse } = require('./parser');
+const { parse, consume } = require('./stub');
 const fs = require('fs');
 const stream = require('stream');
 
@@ -12,9 +12,9 @@ describe('etan', () => {
       argv: [null, null, '/tmp/etan.sloth'],
       exit: jest.fn(),
     };
-    const config = { memory: 0xff };
+    const config = { parse: parse, memory: 0xff };
 
-    exec(process, parse, config);
+    exec(process, config);
 
     expect(process.exit).toBeCalledWith(0x12);
   });
@@ -25,9 +25,9 @@ describe('etan', () => {
       stderr: { write: jest.fn() },
       exit: jest.fn(),
     };
-    const config = { memory: 0xff };
+    const config = { parse: parse, memory: 0xff };
 
-    exec(process, parse, config);
+    exec(process, config);
 
     expect(process.stderr.write).toBeCalledWith('Invalid source file \'invalid\'\n');
     expect(process.exit).toBeCalledWith(1);
@@ -38,9 +38,9 @@ describe('etan', () => {
       argv: [null, null, '--eval', 'exit 0x12'],
       exit: jest.fn(),
     };
-    const config = { memory: 0xff };
+    const config = { parse: parse, memory: 0xff };
 
-    exec(process, parse, config);
+    exec(process, config);
 
     expect(process.exit).toBeCalledWith(0x12);
   });
@@ -64,9 +64,9 @@ describe('etan', () => {
       }),
       exit: jest.fn(),
     };
-    const config = { memory: 0xff };
+    const config = { parse: parse, consume: consume, memory: 0xff };
 
-    await exec(process, parse, config);
+    await exec(process, config);
 
     expect(outputs).toStrictEqual(['> ', '0\n', '> ', '18\n', '> ']);
   });

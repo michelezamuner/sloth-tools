@@ -1,3 +1,3 @@
 const { run } = require('./run');
 
-exports.exec = (code, parse, config) => run(code, parse, config);
+exports.exec = (code, config) => run(code, config.parse, { memory: config.memory });

@@ -2,9 +2,10 @@ const memory = require('./memory');
 const executor = require('./executor');
 const { instruction } = require('fedelm');
 
-exports.memory = memory;
+exports.run = (code, config) => {
+  const mem = memory.create(config.memory);
+  memory.load(mem, code);
 
-exports.run = mem => {
   let ip = 0;
   const ipBytes = Buffer.alloc(2);
   for (;;) {

@@ -1,4 +1,4 @@
-const { ast } = require('fion');
+const { ast, stmt } = require('fion');
 
 exports.parse = code => {
   const parts = code.split(' ');
@@ -18,4 +18,12 @@ exports.parse = code => {
   }
 
   return ast.create({ 'main': stmts });
+};
+
+exports.consume = (a, ctx) => {
+  const main = a.funs.find(({ name }) => name === 'main');
+  const newCtx = main.stmts.filter(({ type }) => type === stmt.DEC);
+  main.stmts.unshift(...ctx);
+
+  return { ast: a, ctx: [...ctx, ...newCtx] };
 };
