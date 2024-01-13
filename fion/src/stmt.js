@@ -13,6 +13,9 @@ exports.create = def => {
   }
 
   const [type, ...args] = def;
+  if (typeof type !== 'string') {
+    throw `Invalid statement: first element must be statement type, found '${JSON.stringify(type)}'`;
+  }
 
   switch(type) {
   case exports.RET: return { type: exports.RET, ...ret.create(...args) };

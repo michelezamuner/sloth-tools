@@ -47,4 +47,8 @@ describe('expr', () => {
   it('errors on invalid expression', () => {
     expect(() => expr.create(['INVALID'])).toThrow('Invalid expression \'INVALID\'');
   });
+
+  it('errors on expression with invalid format', () => {
+    expect(() => expr.create([[]])).toThrow('Invalid expression: first element must be expression type, found \'[]\'');
+  });
 });

@@ -1,18 +1,17 @@
 const readline = require('readline');
 const { run } = require('./run');
 
-exports.exec = async(process, config) => {
+exports.exec = async(process, parse, config) => {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
   process.stdout.write('> ');
 
   let ctx = [];
-  const parse = code => {
-    const ast = config.parse(code);
-    const { ast: a, ctx: c } = config.consume(ast, ctx);
-    ctx = c;
+  const consume = line => {
+    const res = parse(line, ctx);
+    ctx = res.ctx;
 
-    return a;
+    return res;
   };
   for await(const code of rl) {
     if (code === ':q') {
@@ -21,7 +20,7 @@ exports.exec = async(process, config) => {
       break;
     }
 
-    const result = run(code, parse, config);
+    const result = run(code, consume, config);
 
     process.stdout.write(`${result}\n`);
     process.stdout.write('> ');

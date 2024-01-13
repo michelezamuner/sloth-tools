@@ -40,4 +40,8 @@ describe('ret', () => {
   it('errors on invalid statement', () => {
     expect(() => stmt.create(['INVALID'])).toThrow('Invalid statement \'INVALID\'');
   });
+
+  it('errors on statement with invalid format', () => {
+    expect(() => stmt.create([[]])).toThrow('Invalid statement: first element must be statement type, found \'[]\'');
+  });
 });

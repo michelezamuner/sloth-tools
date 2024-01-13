@@ -4,10 +4,10 @@ const expr = require('../src/expr');
 
 describe('ast', () => {
   it('creates ast', () => {
-    const a = ast.create({
-      'f': [['RET', ['BYTE', 0x00]]],
-      'g': [['RET', ['BYTE', 0x00]]],
-    });
+    const a = ast.create([
+      ['f', [['RET', ['BYTE', 0x00]]]],
+      ['g', [['RET', ['BYTE', 0x00]]]],
+    ]);
 
     expect(a).toStrictEqual({
       funs: [
@@ -31,5 +31,9 @@ describe('ast', () => {
         },
       ],
     });
+  });
+
+  it('errors on ast with invalid format', () => {
+    expect(() => ast.create('a')).toThrow('Invalid ast: must be a list of functions, found \'"a"\'');
   });
 });

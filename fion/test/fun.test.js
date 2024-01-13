@@ -3,8 +3,8 @@ const stmt = require('../src/stmt');
 const expr = require('../src/expr');
 
 describe('fun', () => {
-  it('creates function definition', () => {
-    const f = fun.create('f', [['RET', [ 'BYTE', 0x00 ]]]);
+  it('creates function', () => {
+    const f = fun.create(['f', [['RET', ['BYTE', 0x00]]]]);
 
     expect(f).toStrictEqual({
       name: 'f',
@@ -14,4 +14,10 @@ describe('fun', () => {
       }],
     });
   });
+
+  it('errors on function with invalid format', () => {
+    expect(() => fun.create([[], []])).toThrow('Invalid function: first element must be function name, found \'[]\'');
+    expect(() => fun.create(['f', 'a'])).toThrow('Invalid function: second element must be a list of statements, found \'"a"\'');
+  });
 });
+

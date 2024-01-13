@@ -1,13 +1,8 @@
 #!/usr/bin/env node
 
 const { exec } = require('etan');
-const { parse } = require('../src/parser');
-const { consume } = require('../src/consumer');
+const { parse } = require('../src/ctx_parser');
 
-const config = {
-  parse: parse,
-  consume: consume,
-  memory: 0xff
-};
+const config = { memory: 0xff };
 
-exec(process, config);
+exec(process, parse, config);

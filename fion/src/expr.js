@@ -12,6 +12,10 @@ exports.ref = ref;
 exports.create = args => _create(args);
 
 function _create([type, ...args]) {
+  if (typeof type !== 'string') {
+    throw `Invalid expression: first element must be expression type, found '${JSON.stringify(type)}'`;
+  }
+
   switch(type) {
   case exports.BYTE: return { type: exports.BYTE, ...byte.create(...args) };
   case exports.REF: return { type: exports.REF, ...ref.create(...args) };

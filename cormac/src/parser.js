@@ -1,10 +1,10 @@
-const { ast, stmt } = require('fion');
+const { stmt } = require('fion');
 const lexer = require('./lexer');
-const parser = require('./parser/block');
+const parser = require('./parser/module');
 
 exports.parse = code => {
   const lexemes = lexer.parse(code);
-  const a = ast.create({ 'main': parser.parse(lexemes) });
+  const a = parser.parse(lexemes);
 
   const main = a.funs.find(({ name }) => name === 'main');
   if (!main.stmts.find(({ type }) => type === stmt.RET)) {

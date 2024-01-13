@@ -1,8 +1,8 @@
 const exec = require('child_process').execSync;
 
 describe('cormac', () => {
-  it('evaluates single value', () => {
-    const code = '0x12';
+  it('exits with value returned from main', () => {
+    const code = 'fun main 0x12';
 
     try {
       exec(`bin/run --eval "${code}"`);
@@ -13,7 +13,7 @@ describe('cormac', () => {
     expect.hasAssertions();
   });
 
-  it('increments a value', () => {
+  it('increments values', () => {
     const code = '0x11++';
 
     try {
@@ -25,8 +25,8 @@ describe('cormac', () => {
     expect.hasAssertions();
   });
 
-  it('uses variables', () => {
-    const code = 'a := 0x11; a = a++; a';
+  it('stores values in variables', () => {
+    const code = 'fun main a := 0x11; a = a++; a';
 
     try {
       exec(`bin/run --eval "${code}"`);
