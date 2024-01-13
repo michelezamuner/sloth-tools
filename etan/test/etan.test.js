@@ -1,12 +1,13 @@
+const Fs = require('fs');
+const Stream = require('stream');
+
 const { exec } = require('../src/lib');
 const { parse } = require('./stub');
-const fs = require('fs');
-const stream = require('stream');
 
 describe('etan', () => {
   it('execute source file', () => {
     const program = 'exit 0x12';
-    fs.writeFileSync('/tmp/etan.sloth', program);
+    Fs.writeFileSync('/tmp/etan.sloth', program);
 
     const process = {
       argv: [null, null, '/tmp/etan.sloth'],
@@ -51,12 +52,12 @@ describe('etan', () => {
     let readInput = 0;
     const process = {
       argv: [null, null, '--repl'],
-      stdin: new stream.Readable({
+      stdin: new Stream.Readable({
         read() {
           this.push(inputs[readInput++]);
         }
       }),
-      stdout: new stream.Writable({
+      stdout: new Stream.Writable({
         write(chunk, encoding, next) {
           outputs.push(chunk.toString());
           next();

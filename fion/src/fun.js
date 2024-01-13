@@ -1,4 +1,4 @@
-const stmt = require('./stmt');
+const Stmt = require('./stmt');
 
 exports.create = ([name, stmts]) => {
   if (typeof name !== 'string') {
@@ -9,5 +9,5 @@ exports.create = ([name, stmts]) => {
     throw `Invalid function: second element must be a list of statements, found '${JSON.stringify(stmts)}'`;
   }
 
-  return { name: name, stmts: stmts.map(def => stmt.create(def)) };
+  return { name: name, stmts: stmts.map(def => Stmt.create(def)) };
 };

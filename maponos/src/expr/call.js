@@ -1,6 +1,7 @@
 const { parse } = require('fedelm');
-const { expr } = require('fion');
-const incr = require('./call/incr');
+const { Expr } = require('fion');
+
+const Incr = require('./call/incr');
 
 exports.compile = ({ fun: { ref: fun }, args: args }, compile) => {
   const elems = [];
@@ -11,7 +12,7 @@ exports.compile = ({ fun: { ref: fun }, args: args }, compile) => {
       elems.push(compile(arg));
     }
     // @todo: avoid duplication
-    if (arg.type === expr.CALL) {
+    if (arg.type === Expr.CALL) {
       elems.push(parse('pop a'));
     }
     // @todo: should push according to what has been compiled
@@ -19,7 +20,7 @@ exports.compile = ({ fun: { ref: fun }, args: args }, compile) => {
   }
   switch (fun) {
   case 'INCR':
-    elems.push(incr.compile());
+    elems.push(Incr.compile());
     break;
   }
 

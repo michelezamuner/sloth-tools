@@ -1,11 +1,11 @@
-const ret = require('./stmt/ret');
+const Asm = require('./stmt/asm');
 // @todo change this to 'dcl', because it looks like "decrement"
-const dec = require('./stmt/dec');
-const asm = require('./stmt/asm');
+const Dec = require('./stmt/dec');
+const Ret = require('./stmt/ret');
 
-exports.RET = 'RET';
-exports.DEC = 'DEC';
 exports.ASM = 'ASM';
+exports.DEC = 'DEC';
+exports.RET = 'RET';
 
 exports.create = def => {
   if (def.type) {
@@ -18,9 +18,9 @@ exports.create = def => {
   }
 
   switch(type) {
-  case exports.RET: return { type: exports.RET, ...ret.create(...args) };
-  case exports.DEC: return { type: exports.DEC, ...dec.create(...args) };
-  case exports.ASM: return { type: exports.ASM, ...asm.create(...args) };
+  case exports.ASM: return { type: exports.ASM, ...Asm.create(...args) };
+  case exports.DEC: return { type: exports.DEC, ...Dec.create(...args) };
+  case exports.RET: return { type: exports.RET, ...Ret.create(...args) };
   default: throw `Invalid statement '${type}'`;
   }
 };

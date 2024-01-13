@@ -1,22 +1,23 @@
-const ast = require('../src/ast');
-const stmt = require('../src/stmt');
-const expr = require('../src/expr');
+const Ast = require('../src/ast');
+const Expr = require('../src/expr');
+const Stmt = require('../src/stmt');
+
 
 describe('ast', () => {
   it('creates ast', () => {
-    const a = ast.create([
+    const ast = Ast.create([
       ['f', [['RET', ['BYTE', 0x00]]]],
       ['g', [['RET', ['BYTE', 0x00]]]],
     ]);
 
-    expect(a).toStrictEqual({
+    expect(ast).toStrictEqual({
       funs: [
         {
           name: 'f',
           stmts: [
             {
-              type: stmt.RET,
-              expr: { type: expr.BYTE, val: Buffer.from([0x00]) },
+              type: Stmt.RET,
+              expr: { type: Expr.BYTE, val: Buffer.from([0x00]) },
             },
           ],
         },
@@ -24,8 +25,8 @@ describe('ast', () => {
           name: 'g',
           stmts: [
             {
-              type: stmt.RET,
-              expr: { type: expr.BYTE, val: Buffer.from([0x00]) },
+              type: Stmt.RET,
+              expr: { type: Expr.BYTE, val: Buffer.from([0x00]) },
             },
           ],
         },
@@ -34,6 +35,6 @@ describe('ast', () => {
   });
 
   it('errors on ast with invalid format', () => {
-    expect(() => ast.create('a')).toThrow('Invalid ast: must be a list of functions, found \'"a"\'');
+    expect(() => Ast.create('a')).toThrow('Invalid ast: must be a list of functions, found \'"a"\'');
   });
 });

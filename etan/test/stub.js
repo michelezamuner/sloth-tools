@@ -1,15 +1,15 @@
-const { ast, stmt } = require('fion');
+const { Ast, Stmt } = require('fion');
 
 exports.parse = (code, ctx = []) => {
-  const a = _parse(code);
-  const main = a.funs.find(({ name }) => name === 'main');
-  const newCtx = main.stmts.filter(({ type }) => type === stmt.DEC);
+  const ast = parse(code);
+  const main = ast.funs.find(({ name }) => name === 'main');
+  const newCtx = main.stmts.filter(({ type }) => type === Stmt.DEC);
   main.stmts.unshift(...ctx);
 
-  return { ast: a, ctx: [...ctx, ...newCtx] };
+  return { ast: ast, ctx: [...ctx, ...newCtx] };
 };
 
-function _parse(code) {
+function parse(code) {
   const parts = code.split(' ');
   let stmts = [];
 
@@ -26,6 +26,6 @@ function _parse(code) {
     stmts.push(['RET', ['BYTE', 0x00]]);
   }
 
-  return ast.create([['main', stmts]]);
+  return Ast.create([['main', stmts]]);
 }
 

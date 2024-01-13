@@ -1,13 +1,14 @@
-const byte = require('./expr/byte');
-const ref = require('./expr/ref');
-const var_ = require('./expr/var');
-const call = require('./expr/call');
+const Byte = require('./expr/byte');
+const Call = require('./expr/call');
+const Ref = require('./expr/ref');
+const Var = require('./expr/var');
 
 exports.BYTE = 'BYTE';
+exports.CALL = 'CALL';
 exports.REF = 'REF';
 exports.VAR = 'VAR';
-exports.CALL = 'CALL';
-exports.ref = ref;
+
+exports.ref = Ref;
 
 exports.create = args => _create(args);
 
@@ -17,10 +18,10 @@ function _create([type, ...args]) {
   }
 
   switch(type) {
-  case exports.BYTE: return { type: exports.BYTE, ...byte.create(...args) };
-  case exports.REF: return { type: exports.REF, ...ref.create(...args) };
-  case exports.VAR: return { type: exports.VAR, ...var_.create(...args) };
-  case exports.CALL: return { type: exports.CALL, ...call.create(_create, ...args) };
+  case exports.BYTE: return { type: exports.BYTE, ...Byte.create(...args) };
+  case exports.CALL: return { type: exports.CALL, ...Call.create(_create, ...args) };
+  case exports.REF: return { type: exports.REF, ...Ref.create(...args) };
+  case exports.VAR: return { type: exports.VAR, ...Var.create(...args) };
   default: throw `Invalid expression '${type}'`;
   }
 }

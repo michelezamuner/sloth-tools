@@ -1,12 +1,13 @@
-const { stmt } = require('fion');
-const ret = require('./stmt/ret');
-const dec = require('./stmt/dec');
-const asm = require('./stmt/asm');
+const { Stmt } = require('fion');
+
+const Asm = require('./stmt/asm');
+const Dec = require('./stmt/dec');
+const Ret = require('./stmt/ret');
 
 exports.compile = ast => {
   switch(ast.type) {
-  case stmt.RET: return ret.compile(ast);
-  case stmt.DEC: return dec.compile(ast);
-  case stmt.ASM: return asm.compile(ast);
+  case Stmt.RET: return Ret.compile(ast);
+  case Stmt.DEC: return Dec.compile(ast);
+  case Stmt.ASM: return Asm.compile(ast);
   }
 };

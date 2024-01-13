@@ -1,5 +1,6 @@
 const { code } = require('fedelm');
-const { create, load, read, set, get, push, pop } = require('../src/memory');
+
+const { create, get, load, pop, push, read, set } = require('../src/memory');
 
 describe('memory', () => {
   it('loads and reads bytes', () => {

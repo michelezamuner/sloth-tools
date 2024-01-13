@@ -1,4 +1,5 @@
-const { expr } = require('fion');
+const { Expr } = require('fion');
+
 const operatorsDefinitions = require('./operators.json');
 
 exports.parse = lexemes => _parse(lexemes);
@@ -10,10 +11,10 @@ function _parse(lexemes) {
     }
 
     if (!isNaN(lexemes[0])) {
-      return expr.create(['BYTE', lexemes[0]]);
+      return Expr.create(['BYTE', lexemes[0]]);
     }
 
-    return expr.create(['REF', lexemes[0]]);
+    return Expr.create(['REF', lexemes[0]]);
   }
 
   const expr_lexemes = [];
@@ -26,7 +27,7 @@ function _parse(lexemes) {
     if (expr_lexemes[0] === '(' && expr_lexemes[2] === ')' && operators.includes(expr_lexemes[1])) {
       const operatorDefinition = operatorsDefinitions[expr_lexemes[1]];
       expr_lexemes.length = 0;
-      expr_lexemes.push(expr.create(operatorDefinition));
+      expr_lexemes.push(Expr.create(operatorDefinition));
     }
   }
 
@@ -40,7 +41,7 @@ function _parse(lexemes) {
 
   const [fun, ...args] = expr_lexemes.filter(l => !['(', ')'].includes(l));
 
-  return expr.create(['CALL', _parse([fun]), ...args.map(a => _parse([a]))]);
+  return Expr.create(['CALL', _parse([fun]), ...args.map(a => _parse([a]))]);
 }
 
 const operators = Object.keys(operatorsDefinitions);

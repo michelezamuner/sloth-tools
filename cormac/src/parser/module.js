@@ -1,5 +1,6 @@
-const { ast } = require('fion');
-const block = require('./block');
+const { Ast } = require('fion');
+
+const Parser = require('./block');
 
 exports.parse = lexemes => {
   const funs = [];
@@ -10,7 +11,7 @@ exports.parse = lexemes => {
 
     if (lexeme === 'fun') {
       if (fun[1]) {
-        fun[1] = block.parse(fun[1]);
+        fun[1] = Parser.parse(fun[1]);
         funs.push(fun);
         fun = [];
       }
@@ -26,8 +27,8 @@ exports.parse = lexemes => {
     }
   }
 
-  fun[1] = block.parse(fun[1]);
+  fun[1] = Parser.parse(fun[1]);
   funs.push(fun);
 
-  return ast.create(funs);
+  return Ast.create(funs);
 };

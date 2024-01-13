@@ -1,5 +1,6 @@
-const { run } = require('../src/lib');
 const { parse } = require('fedelm');
+
+const { run } = require('../src/lib');
 
 describe('heber', () => {
   it('returns program exit status', () => {

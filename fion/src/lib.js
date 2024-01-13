@@ -1,4 +1,4 @@
-exports.ast = require('./ast');
-exports.fun = require('./fun');
-exports.stmt = require('./stmt');
-exports.expr = require('./expr');
+exports.Ast = require('./ast');
+exports.Expr = require('./expr');
+exports.Fun = require('./fun');
+exports.Stmt = require('./stmt');

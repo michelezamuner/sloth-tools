@@ -1,7 +1,7 @@
 const exec = require('child_process').execSync;
 
 describe('cormac', () => {
-  it('exits with value returned from main', () => {
+  it('defines main function', () => {
     const code = 'fun main 0x12';
 
     try {

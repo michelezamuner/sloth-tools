@@ -1,12 +1,13 @@
-const fs = require('fs');
+const Fs = require('fs');
+
 const { run } = require('./run');
 
 exports.exec = (file, parse, config) => {
-  if (!fs.existsSync(file)) {
+  if (!Fs.existsSync(file)) {
     throw `Invalid source file '${file}'\n`;
   }
 
-  const code = fs.readFileSync(file, 'utf-8');
+  const code = Fs.readFileSync(file, 'utf-8');
 
   return run(code, parse, config);
 };

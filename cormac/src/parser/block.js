@@ -1,4 +1,4 @@
-const parser = require('./stmt');
+const Parser = require('./stmt');
 
 exports.parse = lexemes => {
   const block = [];
@@ -6,7 +6,7 @@ exports.parse = lexemes => {
 
   for (const lexeme of lexemes) {
     if (lexeme === ';') {
-      block.push(parser.parse(stmt));
+      block.push(Parser.parse(stmt));
       stmt.length = 0;
 
       continue;
@@ -14,7 +14,7 @@ exports.parse = lexemes => {
     stmt.push(lexeme);
   }
   if (stmt.length) {
-    block.push(parser.parse(stmt));
+    block.push(Parser.parse(stmt));
   }
 
   return block;

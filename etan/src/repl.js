@@ -1,8 +1,9 @@
-const readline = require('readline');
+const Readline = require('readline');
+
 const { run } = require('./run');
 
 exports.exec = async(process, parse, config) => {
-  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  const rl = Readline.createInterface({ input: process.stdin, output: process.stdout });
 
   process.stdout.write('> ');
 

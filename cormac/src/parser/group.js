@@ -1,10 +1,11 @@
-const parser = require('./normalizer');
-const { expr } = require('fion');
+const { Expr } = require('fion');
+
+const Parser = require('./normalizer');
 const operatorsDefinitions = require('./operators.json');
 
-exports.parse = lexemes => _parse(lexemes);
+exports.parse = lexemes => parse(lexemes);
 
-function _parse(lexemes) {
+function parse(lexemes) {
   const groups = [[]];
 
   for (const lexeme of lexemes) {
@@ -17,13 +18,13 @@ function _parse(lexemes) {
     if (lexeme === ')') {
       const group = groups.pop();
       if (group.length === 1 && operators.includes(group[0])) {
-        groups[groups.length - 1].push(parser.parse(['(', ...group, ')']));
-      } else if (groups.length && groups[groups.length - 1].length && (!groups[groups.length - 1][groups[groups.length - 1].length - 1].type || groups[groups.length - 1][groups[groups.length - 1].length - 1].type === expr.REF)) {
+        groups[groups.length - 1].push(Parser.parse(['(', ...group, ')']));
+      } else if (groups.length && groups[groups.length - 1].length && (!groups[groups.length - 1][groups[groups.length - 1].length - 1].type || groups[groups.length - 1][groups[groups.length - 1].length - 1].type === Expr.REF)) {
         groups[groups.length - 1].push('(');
-        groups[groups.length - 1].push(parser.parse(group));
+        groups[groups.length - 1].push(Parser.parse(group));
         groups[groups.length - 1].push(')');
       } else {
-        groups[groups.length - 1].push(parser.parse(group));
+        groups[groups.length - 1].push(Parser.parse(group));
       }
 
       continue;
@@ -32,7 +33,7 @@ function _parse(lexemes) {
     groups[groups.length - 1].push(lexeme);
   }
 
-  return parser.parse(groups[0]);
+  return Parser.parse(groups[0]);
 }
 
 const operators = Object.keys(operatorsDefinitions);

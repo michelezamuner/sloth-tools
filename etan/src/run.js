@@ -1,5 +1,5 @@
-const { compile } = require('maponos');
 const { run } = require('heber');
+const { compile } = require('maponos');
 
 exports.run = (code, parse, config) => {
   const { ast: ast } = parse(code);

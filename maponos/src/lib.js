@@ -1,10 +1,11 @@
 const { parse } = require('fedelm');
-const stmt = require('./stmt');
+
+const Stmt = require('./stmt');
 
 exports.compile = ast => {
   const elems = [];
   for (const s of ast.funs[0].stmts) {
-    elems.push(stmt.compile(s));
+    elems.push(Stmt.compile(s));
   }
 
   elems.push(parse(`

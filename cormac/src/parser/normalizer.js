@@ -1,4 +1,4 @@
-const parser = require('./expr');
+const Parser = require('./expr');
 
 exports.parse = lexemes => {
   let current = [];
@@ -14,5 +14,5 @@ exports.parse = lexemes => {
     current.push(lexeme);
   }
 
-  return parser.parse(current);
+  return Parser.parse(current);
 };

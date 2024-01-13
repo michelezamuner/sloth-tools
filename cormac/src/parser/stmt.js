@@ -1,14 +1,15 @@
-const { stmt } = require('fion');
-const parser = require('./group');
+const { Stmt } = require('fion');
+
+const Parser = require('./group');
 
 exports.parse = lexemes => {
   if (lexemes[1] === ':=') {
-    return stmt.create(['DEC', lexemes[0], parser.parse(lexemes.slice(2))]);
+    return Stmt.create(['DEC', lexemes[0], Parser.parse(lexemes.slice(2))]);
   }
 
   if (lexemes[1] === '=') {
-    return stmt.create(['ASM', ['VAR', lexemes[0]], parser.parse(lexemes.slice(2))]);
+    return Stmt.create(['ASM', ['VAR', lexemes[0]], Parser.parse(lexemes.slice(2))]);
   }
 
-  return stmt.create(['RET', parser.parse(lexemes)]);
+  return Stmt.create(['RET', Parser.parse(lexemes)]);
 };

@@ -1,6 +1,6 @@
-const eval_ = require('./eval');
-const file = require('./file');
-const repl = require('./repl');
+const Eval = require('./eval');
+const File = require('./file');
+const Repl = require('./repl');
 
 exports.exec = async(process, parse, config) => {
   if (process.argv[2].startsWith('--')) {
@@ -15,8 +15,8 @@ async function execOption(process, parse, config) {
   const code = process.argv[3];
 
   switch (option) {
-  case '--eval': return process.exit(eval_.exec(code, parse, config));
-  case '--repl': return await repl.exec(process, parse, config);
+  case '--eval': return process.exit(Eval.exec(code, parse, config));
+  case '--repl': return await Repl.exec(process, parse, config);
   default:
     process.stderr.write(`Invalid option '${option}'\n`);
 
@@ -28,7 +28,7 @@ function execFile(process, parse, config) {
   const f = process.argv[2];
 
   try {
-    return process.exit(file.exec(f, parse, config));
+    return process.exit(File.exec(f, parse, config));
   } catch(e) {
     process.stderr.write(e);
 

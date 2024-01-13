@@ -1,50 +1,51 @@
+const { Expr } = require('fion');
+
+const Lexer = require('../../src/lexer');
 const { parse } = require('../../src/parser/expr');
-const lexer = require('../../src/lexer');
-const { expr } = require('fion');
 
 describe('expr parser', () => {
   it('parses byte', () => {
-    const lexemes = lexer.parse('0x12');
+    const lexemes = Lexer.parse('0x12');
 
     const ast = parse(lexemes);
 
-    expect(ast).toStrictEqual(expr.create(['BYTE', 0x12]));
+    expect(ast).toStrictEqual(Expr.create(['BYTE', 0x12]));
   });
 
   it('parses byte ast', () => {
-    const lexemes = [ expr.create(['BYTE', 0x12]) ];
+    const lexemes = [ Expr.create(['BYTE', 0x12]) ];
 
     const ast = parse(lexemes);
 
-    expect(ast).toStrictEqual(expr.create(['BYTE', 0x12]));
+    expect(ast).toStrictEqual(Expr.create(['BYTE', 0x12]));
   });
 
   it('parses reference', () => {
-    const lexemes = lexer.parse('ref');
+    const lexemes = Lexer.parse('ref');
 
     const ast = parse(lexemes);
 
-    expect(ast).toStrictEqual(expr.create(['REF', 'ref']));
+    expect(ast).toStrictEqual(Expr.create(['REF', 'ref']));
   });
 
   it('parses incr reference', () => {
-    const lexemes = lexer.parse('(++)');
+    const lexemes = Lexer.parse('(++)');
 
     const ast = parse(lexemes);
 
-    expect(ast).toStrictEqual(expr.create(['REF', 'INCR']));
+    expect(ast).toStrictEqual(Expr.create(['REF', 'INCR']));
   });
 
   it('parses fun call', () => {
-    const lexemes = lexer.parse('fun(0x12)');
+    const lexemes = Lexer.parse('fun(0x12)');
 
     const ast = parse(lexemes);
 
-    expect(ast).toStrictEqual(expr.create(['CALL', ['REF', 'fun'], ['BYTE', 0x12]]));
+    expect(ast).toStrictEqual(Expr.create(['CALL', ['REF', 'fun'], ['BYTE', 0x12]]));
   });
 
   it('errors on invalid fun call', () => {
-    const lexemes = lexer.parse('(++)0x12');
+    const lexemes = Lexer.parse('(++)0x12');
 
     expect(() => parse(lexemes)).toThrow('Invalid function call');
   });

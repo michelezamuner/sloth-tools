@@ -1,3 +1,3 @@
 # Cormac
 
-Language for the Fion AST.
+Test language for the `fion` AST.

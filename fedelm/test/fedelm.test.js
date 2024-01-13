@@ -1,5 +1,5 @@
-const { code, decode, instruction, parse } = require('../src/lib');
 const instructions = require('../src/instructions.json');
+const { code, decode, instruction, parse } = require('../src/lib');
 const registers = require('../src/registers.json');
 
 describe('fedelm', () => {

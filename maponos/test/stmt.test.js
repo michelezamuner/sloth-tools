@@ -1,10 +1,11 @@
-const { compile } = require('../src/stmt');
-const { stmt } = require('fion');
 const { parse } = require('fedelm');
+const { Stmt } = require('fion');
+
+const { compile } = require('../src/stmt');
 
 describe('statement compiler', () => {
   it('compiles return from byte', () => {
-    const ast = stmt.create(['RET', ['BYTE', 0x12]]);
+    const ast = Stmt.create(['RET', ['BYTE', 0x12]]);
 
     const bytecode = compile(ast);
 
@@ -15,7 +16,7 @@ describe('statement compiler', () => {
   });
 
   it('compiles return from ref', () => {
-    const ast = stmt.create(['RET', ['REF', 'a']]);
+    const ast = Stmt.create(['RET', ['REF', 'a']]);
 
     const bytecode = compile(ast);
 
@@ -23,7 +24,7 @@ describe('statement compiler', () => {
   });
 
   it('compiles return from call', () => {
-    const ast = stmt.create(['RET', ['CALL', ['REF', 'INCR'], ['BYTE', 0x12]]]);
+    const ast = Stmt.create(['RET', ['CALL', ['REF', 'INCR'], ['BYTE', 0x12]]]);
 
     const bytecode = compile(ast);
 
@@ -39,7 +40,7 @@ describe('statement compiler', () => {
   });
 
   it('compiles declaration', () => {
-    const ast = stmt.create(['DEC', 'a', ['BYTE', 0x12]]);
+    const ast = Stmt.create(['DEC', 'a', ['BYTE', 0x12]]);
 
     const bytecode = compile(ast);
 
@@ -50,7 +51,7 @@ describe('statement compiler', () => {
   });
 
   it('compiles assignment of byte', () => {
-    const ast = stmt.create(['ASM', ['VAR', 'a'], ['BYTE', 0x12]]);
+    const ast = Stmt.create(['ASM', ['VAR', 'a'], ['BYTE', 0x12]]);
 
     const bytecode = compile(ast);
 
@@ -61,7 +62,7 @@ describe('statement compiler', () => {
   });
 
   it('compiles assignment of call', () => {
-    const ast = stmt.create(['ASM', ['VAR', 'a'], ['CALL', ['REF', 'INCR'],['BYTE', 0x12]]]);
+    const ast = Stmt.create(['ASM', ['VAR', 'a'], ['CALL', ['REF', 'INCR'],['BYTE', 0x12]]]);
 
     const bytecode = compile(ast);
 

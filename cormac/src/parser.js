@@ -1,15 +1,24 @@
-const { stmt } = require('fion');
-const lexer = require('./lexer');
-const parser = require('./parser/module');
+const { Stmt } = require('fion');
 
-exports.parse = code => {
-  const lexemes = lexer.parse(code);
-  const a = parser.parse(lexemes);
+const Lexer = require('./lexer');
+const Parser = require('./parser/module');
 
-  const main = a.funs.find(({ name }) => name === 'main');
-  if (!main.stmts.find(({ type }) => type === stmt.RET)) {
-    main.stmts.push(stmt.create(['RET', ['BYTE', 0x00]]));
+exports.parse = (code, ctx = []) => {
+  // @todo: use a better check
+  if (code.indexOf('fun main') === -1) {
+    code = `fun main ${code}`;
   }
 
-  return a;
+  const lexemes = Lexer.parse(code);
+  const ast = Parser.parse(lexemes);
+
+  const main = ast.funs.find(({ name }) => name === 'main');
+  if (!main.stmts.find(({ type }) => type === Stmt.RET)) {
+    main.stmts.push(Stmt.create(['RET', ['BYTE', 0x00]]));
+  }
+
+  const newCtx = main.stmts.filter(({ type }) => type === Stmt.DEC);
+  main.stmts.unshift(...ctx);
+
+  return { ast: ast, ctx: [...ctx, ...newCtx] };
 };
