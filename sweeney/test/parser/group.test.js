@@ -20,7 +20,7 @@ describe('group parser', () => {
     expect(ast).toStrictEqual(Expr.create(['CALL', ['REF', 'fun'], ['BYTE', 0x12]]));
   });
 
-  it('parses group of unary expression', () => {
+  it('parses group with unary expression', () => {
     const lexemes = Lexer.parse('(0x12)');
 
     const ast = parse(lexemes);
@@ -28,8 +28,16 @@ describe('group parser', () => {
     expect(ast).toStrictEqual(Expr.create(['BYTE', 0x12]));
   });
 
-  it('parses group containing function call', () => {
+  it('parses group with function call', () => {
     const lexemes = Lexer.parse('(fun(0x12))');
+
+    const ast = parse(lexemes);
+
+    expect(ast).toStrictEqual(Expr.create(['CALL', ['REF', 'fun'], ['BYTE', 0x12]]));
+  });
+
+  it('parses nested groups', () => {
+    const lexemes = Lexer.parse('(fun((0x12)))');
 
     const ast = parse(lexemes);
 

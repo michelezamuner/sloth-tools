@@ -1,8 +1,8 @@
-const Parser = require('./expr');
+exports.parse = lexemes => _parse(lexemes);
 
-exports.parse = lexemes => parse(lexemes);
+const Parser = require('./normalizer');
 
-function parse(lexemes) {
+function _parse(lexemes) {
   const groups = [[]];
 
   for (const lexeme of lexemes) {

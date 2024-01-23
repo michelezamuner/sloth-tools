@@ -2,7 +2,7 @@ const { Ast } = require('fion');
 
 const Parser = require('./block');
 
-exports.parse = lexemes => {
+exports.parse = (lexemes, visitors = {}) => {
   const funs = [];
   let fun = [];
 
@@ -10,24 +10,33 @@ exports.parse = lexemes => {
     const lexeme = lexemes[i];
 
     if (lexeme === 'fun') {
-      if (fun[1]) {
-        fun[1] = Parser.parse(fun[1]);
+      if (fun.length) {
+        if (visitors.module) {
+          fun = visitors.module(fun);
+        }
+        fun[1] = Parser.parse(fun[1], visitors);
         funs.push(fun);
         fun = [];
       }
 
+      fun.push(lexemes[i+1]);
+      fun.push([]);
+      i++;
+
       continue;
     }
 
-    if (fun.length === 0) {
-      fun.push(lexeme);
-      fun.push([]);
-    } else {
-      fun[1].push(lexeme);
+    if (!fun[1]) {
+      throw `Invalid module '${JSON.stringify(lexemes)}'`;
     }
+
+    fun[1].push(lexeme);
   }
 
-  fun[1] = Parser.parse(fun[1]);
+  if (visitors.module) {
+    fun = visitors.module(fun);
+  }
+  fun[1] = Parser.parse(fun[1], visitors);
   funs.push(fun);
 
   return Ast.create(funs);

@@ -1,8 +1,8 @@
 const exec = require('child_process').execSync;
 
 describe('cormac', () => {
-  it('defines main function', () => {
-    const code = 'fun main 0x12';
+  it('provides returning value from function', () => {
+    const code = 'fun main ret 0x12';
 
     try {
       exec(`bin/run --eval "${code}"`);
@@ -13,8 +13,8 @@ describe('cormac', () => {
     expect.hasAssertions();
   });
 
-  it('increments values', () => {
-    const code = '0x11++';
+  it('provides increment function', () => {
+    const code = 'fun main ret INCR(0x11)';
 
     try {
       exec(`bin/run --eval "${code}"`);
@@ -25,8 +25,20 @@ describe('cormac', () => {
     expect.hasAssertions();
   });
 
-  it('stores values in variables', () => {
-    const code = 'fun main a := 0x11; a = a++; a';
+  it('provides variable declaration', () => {
+    const code = 'fun main a := 0x12; ret a';
+
+    try {
+      exec(`bin/run --eval "${code}"`);
+    } catch (e) {
+      expect(e.status).toBe(0x12);
+      expect(e.stdout.toString()).toBe('');
+    }
+    expect.hasAssertions();
+  });
+
+  it('provides variable assignment', () => {
+    const code = 'fun main a := 0x00; a = 0x12; ret a';
 
     try {
       exec(`bin/run --eval "${code}"`);

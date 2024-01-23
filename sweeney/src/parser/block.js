@@ -1,6 +1,6 @@
 const Parser = require('./stmt');
 
-exports.parse = lexemes => {
+exports.parse = (lexemes, visitors = {}) => {
   let block = [];
   let stmt = [];
 
@@ -17,5 +17,11 @@ exports.parse = lexemes => {
     block.push(stmt);
   }
 
-  return block.map(stmt => Parser.parse(stmt));
+  let parsedBlock = block.map(stmt => Parser.parse(stmt));
+
+  if (visitors.block) {
+    parsedBlock = visitors.block(parsedBlock);
+  }
+
+  return parsedBlock;
 };
