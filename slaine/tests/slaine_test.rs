@@ -1,4 +1,4 @@
 #[test]
-fn test_greeting() {
-    assert_eq!(slaine::greeting(), "Hello, World!");
+fn run_vm() {
+    assert_eq!(slaine::run(), 0);
 }

@@ -1,3 +1,3 @@
 fn main() {
-    println!("{}", slaine::greeting());
+    slaine::run();
 }

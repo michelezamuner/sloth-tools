@@ -1,3 +1,3 @@
-pub fn greeting() -> &'static str {
-    "Hello, World!"
+pub fn run() -> u8 {
+    0
 }
