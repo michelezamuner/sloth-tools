@@ -1,23 +1,60 @@
-pub enum Status { ON, OFF }
+pub struct Client {
+  vm: Vm,
+}
 
-pub struct Vm { status: Status }
+impl Client {
+  pub fn new() -> Self {
+    Self {
+      vm: Vm::new(),
+    }
+  }
+  pub fn run(self: &mut Self, cmd: &str) -> &str {
+    match cmd {
+      "status" => self.vm.status().into(),
+      "start" => {
+        self.vm.start();
+        ""
+      },
+      "stop" => {
+        self.vm.stop();
+        ""
+      },
+      _ => ""
+    }
+  }
+}
+
+impl From<&Status> for &str {
+  fn from(value: &Status) -> Self {
+    match value {
+      Status::OFF => "off",
+      Status::ON => "on",
+    }
+  }
+}
+
+struct Vm {
+  status: Status,
+}
 
 impl Vm {
-    pub fn new() -> Vm {
-        Vm {
-            status: Status::OFF,
-        }
+  fn new() -> Self {
+    Self {
+      status: Status::OFF,
     }
+  }
 
-    pub fn status(self: &Self) -> &Status {
-        &self.status
-    }
+  fn status(self: &Self) -> &Status {
+    &self.status
+  }
 
-    pub fn start(self: &mut Self) {
-        self.status = Status::ON
-    }
+  fn start(self: &mut Self) {
+    self.status = Status::ON
+  }
 
-    pub fn stop(self: &mut Self) {
-        self.status = Status::OFF;
-    }
+  fn stop(self: &mut Self) {
+    self.status = Status::OFF;
+  }
 }
+
+enum Status { ON, OFF }
