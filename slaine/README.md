@@ -1,12 +1,21 @@
 # Slaine
 
-Simulation of an entire computer system, including:
+Simple virtualization system. A virtual machine is a simulation of a computer system, including:
 - CPU
 - central bus
-- main memory
 - devices
 
-The CPU is designed to execute instructions defined by a specific architecture. The CPU communicates with the main memory and the devices via the central bus.
+The CPU executes instructions defined by a specific architecture. The CPU communicates with the devices via the central bus, which acts as a facade where all devices are represented like addresses of a single big virtual memory.
+
+A hypervisor acts as a shell of the virtual machine, providing means to turn the machine on and off, and to inspect its status.
+
+## Features
+
+- the hypervisor inspects the status of the vm
+- the hypervisor turns the vm on and off
+- when started, the vm executes the instructions found in the device at the starting memory location
+- instructions can read or write to memory locations, this has different effects according to the specific devices loaded at those locations
+- different devices can be loaded at different memory segments
 
 ## Architecture
 
