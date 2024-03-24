@@ -1,23 +1,36 @@
+mod bus;
+
+use crate::vm::bus::Bus;
+
+pub trait Device {
+  fn read(&self) -> u8;
+}
+
 pub trait Input {
   fn is_off(&self) -> bool;
 }
 
 pub struct Vm {
-  rom: Option<Rom>,
+  bus: Bus,
 }
 
 impl Vm {
   pub fn new() -> Self {
-    Self { rom: None }
+    Self { bus: Bus::new() }
   }
 
-  pub fn plug(&mut self, rom: Rom) {
-    self.rom = Some(rom);
+  pub fn with_rom(rom: Rom) -> Self {
+    let mut bus = Bus::new();
+    let b: Box<dyn Device> = Box::new(rom);
+    bus.register(b);
+
+    Self { bus }
   }
 
-  pub fn run<I: Input>(&self, input: I) {
+  pub fn run<T: Input>(&self, input: T) {
     while !input.is_off() {
-      if self.rom.as_ref().is_some_and(|r| r.read() == 0xff) {
+      // @todo: fail if rom is missing
+      if self.bus.read() == 0xff {
         break;
       }
     }
@@ -31,8 +44,10 @@ impl Rom {
   pub fn new() -> Self {
     Self {}
   }
+}
 
-  pub fn read(&self) -> u8 {
+impl Device for Rom {
+  fn read(&self) -> u8 {
     0xff
   }
 }
@@ -51,8 +66,7 @@ mod tests {
 
   #[test]
   fn stop_with_rom() {
-    let mut vm = Vm::new();
-    vm.plug(Rom::new());
+    let vm = Vm::with_rom(Rom::new());
 
     let output = vm.run(InputOn {});
 

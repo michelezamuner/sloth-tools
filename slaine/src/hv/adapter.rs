@@ -1,4 +1,4 @@
-use crate::vm;
+use crate::vm::*;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::thread::JoinHandle;
@@ -29,10 +29,11 @@ impl Adapter {
     let input = AdapterInput::new(Arc::clone(&self.should_stop));
     let plug = self.plug;
     self.handle = Some(thread::spawn(move || {
-      let mut vm = vm::Vm::new();
-      if plug {
-        vm.plug(vm::Rom::new());
-      }
+      let vm = if plug {
+        Vm::with_rom(Rom::new())
+      } else {
+        Vm::new()
+      };
       vm.run(input)
     }))
   }
@@ -56,7 +57,7 @@ impl AdapterInput {
   }
 }
 
-impl vm::Input for AdapterInput {
+impl Input for AdapterInput {
   fn is_off(&self) -> bool {
     *self.should_stop.lock().unwrap()
   }
