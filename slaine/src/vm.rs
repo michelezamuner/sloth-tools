@@ -1,9 +1,18 @@
 mod bus;
+mod cpu;
 
 use crate::vm::bus::Bus;
+use crate::vm::cpu::Cpu;
+use std::rc::Rc;
+
+#[derive(Debug)]
+pub enum Error {
+  InvalidSegment,
+  NoDevice,
+}
 
 pub trait Device {
-  fn read(&self) -> u8;
+  fn read(&self, addr: u16) -> u8;
 }
 
 pub trait Input {
@@ -11,29 +20,31 @@ pub trait Input {
 }
 
 pub struct Vm {
-  bus: Bus,
+  _bus: Rc<Bus>,
+  cpu: Cpu,
 }
 
 impl Vm {
   pub fn new() -> Self {
-    Self { bus: Bus::new() }
+    let bus = Rc::new(Bus::new());
+    let cpu = Cpu::new(Rc::clone(&bus));
+    Self { _bus: bus, cpu }
   }
 
   pub fn with_rom(rom: Rom) -> Self {
+    // @todo: pass device configuration from outside
     let mut bus = Bus::new();
-    let b: Box<dyn Device> = Box::new(rom);
-    bus.register(b);
+    let dev: Box<dyn Device> = Box::new(rom);
+    let _ = bus.register(dev, 0x00);
 
-    Self { bus }
+    let bus_ref = Rc::new(bus);
+    let cpu = Cpu::new(Rc::clone(&bus_ref));
+
+    Self { _bus: bus_ref, cpu }
   }
 
-  pub fn run<T: Input>(&self, input: T) {
-    while !input.is_off() {
-      // @todo: fail if rom is missing
-      if self.bus.read() == 0xff {
-        break;
-      }
-    }
+  pub fn run<T: Input>(&self, input: T) -> Result<(), Error> {
+    self.cpu.run(|| input.is_off())
   }
 }
 
@@ -47,7 +58,7 @@ impl Rom {
 }
 
 impl Device for Rom {
-  fn read(&self) -> u8 {
+  fn read(&self, _addr: u16) -> u8 {
     0xff
   }
 }
@@ -59,24 +70,25 @@ mod tests {
   #[test]
   fn stop_when_is_off() {
     let vm = Vm::new();
-    let output = vm.run(InputOff {});
 
-    assert_eq!(output, ());
+    let res = vm.run(InputOff {});
+
+    assert!(res.is_ok());
   }
 
   #[test]
   fn stop_with_rom() {
     let vm = Vm::with_rom(Rom::new());
 
-    let output = vm.run(InputOn {});
+    let res = vm.run(InputOn {});
 
-    assert_eq!(output, ());
+    assert!(res.is_ok());
   }
 
   #[test]
   fn rom_just_has_exit_instruction() {
     let rom = Rom::new();
-    let instruction = rom.read();
+    let instruction = rom.read(0x00);
     assert_eq!(instruction, 0xff);
   }
 

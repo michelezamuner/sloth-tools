@@ -34,7 +34,9 @@ impl Adapter {
       } else {
         Vm::new()
       };
-      vm.run(input)
+
+      // @todo: handle errors
+      let _ = vm.run(input);
     }))
   }
 
