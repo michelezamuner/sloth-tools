@@ -9,7 +9,7 @@ pub enum Status {
 }
 
 pub struct Hv {
-  should_stop: Arc<Mutex<bool>>,
+  power_off: Arc<Mutex<bool>>,
   handle: Option<thread::JoinHandle<Result<(), Error>>>,
   plug: Option<(u8, u8)>,
 }
@@ -17,7 +17,7 @@ pub struct Hv {
 impl Hv {
   pub fn new() -> Self {
     Self {
-      should_stop: Arc::new(Mutex::new(false)),
+      power_off: Arc::new(Mutex::new(false)),
       handle: None,
       plug: None,
     }
@@ -41,7 +41,7 @@ impl Hv {
   }
 
   pub fn start(&mut self) {
-    let input = HvInput::new(Arc::clone(&self.should_stop));
+    let input = HvInput::new(Arc::clone(&self.power_off));
     let plug = self.plug;
     self.handle = Some(thread::spawn(move || {
       let mut bus = Bus::new();
@@ -55,7 +55,7 @@ impl Hv {
   }
 
   pub fn stop(&mut self) {
-    *self.should_stop.lock().unwrap() = true
+    *self.power_off.lock().unwrap() = true
   }
 
   pub fn plug(&mut self, seg: u8, code: u8) {
@@ -64,17 +64,17 @@ impl Hv {
 }
 
 struct HvInput {
-  should_stop: Arc<Mutex<bool>>,
+  power_off: Arc<Mutex<bool>>,
 }
 
 impl HvInput {
-  fn new(should_stop: Arc<Mutex<bool>>) -> Self {
-    Self { should_stop }
+  fn new(power_off: Arc<Mutex<bool>>) -> Self {
+    Self { power_off }
   }
 }
 
 impl Input for HvInput {
-  fn is_off(&self) -> bool {
-    *self.should_stop.lock().unwrap()
+  fn power_off(&self) -> bool {
+    *self.power_off.lock().unwrap()
   }
 }

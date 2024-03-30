@@ -18,7 +18,7 @@ pub trait Device {
 }
 
 pub trait Input {
-  fn is_off(&self) -> bool;
+  fn power_off(&self) -> bool;
 }
 
 pub struct Vm {
@@ -34,7 +34,7 @@ impl Vm {
   }
 
   pub fn run<T: Input>(&self, input: T) -> Result<(), Error> {
-    self.cpu.run(|| input.is_off())
+    self.cpu.run(|| input.power_off())
   }
 }
 
@@ -43,7 +43,7 @@ mod tests {
   use super::*;
 
   #[test]
-  fn stop_when_is_off() {
+  fn stop_when_power_off() {
     let vm = Vm::new(Bus::new());
 
     let res = vm.run(InputOff {});
@@ -52,7 +52,7 @@ mod tests {
   }
 
   #[test]
-  fn stop_with_rom() {
+  fn stop_with_halt_code() {
     let mut bus = Bus::new();
     let rom: Box<dyn Device> = Box::new(Rom::new(0xff));
     let _ = bus.register(rom, 0x00);
@@ -66,14 +66,14 @@ mod tests {
 
   struct InputOff {}
   impl Input for InputOff {
-    fn is_off(&self) -> bool {
+    fn power_off(&self) -> bool {
       true
     }
   }
 
   struct InputOn {}
   impl Input for InputOn {
-    fn is_off(&self) -> bool {
+    fn power_off(&self) -> bool {
       false
     }
   }

@@ -10,8 +10,8 @@ impl Cpu {
     Cpu { bus }
   }
 
-  pub fn run<T: FnMut() -> bool>(&self, mut interrupt: T) -> Result<(), Error> {
-    while !interrupt() {
+  pub fn run<T: FnMut() -> bool>(&self, mut power_off: T) -> Result<(), Error> {
+    while !power_off() {
       let code = self.bus.read(0x00)?;
       if code == 0xff {
         break;
@@ -38,7 +38,7 @@ mod tests {
   }
 
   #[test]
-  fn halt_with_interrupt() {
+  fn terminate_with_power_off() {
     let mut bus = Bus::new();
     let dev = Dev {};
     let _ = bus.register(Box::new(dev), 0x00);
@@ -50,7 +50,7 @@ mod tests {
   }
 
   #[test]
-  fn run_just_halt_code() {
+  fn terminate_with_halt_code() {
     let mut bus = Bus::new();
     let dev = Dev {};
     let _ = bus.register(Box::new(dev), 0x00);
