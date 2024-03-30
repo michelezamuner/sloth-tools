@@ -32,7 +32,7 @@ impl Hv {
     self.adapter.stop()
   }
 
-  pub fn plug(&mut self) {
-    self.adapter.plug()
+  pub fn plug(&mut self, seg: u8, code: u8) {
+    self.adapter.plug(seg, code)
   }
 }

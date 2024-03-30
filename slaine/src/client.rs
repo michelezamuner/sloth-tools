@@ -21,15 +21,21 @@ impl Client {
         self.hv.stop();
         None
       }
-      "plug" => {
-        self.hv.plug();
-        None
-      }
       "quit" => {
         self.hv.stop();
         Some(Response::Quit)
       }
-      _ => Some(Response::Msg("invalid command".into())),
+      _ => {
+        if cmd.starts_with("plug ") {
+          let parts: Vec<_> = cmd.split(' ').collect();
+          let seg = parts[1].to_string().parse::<u8>().unwrap();
+          let code = parts[2].to_string().parse::<u8>().unwrap();
+          self.hv.plug(seg, code);
+          None
+        } else {
+          Some(Response::Msg("invalid command".into()))
+        }
+      }
     }
   }
 }
@@ -53,10 +59,9 @@ impl From<Status> for String {
 impl From<Error> for String {
   fn from(value: Error) -> Self {
     match value {
-      Error::NoDevice => "No starting device found",
-      _ => "",
+      Error::NoDevice => "No starting device found".to_string(),
+      Error::InvalidSegment(seg) => format!("Cannot register device on invalid segment {}", seg),
     }
-    .into()
   }
 }
 

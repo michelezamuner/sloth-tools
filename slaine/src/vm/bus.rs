@@ -13,7 +13,7 @@ impl Bus {
   }
   pub fn register(&mut self, device: Box<dyn Device>, seg: u8) -> Result<(), Error> {
     if seg > 15 {
-      return Err(Error::InvalidSegment);
+      return Err(Error::InvalidSegment(seg));
     }
 
     self.devices[seg as usize] = Some(device);
@@ -45,7 +45,7 @@ mod tests {
 
     let res = bus.register(Box::new(dev), 0xff);
 
-    assert!(matches!(res, Err(Error::InvalidSegment)));
+    assert!(matches!(res, Err(Error::InvalidSegment(0xff))));
   }
   #[test]
   fn fails_if_no_device_is_registered_for_given_address() {

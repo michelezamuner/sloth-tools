@@ -1,13 +1,15 @@
 mod bus;
 mod cpu;
+mod rom;
 
-use crate::vm::bus::Bus;
-use crate::vm::cpu::Cpu;
+pub use bus::Bus;
+use cpu::Cpu;
+pub use rom::Rom;
 use std::rc::Rc;
 
 #[derive(Debug, PartialEq)]
 pub enum Error {
-  InvalidSegment,
+  InvalidSegment(u8),
   NoDevice,
 }
 
@@ -25,41 +27,14 @@ pub struct Vm {
 }
 
 impl Vm {
-  pub fn new() -> Self {
-    let bus = Rc::new(Bus::new());
-    let cpu = Cpu::new(Rc::clone(&bus));
-    Self { _bus: bus, cpu }
-  }
-
-  pub fn with_rom(rom: Rom) -> Self {
-    // @todo: pass device configuration from outside
-    let mut bus = Bus::new();
-    let dev: Box<dyn Device> = Box::new(rom);
-    let _ = bus.register(dev, 0x00);
-
+  pub fn new(bus: Bus) -> Self {
     let bus_ref = Rc::new(bus);
     let cpu = Cpu::new(Rc::clone(&bus_ref));
-
     Self { _bus: bus_ref, cpu }
   }
 
   pub fn run<T: Input>(&self, input: T) -> Result<(), Error> {
     self.cpu.run(|| input.is_off())
-  }
-}
-
-#[derive(Debug)]
-pub struct Rom {}
-
-impl Rom {
-  pub fn new() -> Self {
-    Self {}
-  }
-}
-
-impl Device for Rom {
-  fn read(&self, _addr: u16) -> u8 {
-    0xff
   }
 }
 
@@ -69,7 +44,7 @@ mod tests {
 
   #[test]
   fn stop_when_is_off() {
-    let vm = Vm::new();
+    let vm = Vm::new(Bus::new());
 
     let res = vm.run(InputOff {});
 
@@ -78,18 +53,15 @@ mod tests {
 
   #[test]
   fn stop_with_rom() {
-    let vm = Vm::with_rom(Rom::new());
+    let mut bus = Bus::new();
+    let rom: Box<dyn Device> = Box::new(Rom::new(0xff));
+    let _ = bus.register(rom, 0x00);
+
+    let vm = Vm::new(bus);
 
     let res = vm.run(InputOn {});
 
     assert!(res.is_ok());
-  }
-
-  #[test]
-  fn rom_just_has_exit_instruction() {
-    let rom = Rom::new();
-    let instruction = rom.read(0x00);
-    assert_eq!(instruction, 0xff);
   }
 
   struct InputOff {}
