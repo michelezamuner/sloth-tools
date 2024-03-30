@@ -1,4 +1,4 @@
-use slaine::client::{Client, Cmd, Output};
+use slaine::client::{Client, Response};
 use std::io::Write;
 
 fn main() {
@@ -12,8 +12,8 @@ fn main() {
     let output = client.exec(cmd.trim());
 
     match output {
-      Some(Output::Msg(msg)) => println!("{}", msg),
-      Some(Output::Cmd(Cmd::QUIT)) => break,
+      Some(Response::Msg(msg)) => println!("{}", msg),
+      Some(Response::Quit) => break,
       _ => {}
     }
   }

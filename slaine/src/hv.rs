@@ -1,11 +1,12 @@
 mod adapter;
 
+use crate::vm::Error;
 use adapter::Adapter;
 
 #[derive(Debug, PartialEq)]
 pub enum Status {
   On,
-  Off,
+  Off(Option<Error>),
 }
 
 pub struct Hv {
@@ -19,12 +20,8 @@ impl Hv {
     }
   }
 
-  pub fn status(&self) -> Status {
-    if self.adapter.is_running() {
-      Status::On
-    } else {
-      Status::Off
-    }
+  pub fn status(&mut self) -> Status {
+    self.adapter.status()
   }
 
   pub fn start(&mut self) {

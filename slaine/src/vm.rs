@@ -5,7 +5,7 @@ use crate::vm::bus::Bus;
 use crate::vm::cpu::Cpu;
 use std::rc::Rc;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Error {
   InvalidSegment,
   NoDevice,

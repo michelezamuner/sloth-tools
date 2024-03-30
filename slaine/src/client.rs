@@ -1,4 +1,5 @@
 use crate::hv::{Hv, Status};
+use crate::vm::Error;
 
 pub struct Client {
   hv: Hv,
@@ -9,9 +10,9 @@ impl Client {
     Client { hv: Hv::new() }
   }
 
-  pub fn exec(&mut self, cmd: &str) -> Option<Output> {
+  pub fn exec(&mut self, cmd: &str) -> Option<Response> {
     match cmd {
-      "status" => Some(Output::Msg(self.hv.status().into())),
+      "status" => Some(Response::Msg(self.hv.status().into())),
       "start" => {
         self.hv.start();
         None
@@ -26,9 +27,9 @@ impl Client {
       }
       "quit" => {
         self.hv.stop();
-        Some(Output::Cmd(Cmd::QUIT))
+        Some(Response::Quit)
       }
-      _ => Some(Output::Msg("invalid command".into())),
+      _ => Some(Response::Msg("invalid command".into())),
     }
   }
 }
@@ -42,20 +43,25 @@ impl Default for Client {
 impl From<Status> for String {
   fn from(value: Status) -> Self {
     match value {
-      Status::Off => "off",
-      Status::On => "on",
+      Status::Off(None) => "off".to_string(),
+      Status::Off(Some(e)) => format!("off\nError: {}", String::from(e)),
+      Status::On => "on".to_string(),
+    }
+  }
+}
+
+impl From<Error> for String {
+  fn from(value: Error) -> Self {
+    match value {
+      Error::NoDevice => "No starting device found",
+      _ => "",
     }
     .into()
   }
 }
 
 #[derive(Debug, PartialEq)]
-pub enum Output {
-  Cmd(Cmd),
+pub enum Response {
   Msg(String),
-}
-
-#[derive(Debug, PartialEq)]
-pub enum Cmd {
-  QUIT,
+  Quit,
 }

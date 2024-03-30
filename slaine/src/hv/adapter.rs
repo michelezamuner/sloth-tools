@@ -1,3 +1,4 @@
+use crate::hv::Status;
 use crate::vm::*;
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -5,7 +6,7 @@ use std::thread::JoinHandle;
 
 pub struct Adapter {
   should_stop: Arc<Mutex<bool>>,
-  handle: Option<JoinHandle<()>>,
+  handle: Option<JoinHandle<Result<(), Error>>>,
   plug: bool,
 }
 
@@ -18,11 +19,19 @@ impl Adapter {
     }
   }
 
-  pub fn is_running(&self) -> bool {
-    match &self.handle {
-      Some(handle) => !handle.is_finished(),
-      None => false,
+  pub fn status(&mut self) -> Status {
+    if let Some(handle) = self.handle.take() {
+      return if handle.is_finished() {
+        Status::Off(match handle.join().unwrap() {
+          Ok(_) => None,
+          Err(e) => Some(e),
+        })
+      } else {
+        Status::On
+      };
     }
+
+    Status::Off(None)
   }
 
   pub fn start(&mut self) {
@@ -35,8 +44,7 @@ impl Adapter {
         Vm::new()
       };
 
-      // @todo: handle errors
-      let _ = vm.run(input);
+      vm.run(input)
     }))
   }
 
