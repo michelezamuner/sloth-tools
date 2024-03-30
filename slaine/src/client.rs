@@ -1,5 +1,5 @@
 use crate::hv::{Hv, Status};
-use crate::vm::Error;
+use crate::vm::{Data, Error};
 
 pub struct Client {
   hv: Hv,
@@ -29,7 +29,7 @@ impl Client {
         if cmd.starts_with("plug ") {
           let parts: Vec<_> = cmd.split(' ').collect();
           let seg = parts[1].to_string().parse::<u8>().unwrap();
-          let code = parts[2].to_string().parse::<u8>().unwrap();
+          let code = parts[2].to_string().parse::<Data>().unwrap();
           self.hv.plug(seg, code);
           None
         } else {

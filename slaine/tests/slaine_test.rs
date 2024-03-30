@@ -67,7 +67,7 @@ fn stop_vm_via_code_in_device() {
   let mut client = Client::new();
 
   // @todo: for now the "plug" command adds a ROM that just turns off the vm immediately
-  client.exec("plug 0 255");
+  client.exec(&format!("plug 0 {}", 0xff000000));
   client.exec("start");
   thread::sleep(Duration::from_millis(100));
 

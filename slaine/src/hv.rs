@@ -1,4 +1,4 @@
-use crate::vm::{Bus, Device, Error, Input, Rom, Vm};
+use crate::vm::{Bus, Data, Device, Error, Input, Rom, Vm};
 use std::sync::{Arc, Mutex};
 use std::thread;
 
@@ -11,7 +11,7 @@ pub enum Status {
 pub struct Hv {
   power_off: Arc<Mutex<bool>>,
   handle: Option<thread::JoinHandle<Result<(), Error>>>,
-  plug: Option<(u8, u8)>,
+  plug: Option<(u8, Data)>,
 }
 
 impl Hv {
@@ -49,7 +49,7 @@ impl Hv {
         let rom: Box<dyn Device> = Box::new(Rom::new(code));
         bus.register(rom, seg)?;
       }
-      let vm = Vm::new(bus);
+      let mut vm = Vm::new(bus);
       vm.run(input)
     }))
   }
@@ -58,7 +58,7 @@ impl Hv {
     *self.power_off.lock().unwrap() = true
   }
 
-  pub fn plug(&mut self, seg: u8, code: u8) {
+  pub fn plug(&mut self, seg: u8, code: Data) {
     self.plug = Some((seg, code));
   }
 }

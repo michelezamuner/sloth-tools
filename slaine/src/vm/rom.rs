@@ -1,17 +1,18 @@
 use super::Device;
+use crate::vm::{Addr, Data};
 
 pub struct Rom {
-  code: u8,
+  code: Data,
 }
 
 impl Rom {
-  pub fn new(code: u8) -> Self {
+  pub fn new(code: Data) -> Self {
     Self { code }
   }
 }
 
 impl Device for Rom {
-  fn read(&self, _addr: u16) -> u8 {
+  fn read(&self, _addr: Addr) -> Data {
     self.code
   }
 }

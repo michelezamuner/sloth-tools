@@ -1,24 +1,38 @@
-use super::{Bus, Error};
+use super::*;
 use std::rc::Rc;
 
 pub struct Cpu {
   bus: Rc<Bus>,
+  ip: u16,
+  ir: u32,
+  ix: u8,
 }
 
 impl Cpu {
   pub fn new(bus: Rc<Bus>) -> Self {
-    Cpu { bus }
+    Cpu {
+      bus,
+      ip: 0x00,
+      ir: 0x00,
+      ix: 0x00,
+    }
   }
 
-  pub fn run<T: FnMut() -> bool>(&self, mut power_off: T) -> Result<(), Error> {
-    while !power_off() {
-      let code = self.bus.read(0x00)?;
-      if code == 0xff {
-        break;
-      }
+  pub fn run<T: FnMut() -> bool>(&mut self, mut power_off: T) -> Result<(), Error> {
+    while !power_off() && self.ix != 0xff {
+      self.ir = self.bus.read(self.ip)?;
+      // @todo: self.ip += DATA_SIZE as u16;
+      self.exec();
     }
 
     Ok(())
+  }
+
+  fn exec(&mut self) {
+    let opcode = (self.ir >> 24) as u8;
+    if opcode == 0xff {
+      self.ix = 0xff;
+    }
   }
 }
 
@@ -30,7 +44,7 @@ mod tests {
   #[test]
   fn fails_if_no_device_is_registered_at_begin_addr() {
     let bus = Bus::new();
-    let cpu = Cpu::new(Rc::new(bus));
+    let mut cpu = Cpu::new(Rc::new(bus));
 
     let res = cpu.run(|| false);
 
@@ -42,7 +56,7 @@ mod tests {
     let mut bus = Bus::new();
     let dev = Dev {};
     let _ = bus.register(Box::new(dev), 0x00);
-    let cpu = Cpu::new(Rc::new(bus));
+    let mut cpu = Cpu::new(Rc::new(bus));
 
     let res = cpu.run(|| true);
 
@@ -54,7 +68,7 @@ mod tests {
     let mut bus = Bus::new();
     let dev = Dev {};
     let _ = bus.register(Box::new(dev), 0x00);
-    let cpu = Cpu::new(Rc::new(bus));
+    let mut cpu = Cpu::new(Rc::new(bus));
 
     let res = cpu.run(|| false);
 
@@ -63,8 +77,8 @@ mod tests {
 
   struct Dev {}
   impl Device for Dev {
-    fn read(&self, _addr: u16) -> u8 {
-      0xff // halt instruction
+    fn read(&self, _addr: Addr) -> Data {
+      0xff000000 // halt instruction
     }
   }
 }

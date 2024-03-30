@@ -1,5 +1,9 @@
 use super::{Device, Error};
 
+pub type Data = u32;
+// @todo: pub const DATA_SIZE: u8 = 0x20;
+pub type Addr = u16;
+
 #[derive(Default)]
 pub struct Bus {
   devices: [Option<Box<dyn Device>>; 16],
@@ -21,7 +25,7 @@ impl Bus {
     Ok(())
   }
 
-  pub fn read(&self, addr: u16) -> Result<u8, Error> {
+  pub fn read(&self, addr: Addr) -> Result<Data, Error> {
     let seg = addr >> 12;
     let off = addr & 0x0fff;
 
@@ -71,7 +75,7 @@ mod tests {
 
   struct Dev {}
   impl Device for Dev {
-    fn read(&self, addr: u16) -> u8 {
+    fn read(&self, addr: Addr) -> Data {
       match addr {
         0x0234 => 0x12,
         _ => 000,

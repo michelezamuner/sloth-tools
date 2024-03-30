@@ -2,9 +2,9 @@ mod bus;
 mod cpu;
 mod rom;
 
-pub use bus::Bus;
-use cpu::Cpu;
-pub use rom::Rom;
+pub use bus::*;
+use cpu::*;
+pub use rom::*;
 use std::rc::Rc;
 
 #[derive(Debug, PartialEq)]
@@ -14,7 +14,7 @@ pub enum Error {
 }
 
 pub trait Device {
-  fn read(&self, addr: u16) -> u8;
+  fn read(&self, addr: Addr) -> Data;
 }
 
 pub trait Input {
@@ -33,7 +33,7 @@ impl Vm {
     Self { _bus: bus_ref, cpu }
   }
 
-  pub fn run<T: Input>(&self, input: T) -> Result<(), Error> {
+  pub fn run<T: Input>(&mut self, input: T) -> Result<(), Error> {
     self.cpu.run(|| input.power_off())
   }
 }
@@ -44,7 +44,7 @@ mod tests {
 
   #[test]
   fn stop_when_power_off() {
-    let vm = Vm::new(Bus::new());
+    let mut vm = Vm::new(Bus::new());
 
     let res = vm.run(InputOff {});
 
@@ -54,10 +54,10 @@ mod tests {
   #[test]
   fn stop_with_halt_code() {
     let mut bus = Bus::new();
-    let rom: Box<dyn Device> = Box::new(Rom::new(0xff));
+    let rom: Box<dyn Device> = Box::new(Rom::new(0xff000000));
     let _ = bus.register(rom, 0x00);
 
-    let vm = Vm::new(bus);
+    let mut vm = Vm::new(bus);
 
     let res = vm.run(InputOn {});
 
