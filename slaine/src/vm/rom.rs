@@ -23,10 +23,10 @@ mod tests {
 
   #[test]
   fn read_rom_code() {
-    let rom = Rom::new(0x12);
+    let rom = Rom::new([0x00, 0x00, 0x00, 0x12]);
 
     let code = rom.read(0x00);
 
-    assert_eq!(code, 0x12);
+    assert_eq!(code, [0x00, 0x00, 0x00, 0x12]);
   }
 }

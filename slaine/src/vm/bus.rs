@@ -1,12 +1,16 @@
 use super::{Device, Error};
 
-pub type Data = u32;
+pub type Data = [u8; 4];
 // @todo: pub const DATA_SIZE: u8 = 0x20;
 pub type Addr = u16;
+pub type Byte = u8;
+pub type Seg = usize;
+
+const MAX_SEGMENTS: Seg = 16;
 
 #[derive(Default)]
 pub struct Bus {
-  devices: [Option<Box<dyn Device>>; 16],
+  devices: [Option<Box<dyn Device>>; MAX_SEGMENTS],
 }
 
 impl Bus {
@@ -15,21 +19,21 @@ impl Bus {
       devices: Default::default(),
     }
   }
-  pub fn register(&mut self, device: Box<dyn Device>, seg: u8) -> Result<(), Error> {
-    if seg > 15 {
+  pub fn register(&mut self, device: Box<dyn Device>, seg: Seg) -> Result<(), Error> {
+    if seg > (MAX_SEGMENTS - 1) {
       return Err(Error::InvalidSegment(seg));
     }
 
-    self.devices[seg as usize] = Some(device);
+    self.devices[seg] = Some(device);
 
     Ok(())
   }
 
   pub fn read(&self, addr: Addr) -> Result<Data, Error> {
-    let seg = addr >> 12;
-    let off = addr & 0x0fff;
+    let seg = (addr >> 12) as Seg;
+    let off = (addr & 0x0fff) as Addr;
 
-    let dev = self.devices[seg as usize].as_ref();
+    let dev = self.devices[seg].as_ref();
     if dev.is_none() {
       return Err(Error::NoDevice);
     }
@@ -70,15 +74,15 @@ mod tests {
 
     let res = bus.read(0x1234);
 
-    assert_eq!(res.unwrap(), 0x12);
+    assert_eq!(res.unwrap(), [0x00, 0x00, 0x00, 0x12]);
   }
 
   struct Dev {}
   impl Device for Dev {
     fn read(&self, addr: Addr) -> Data {
       match addr {
-        0x0234 => 0x12,
-        _ => 000,
+        0x0234 => [0x00, 0x00, 0x00, 0x12],
+        _ => [0x00, 0x00, 0x00, 0x00],
       }
     }
   }

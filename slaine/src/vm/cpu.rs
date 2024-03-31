@@ -3,9 +3,9 @@ use std::rc::Rc;
 
 pub struct Cpu {
   bus: Rc<Bus>,
-  ip: u16,
-  ir: u32,
-  ix: u8,
+  ip: Addr,
+  ir: Data,
+  ix: Byte,
 }
 
 impl Cpu {
@@ -13,7 +13,7 @@ impl Cpu {
     Cpu {
       bus,
       ip: 0x00,
-      ir: 0x00,
+      ir: [0u8, 0u8, 0u8, 0u8],
       ix: 0x00,
     }
   }
@@ -29,7 +29,7 @@ impl Cpu {
   }
 
   fn exec(&mut self) {
-    let opcode = (self.ir >> 24) as u8;
+    let opcode = self.ir[0];
     if opcode == 0xff {
       self.ix = 0xff;
     }
@@ -78,7 +78,7 @@ mod tests {
   struct Dev {}
   impl Device for Dev {
     fn read(&self, _addr: Addr) -> Data {
-      0xff000000 // halt instruction
+      [0xff, 0x00, 0x00, 0x00] // halt instruction
     }
   }
 }

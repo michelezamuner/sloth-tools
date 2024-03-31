@@ -1,4 +1,4 @@
-use crate::vm::{Bus, Data, Device, Error, Input, Rom, Vm};
+use crate::vm::{Bus, Data, Device, Error, Input, Rom, Seg, Vm};
 use std::sync::{Arc, Mutex};
 use std::thread;
 
@@ -11,7 +11,7 @@ pub enum Status {
 pub struct Hv {
   power_off: Arc<Mutex<bool>>,
   handle: Option<thread::JoinHandle<Result<(), Error>>>,
-  plug: Option<(u8, Data)>,
+  plug: Option<(Seg, Data)>,
 }
 
 impl Hv {
@@ -58,7 +58,7 @@ impl Hv {
     *self.power_off.lock().unwrap() = true
   }
 
-  pub fn plug(&mut self, seg: u8, code: Data) {
+  pub fn plug(&mut self, seg: Seg, code: Data) {
     self.plug = Some((seg, code));
   }
 }

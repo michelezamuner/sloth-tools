@@ -9,7 +9,7 @@ use std::rc::Rc;
 
 #[derive(Debug, PartialEq)]
 pub enum Error {
-  InvalidSegment(u8),
+  InvalidSegment(Seg),
   NoDevice,
 }
 
@@ -54,7 +54,7 @@ mod tests {
   #[test]
   fn stop_with_halt_code() {
     let mut bus = Bus::new();
-    let rom: Box<dyn Device> = Box::new(Rom::new(0xff000000));
+    let rom: Box<dyn Device> = Box::new(Rom::new([0xff, 0x00, 0x00, 0x00]));
     let _ = bus.register(rom, 0x00);
 
     let mut vm = Vm::new(bus);
