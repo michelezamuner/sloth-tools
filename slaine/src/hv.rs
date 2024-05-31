@@ -1,17 +1,18 @@
-use crate::vm::{Bus, Data, Device, Error, Input, Rom, Seg, Vm};
+use crate::vm::{Bus, Byte, Device, Error, Input, Rom, Seg, Vm};
 use std::sync::{Arc, Mutex};
 use std::thread;
 
 #[derive(Debug, PartialEq)]
 pub enum Status {
   On,
-  Off(Option<Error>),
+  Off,
 }
 
 pub struct Hv {
   power_off: Arc<Mutex<bool>>,
-  handle: Option<thread::JoinHandle<Result<(), Error>>>,
-  plug: Option<(Seg, Data)>,
+  handle: Option<thread::JoinHandle<()>>,
+  plug_rom: Option<(Seg, Vec<Byte>)>,
+  logs: Arc<Mutex<Vec<Error>>>,
 }
 
 impl Hv {
@@ -19,38 +20,45 @@ impl Hv {
     Self {
       power_off: Arc::new(Mutex::new(false)),
       handle: None,
-      plug: None,
+      plug_rom: None,
+      logs: Arc::new(Mutex::new(vec![])),
     }
   }
 
-  pub fn status(&mut self) -> Status {
+  pub fn status(&self) -> Status {
     if self.handle.is_none() {
-      return Status::Off(None);
+      return Status::Off;
     }
 
-    let handle_ref = self.handle.as_ref().unwrap();
-    if !handle_ref.is_finished() {
-      return Status::On;
+    if self.handle.as_ref().unwrap().is_finished() {
+      return Status::Off;
     }
 
-    let handle_owned = self.handle.take().unwrap();
-    Status::Off(match handle_owned.join().unwrap() {
-      Ok(_) => None,
-      Err(e) => Some(e),
-    })
+    Status::On
   }
 
   pub fn start(&mut self) {
     let input = HvInput::new(Arc::clone(&self.power_off));
-    let plug = self.plug;
+    // @todo: should not copy the whole code from config!
+    // @todo: maybe pass plug_rom as an argument so it can be moved
+    let plug_rom = self.plug_rom.clone();
+    let logs = Arc::clone(&self.logs);
     self.handle = Some(thread::spawn(move || {
       let mut bus = Bus::new();
-      if let Some((seg, code)) = plug {
+      if let Some((seg, code)) = plug_rom {
         let rom: Box<dyn Device> = Box::new(Rom::new(code));
-        bus.register(rom, seg)?;
+        let result = bus.register(rom, seg);
+        if let Err(e) = result {
+          logs.lock().unwrap().push(e);
+
+          return;
+        }
       }
       let mut vm = Vm::new(bus);
-      vm.run(input)
+      let result = vm.run(input);
+      if let Err(e) = result {
+        logs.lock().unwrap().push(e)
+      }
     }))
   }
 
@@ -58,8 +66,12 @@ impl Hv {
     *self.power_off.lock().unwrap() = true
   }
 
-  pub fn plug(&mut self, seg: Seg, code: Data) {
-    self.plug = Some((seg, code));
+  pub fn plug_rom(&mut self, seg: Seg, code: Vec<Byte>) {
+    self.plug_rom = Some((seg, code));
+  }
+
+  pub fn logs(&self) -> Vec<Error> {
+    self.logs.lock().unwrap().to_vec()
   }
 }
 

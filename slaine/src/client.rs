@@ -1,5 +1,6 @@
 use crate::hv::{Hv, Status};
-use crate::vm::{Error, Seg};
+use crate::vm::{Byte, Error, Seg};
+use serde::Deserialize;
 
 pub struct Client {
   hv: Hv,
@@ -21,22 +22,23 @@ impl Client {
         self.hv.stop();
         None
       }
+      "logs" => Some(Response::Msg(
+        self
+          .hv
+          .logs()
+          .into_iter()
+          .map(|e| format!("Error: {}", String::from(e)))
+          .collect::<Vec<String>>()
+          .join("\n"),
+      )),
       "quit" => {
         self.hv.stop();
         Some(Response::Quit)
       }
       _ => {
-        if cmd.starts_with("plug ") {
-          let parts: Vec<_> = cmd.split(' ').collect();
-          let seg = parts[1].to_string().parse::<Seg>().unwrap();
-          let code_as_int = parts[2].to_string().parse::<u32>().unwrap();
-          let code = [
-            ((code_as_int & 0xff000000) >> 24) as u8,
-            ((code_as_int & 0x00ff0000) >> 16) as u8,
-            ((code_as_int & 0x0000ff00) >> 8) as u8,
-            (code_as_int & 0x000000ff) as u8,
-          ];
-          self.hv.plug(seg, code);
+        if let Some(conf) = cmd.strip_prefix("plug rom ") {
+          let config: Config = serde_json::from_str(conf).unwrap();
+          self.hv.plug_rom(config.seg, config.code);
           None
         } else {
           Some(Response::Msg("invalid command".into()))
@@ -55,8 +57,7 @@ impl Default for Client {
 impl From<Status> for String {
   fn from(value: Status) -> Self {
     match value {
-      Status::Off(None) => "off".to_string(),
-      Status::Off(Some(e)) => format!("off\nError: {}", String::from(e)),
+      Status::Off => "off".to_string(),
       Status::On => "on".to_string(),
     }
   }
@@ -67,6 +68,7 @@ impl From<Error> for String {
     match value {
       Error::NoDevice => "No starting device found".to_string(),
       Error::InvalidSegment(seg) => format!("Cannot register device on invalid segment {}", seg),
+      Error::CannotWriteToDevice => "Cannot write to device".to_string(),
     }
   }
 }
@@ -75,4 +77,10 @@ impl From<Error> for String {
 pub enum Response {
   Msg(String),
   Quit,
+}
+
+#[derive(Deserialize)]
+struct Config {
+  seg: Seg,
+  code: Vec<Byte>,
 }

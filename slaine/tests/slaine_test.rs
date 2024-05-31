@@ -3,107 +3,144 @@ use std::thread;
 use std::time::Duration;
 
 #[test]
-fn inspect_state_of_non_started_vm() {
+fn inspect_status_of_non_started_vm() {
   let mut client = Client::new();
 
-  let status_output = client.exec("status");
-  assert_eq!(status_output, Some(Response::Msg("off".into())));
+  let status_response = client.exec("status");
+  assert_eq!(status_response, Some(Response::Msg("off".into())));
 
-  let quit_output = client.exec("quit");
-  assert_eq!(quit_output, Some(Response::Quit));
+  let quit_response = client.exec("quit");
+  assert_eq!(quit_response, Some(Response::Quit));
 }
 
 #[test]
-fn inspect_state_of_running_vm() {
+fn inspect_status_of_running_vm() {
   let mut client = Client::new();
 
-  client.exec("plug 0 0");
-  client.exec("start");
+  let plug_response = client.exec(&format!(
+    r#"plug rom {{"seg":0,"code":[{},{},{},{}]}}"#,
+    0x30, 0x00, 0x00, 0x00
+  ));
+  assert_eq!(plug_response, None);
+
+  let start_response = client.exec("start");
+  assert_eq!(start_response, None);
   thread::sleep(Duration::from_millis(100));
 
-  let mut output = client.exec("status");
-  assert_eq!(output, Some(Response::Msg("on".into())));
+  let status_response_first = client.exec("status");
+  assert_eq!(status_response_first, Some(Response::Msg("on".into())));
 
   thread::sleep(Duration::from_millis(100));
 
-  output = client.exec("status");
-  assert_eq!(output, Some(Response::Msg("on".into())));
+  let status_response_second = client.exec("status");
+  assert_eq!(status_response_second, Some(Response::Msg("on".into())));
 
   client.exec("quit");
 }
 
 #[test]
-fn inspect_state_of_stopped_vm() {
+fn inspect_status_of_stopped_vm() {
   let mut client = Client::new();
 
-  client.exec("plug 0 0");
+  client.exec(&format!(
+    r#"plug rom {{"seg":0,"code":[{},{},{},{}]}}"#,
+    0x30, 0x00, 0x00, 0x00
+  ));
+
   client.exec("start");
   thread::sleep(Duration::from_millis(100));
 
   client.exec("stop");
   thread::sleep(Duration::from_millis(100));
 
-  let output = client.exec("status");
-  assert_eq!(output, Some(Response::Msg("off".into())));
+  let status_response = client.exec("status");
+  assert_eq!(status_response, Some(Response::Msg("off".into())));
 }
 
 #[test]
 fn stop_vm_when_quitting() {
   let mut client = Client::new();
 
-  client.exec("plug 0 0");
+  client.exec(&format!(
+    r#"plug rom {{"seg":0,"code":[{},{},{},{}]}}"#,
+    0x30, 0x00, 0x00, 0x00
+  ));
+
   client.exec("start");
   thread::sleep(Duration::from_millis(100));
 
   client.exec("quit");
   thread::sleep(Duration::from_millis(100));
 
-  let output = client.exec("status");
-  assert_eq!(output, Some(Response::Msg("off".into())));
+  let status_response = client.exec("status");
+  assert_eq!(status_response, Some(Response::Msg("off".into())));
 }
 
 #[test]
-fn stop_vm_via_code_in_device() {
+fn stop_vm_via_halt_instruction() {
   let mut client = Client::new();
 
-  // @todo: for now the "plug" command adds a ROM that just turns off the vm immediately
-  client.exec(&format!("plug 0 {}", 0xff000000));
-  client.exec("start");
-  thread::sleep(Duration::from_millis(100));
-
-  let output = client.exec("status");
-  assert_eq!(output, Some(Response::Msg("off".into())));
-}
-
-#[test]
-fn print_error_if_starting_device_is_missing() {
-  let mut client = Client::new();
+  client.exec(&format!(
+    r#"plug rom {{"seg":0,"code":[{},{},{},{}]}}"#,
+    0xff, 0x00, 0x00, 0x00
+  ));
 
   client.exec("start");
   thread::sleep(Duration::from_millis(100));
 
-  let output = client.exec("status");
+  let status_response = client.exec("status");
+  assert_eq!(status_response, Some(Response::Msg("off".into())));
+}
 
+#[test]
+fn log_error_if_starting_device_is_missing() {
+  let mut client = Client::new();
+
+  client.exec("start");
+  thread::sleep(Duration::from_millis(100));
+
+  let status_response = client.exec("status");
+  assert_eq!(status_response, Some(Response::Msg("off".into())));
+
+  let logs_response = client.exec("logs");
   assert_eq!(
-    output,
-    Some(Response::Msg("off\nError: No starting device found".into()))
+    logs_response,
+    Some(Response::Msg("Error: No starting device found".into()))
   );
 }
 
 #[test]
-fn print_error_if_starting_device_is_plugged_to_an_invalid_segment() {
+fn log_error_if_starting_device_is_plugged_to_an_invalid_segment() {
   let mut client = Client::new();
 
-  client.exec("plug 16 0");
+  client.exec(r#"plug rom {"seg":16,"code":[0,0,0,0]}"#);
+
   client.exec("start");
   thread::sleep(Duration::from_millis(100));
 
-  let output = client.exec("status");
+  let status_response = client.exec("status");
+  assert_eq!(status_response, Some(Response::Msg("off".to_string())));
 
+  let logs_response = client.exec("logs");
   assert_eq!(
-    output,
+    logs_response,
     Some(Response::Msg(
-      "off\nError: Cannot register device on invalid segment 16".into()
+      "Error: Cannot register device on invalid segment 16".to_string()
     ))
   );
+}
+
+// @todo: WIP
+#[ignore]
+#[test]
+fn print_data_to_cli_device() {
+  let mut client = Client::new();
+
+  client.exec(&format!(
+    r#"plug rom {{"seg":0,"code":[{},{},{},{}]}}"#,
+    0x30, 0x00, 0x00, 0x00
+  ));
+  client.exec("plug_cli");
+  client.exec("start");
+  thread::sleep(Duration::from_millis(100));
 }

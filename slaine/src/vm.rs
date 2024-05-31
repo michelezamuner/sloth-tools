@@ -1,20 +1,23 @@
 mod bus;
 mod cpu;
-mod rom;
+mod devices;
 
 pub use bus::*;
 use cpu::*;
-pub use rom::*;
+pub use devices::rom::*;
+use std::cell::RefCell;
 use std::rc::Rc;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Error {
   InvalidSegment(Seg),
   NoDevice,
+  CannotWriteToDevice,
 }
 
 pub trait Device {
   fn read(&self, addr: Addr) -> Data;
+  fn write(&mut self, addr: Addr, data: Data) -> Result<(), Error>;
 }
 
 pub trait Input {
@@ -22,13 +25,13 @@ pub trait Input {
 }
 
 pub struct Vm {
-  _bus: Rc<Bus>,
+  _bus: Rc<RefCell<Bus>>,
   cpu: Cpu,
 }
 
 impl Vm {
   pub fn new(bus: Bus) -> Self {
-    let bus_ref = Rc::new(bus);
+    let bus_ref = Rc::new(RefCell::new(bus));
     let cpu = Cpu::new(Rc::clone(&bus_ref));
     Self { _bus: bus_ref, cpu }
   }
@@ -54,7 +57,7 @@ mod tests {
   #[test]
   fn stop_with_halt_code() {
     let mut bus = Bus::new();
-    let rom: Box<dyn Device> = Box::new(Rom::new([0xff, 0x00, 0x00, 0x00]));
+    let rom: Box<dyn Device> = Box::new(Rom::new([0xff, 0x00, 0x00, 0x00].to_vec()));
     let _ = bus.register(rom, 0x00);
 
     let mut vm = Vm::new(bus);
