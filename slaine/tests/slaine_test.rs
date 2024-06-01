@@ -130,17 +130,18 @@ fn log_error_if_starting_device_is_plugged_to_an_invalid_segment() {
   );
 }
 
-// @todo: WIP
-#[ignore]
 #[test]
 fn print_data_to_cli_device() {
   let mut client = Client::new();
 
   client.exec(&format!(
-    r#"plug rom {{"seg":0,"code":[{},{},{},{}]}}"#,
-    0x30, 0x00, 0x00, 0x00
+    r#"plug rom {{"seg":0,"code":[{},{},{},{},{},{},{},{},{},{},{},{}]}}"#,
+    0x01, 0x00, 0x12, 0x34, 0x07, 0x00, 0x10, 0x00, 0x30, 0x00, 0x00, 0x08
   ));
-  client.exec("plug_cli");
+  client.exec(r#"plug cli {"seg":1,"code":[]}"#);
   client.exec("start");
   thread::sleep(Duration::from_millis(100));
+
+  let logs_response = client.exec("logs");
+  assert_eq!(logs_response, Some(Response::Msg("4660".to_string())));
 }

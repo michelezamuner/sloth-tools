@@ -1,5 +1,5 @@
 use crate::hv::{Hv, Status};
-use crate::vm::{Byte, Error, Seg};
+use crate::vm::{Byte, Seg};
 use serde::Deserialize;
 
 pub struct Client {
@@ -22,24 +22,24 @@ impl Client {
         self.hv.stop();
         None
       }
-      "logs" => Some(Response::Msg(
-        self
-          .hv
-          .logs()
-          .into_iter()
-          .map(|e| format!("Error: {}", String::from(e)))
-          .collect::<Vec<String>>()
-          .join("\n"),
-      )),
+      "logs" => Some(Response::Msg(self.hv.logs().join("\n"))),
       "quit" => {
         self.hv.stop();
         Some(Response::Quit)
       }
       _ => {
-        if let Some(conf) = cmd.strip_prefix("plug rom ") {
-          let config: Config = serde_json::from_str(conf).unwrap();
-          self.hv.plug_rom(config.seg, config.code);
-          None
+        if let Some(plug) = cmd.strip_prefix("plug ") {
+          if let Some(conf) = plug.strip_prefix("rom ") {
+            let config: Config = serde_json::from_str(conf).unwrap();
+            self.hv.plug_rom(config.seg, config.code);
+            None
+          } else if let Some(conf) = plug.strip_prefix("cli ") {
+            let config: Config = serde_json::from_str(conf).unwrap();
+            self.hv.plug_cli(config.seg);
+            None
+          } else {
+            Some(Response::Msg("invalid plug".into()))
+          }
         } else {
           Some(Response::Msg("invalid command".into()))
         }
@@ -59,16 +59,6 @@ impl From<Status> for String {
     match value {
       Status::Off => "off".to_string(),
       Status::On => "on".to_string(),
-    }
-  }
-}
-
-impl From<Error> for String {
-  fn from(value: Error) -> Self {
-    match value {
-      Error::NoDevice => "No starting device found".to_string(),
-      Error::InvalidSegment(seg) => format!("Cannot register device on invalid segment {}", seg),
-      Error::CannotWriteToDevice => "Cannot write to device".to_string(),
     }
   }
 }

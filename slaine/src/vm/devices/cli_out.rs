@@ -23,10 +23,9 @@ impl Device for CliOut {
   }
 
   fn write(&mut self, _addr: Addr, data: Data) -> Result<(), Error> {
-    self.cli.borrow_mut().print(format!(
-      "0x{:x} 0x{:x} 0x{:x} 0x{:x}",
-      data[0], data[1], data[2], data[3]
-    ));
+    let val: u64 =
+      data[0] as u64 * 16777216 + data[1] as u64 * 65536 + data[2] as u64 * 256 + data[3] as u64;
+    self.cli.borrow_mut().print(val.to_string());
 
     Ok(())
   }
@@ -44,7 +43,7 @@ mod tests {
     let result = dev.write(0u16, [0x12, 0x34, 0x56, 0x78].into());
 
     assert_eq!(result, Ok(()));
-    assert_eq!(cli.borrow().printed(), Some("0x12 0x34 0x56 0x78"));
+    assert_eq!(cli.borrow().printed(), Some("305419896"));
   }
 
   #[test]

@@ -4,6 +4,7 @@ mod devices;
 
 pub use bus::*;
 use cpu::*;
+pub use devices::cli_out::*;
 pub use devices::rom::*;
 use std::cell::RefCell;
 use std::rc::Rc;
