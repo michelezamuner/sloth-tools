@@ -1,5 +1,6 @@
 use crate::hv::{Hv, Status};
 use crate::vm::Seg;
+use std::i64;
 
 pub struct Client {
   hv: Hv,
@@ -34,7 +35,7 @@ impl Client {
           let code: Vec<u8> = if parts.len() > 3 {
             parts[3]
               .split(',')
-              .map(|c| c.parse::<u8>().unwrap())
+              .map(|c| i64::from_str_radix(c.strip_prefix("0x").unwrap(), 16).unwrap() as u8)
               .collect()
           } else {
             vec![]
