@@ -1,6 +1,5 @@
 use crate::hv::{Hv, Status};
-use crate::vm::{Byte, Seg};
-use serde::Deserialize;
+use crate::vm::Seg;
 
 pub struct Client {
   hv: Hv,
@@ -28,17 +27,29 @@ impl Client {
         Some(Response::Quit)
       }
       _ => {
-        if let Some(plug) = cmd.strip_prefix("plug ") {
-          if let Some(conf) = plug.strip_prefix("rom ") {
-            let config: Config = serde_json::from_str(conf).unwrap();
-            self.hv.plug_rom(config.seg, config.code);
-            None
-          } else if let Some(conf) = plug.strip_prefix("cli ") {
-            let config: Config = serde_json::from_str(conf).unwrap();
-            self.hv.plug_cli(config.seg);
-            None
+        if cmd.starts_with("plug") {
+          let parts: Vec<&str> = cmd.split(' ').collect();
+          let device = parts[1];
+          let seg = parts[2].parse::<Seg>().unwrap();
+          let code: Vec<u8> = if parts.len() > 3 {
+            parts[3]
+              .split(',')
+              .map(|c| c.parse::<u8>().unwrap())
+              .collect()
           } else {
-            Some(Response::Msg("invalid plug".into()))
+            vec![]
+          };
+
+          match device {
+            "rom" => {
+              self.hv.plug_rom(seg, code);
+              None
+            }
+            "cli" => {
+              self.hv.plug_cli(seg);
+              None
+            }
+            _ => Some(Response::Msg("invalid plug".into())),
           }
         } else {
           Some(Response::Msg("invalid command".into()))
@@ -67,10 +78,4 @@ impl From<Status> for String {
 pub enum Response {
   Msg(String),
   Quit,
-}
-
-#[derive(Deserialize)]
-struct Config {
-  seg: Seg,
-  code: Vec<Byte>,
 }

@@ -17,10 +17,7 @@ fn inspect_status_of_non_started_vm() {
 fn inspect_status_of_running_vm() {
   let mut client = Client::new();
 
-  let plug_response = client.exec(&format!(
-    r#"plug rom {{"seg":0,"code":[{},{},{},{}]}}"#,
-    0x30, 0x00, 0x00, 0x00
-  ));
+  let plug_response = client.exec(&format!("plug rom 0 {},{},{},{}", 0x30, 0x00, 0x00, 0x00));
   assert_eq!(plug_response, None);
 
   let start_response = client.exec("start");
@@ -42,10 +39,7 @@ fn inspect_status_of_running_vm() {
 fn inspect_status_of_stopped_vm() {
   let mut client = Client::new();
 
-  client.exec(&format!(
-    r#"plug rom {{"seg":0,"code":[{},{},{},{}]}}"#,
-    0x30, 0x00, 0x00, 0x00
-  ));
+  client.exec(&format!("plug rom 0 {},{},{},{}", 0x30, 0x00, 0x00, 0x00));
 
   client.exec("start");
   thread::sleep(Duration::from_millis(100));
@@ -61,10 +55,7 @@ fn inspect_status_of_stopped_vm() {
 fn stop_vm_when_quitting() {
   let mut client = Client::new();
 
-  client.exec(&format!(
-    r#"plug rom {{"seg":0,"code":[{},{},{},{}]}}"#,
-    0x30, 0x00, 0x00, 0x00
-  ));
+  client.exec(&format!("plug rom 0 {},{},{},{}", 0x30, 0x00, 0x00, 0x00));
 
   client.exec("start");
   thread::sleep(Duration::from_millis(100));
@@ -80,10 +71,7 @@ fn stop_vm_when_quitting() {
 fn stop_vm_via_halt_instruction() {
   let mut client = Client::new();
 
-  client.exec(&format!(
-    r#"plug rom {{"seg":0,"code":[{},{},{},{}]}}"#,
-    0xff, 0x00, 0x00, 0x00
-  ));
+  client.exec(&format!("plug rom 0 {},{},{},{}", 0xff, 0x00, 0x00, 0x00));
 
   client.exec("start");
   thread::sleep(Duration::from_millis(100));
@@ -113,7 +101,7 @@ fn log_error_if_starting_device_is_missing() {
 fn log_error_if_starting_device_is_plugged_to_an_invalid_segment() {
   let mut client = Client::new();
 
-  client.exec(r#"plug rom {"seg":16,"code":[0,0,0,0]}"#);
+  client.exec("plug rom 16 0,0,0,0");
 
   client.exec("start");
   thread::sleep(Duration::from_millis(100));
@@ -135,10 +123,10 @@ fn print_data_to_cli_device() {
   let mut client = Client::new();
 
   client.exec(&format!(
-    r#"plug rom {{"seg":0,"code":[{},{},{},{},{},{},{},{},{},{},{},{}]}}"#,
+    "plug rom 0 {},{},{},{},{},{},{},{},{},{},{},{}",
     0x01, 0x00, 0x12, 0x34, 0x07, 0x00, 0x10, 0x00, 0x30, 0x00, 0x00, 0x08
   ));
-  client.exec(r#"plug cli {"seg":1,"code":[]}"#);
+  client.exec("plug cli 1");
   client.exec("start");
   thread::sleep(Duration::from_millis(100));
 
