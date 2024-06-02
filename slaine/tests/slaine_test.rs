@@ -122,11 +122,55 @@ fn log_error_if_starting_device_is_plugged_to_an_invalid_segment() {
 fn print_data_to_cli_device() {
   let mut client = Client::new();
 
-  client.exec("plug rom 0 0x01,0x00,0x12,0x34,0x07,0x00,0x10,0x00,0x30,0x00,0x00,0x08");
+  let code = vec![
+    0x01, 0x00, 0x12, 0x34, // mov a 0x1234
+    0x10, 0x00, 0x10, 0x00, // write a 0x1000
+    0xff, 0x00, 0x00, 0x08, // halt
+  ];
+
+  client.exec(&format!(
+    "plug rom 0 {}",
+    code
+      .iter()
+      .map(|b| format!("0x{:x}", b))
+      .collect::<Vec<_>>()
+      .join(",")
+  ));
   client.exec("plug cli 1");
   client.exec("start");
   thread::sleep(Duration::from_millis(100));
 
   let logs_response = client.exec("logs");
   assert_eq!(logs_response, Some(Response::Msg("4660".to_string())));
+}
+
+#[test]
+fn read_from_input_device() {
+  let mut client = Client::new();
+
+  let code = vec![
+    0x11, 0x00, 0x20, 0x00, // read a 0x2000
+    0x31, 0x00, 0x00, 0x00, // jz a 0x0000
+    0x11, 0x00, 0x20, 0x01, // read a 0x2001
+    0x10, 0x00, 0x10, 0x00, // write a 0x1000
+    0xff, 0x00, 0x00, 0x00, // halt
+  ];
+  client.exec(&format!(
+    "plug rom 0 {}",
+    code
+      .iter()
+      .map(|b| format!("0x{:x}", b))
+      .collect::<Vec<_>>()
+      .join(",")
+  ));
+  client.exec("plug cli 1");
+  client.exec("plug input 2");
+  client.exec("start");
+  thread::sleep(Duration::from_millis(100));
+
+  client.exec("input 0x12,0x34,0x56,0x78");
+  thread::sleep(Duration::from_millis(100));
+
+  let logs_response = client.exec("logs");
+  assert_eq!(logs_response, Some(Response::Msg("305419896".to_string())));
 }

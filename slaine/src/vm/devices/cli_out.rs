@@ -1,4 +1,4 @@
-use crate::vm::{Addr, Data, Device, Error};
+use crate::vm::{Addr, Device, Error, Word};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -17,15 +17,16 @@ impl CliOut {
 }
 
 impl Device for CliOut {
-  fn read(&self, _addr: Addr) -> Data {
+  fn read(&self, _addr: Addr) -> Word {
     // @todo: this should return information useful to identify the device
     [0, 0, 0, 0]
   }
 
-  fn write(&mut self, _addr: Addr, data: Data) -> Result<(), Error> {
-    let val: u64 =
-      data[0] as u64 * 16777216 + data[1] as u64 * 65536 + data[2] as u64 * 256 + data[3] as u64;
-    self.cli.borrow_mut().print(val.to_string());
+  fn write(&mut self, _addr: Addr, data: Word) -> Result<(), Error> {
+    self
+      .cli
+      .borrow_mut()
+      .print(u32::from_be_bytes(data).to_string());
 
     Ok(())
   }

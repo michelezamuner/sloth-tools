@@ -4,6 +4,7 @@ mod devices;
 
 pub use bus::*;
 use cpu::*;
+pub use devices::basic_input::*;
 pub use devices::cli_out::*;
 pub use devices::rom::*;
 use std::cell::RefCell;
@@ -17,11 +18,11 @@ pub enum Error {
 }
 
 pub trait Device {
-  fn read(&self, addr: Addr) -> Data;
-  fn write(&mut self, addr: Addr, data: Data) -> Result<(), Error>;
+  fn read(&self, addr: Addr) -> Word;
+  fn write(&mut self, addr: Addr, data: Word) -> Result<(), Error>;
 }
 
-pub trait Input {
+pub trait Interrupt {
   fn power_off(&self) -> bool;
 }
 
@@ -37,7 +38,7 @@ impl Vm {
     Self { _bus: bus_ref, cpu }
   }
 
-  pub fn run<T: Input>(&mut self, input: T) -> Result<(), Error> {
+  pub fn run<T: Interrupt>(&mut self, input: T) -> Result<(), Error> {
     self.cpu.run(|| input.power_off())
   }
 }
@@ -69,14 +70,14 @@ mod tests {
   }
 
   struct InputOff {}
-  impl Input for InputOff {
+  impl Interrupt for InputOff {
     fn power_off(&self) -> bool {
       true
     }
   }
 
   struct InputOn {}
-  impl Input for InputOn {
+  impl Interrupt for InputOn {
     fn power_off(&self) -> bool {
       false
     }

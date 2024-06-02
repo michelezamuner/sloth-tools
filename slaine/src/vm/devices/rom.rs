@@ -1,4 +1,4 @@
-use crate::vm::{Addr, Byte, Data, Device, Error};
+use crate::vm::{Addr, Byte, Device, Error, Word};
 
 pub struct Rom {
   code: Vec<Byte>,
@@ -11,7 +11,7 @@ impl Rom {
 }
 
 impl Device for Rom {
-  fn read(&self, addr: Addr) -> Data {
+  fn read(&self, addr: Addr) -> Word {
     [
       self.code[addr as usize],
       self.code[addr as usize + 1],
@@ -20,7 +20,7 @@ impl Device for Rom {
     ]
   }
 
-  fn write(&mut self, _: Addr, _: Data) -> Result<(), Error> {
+  fn write(&mut self, _: Addr, _: Word) -> Result<(), Error> {
     // @todo: update adding the type of device
     // @todo: update the bus adding the segment of the device
     Err(Error::CannotWriteToDevice)

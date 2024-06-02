@@ -1,6 +1,5 @@
 use crate::hv::{Hv, Status};
-use crate::vm::Seg;
-use std::i64;
+use crate::vm::{Byte, Seg};
 
 pub struct Client {
   hv: Hv,
@@ -32,10 +31,10 @@ impl Client {
           let parts: Vec<&str> = cmd.split(' ').collect();
           let device = parts[1];
           let seg = parts[2].parse::<Seg>().unwrap();
-          let code: Vec<u8> = if parts.len() > 3 {
+          let code: Vec<Byte> = if parts.len() > 3 {
             parts[3]
               .split(',')
-              .map(|c| i64::from_str_radix(c.strip_prefix("0x").unwrap(), 16).unwrap() as u8)
+              .map(|c| u8::from_str_radix(c.strip_prefix("0x").unwrap(), 16).unwrap())
               .collect()
           } else {
             vec![]
@@ -50,8 +49,21 @@ impl Client {
               self.hv.plug_cli(seg);
               None
             }
+            "input" => {
+              self.hv.plug_input(seg);
+              None
+            }
             _ => Some(Response::Msg("invalid plug".into())),
           }
+        } else if cmd.starts_with("input") {
+          let data: Vec<Byte> = cmd
+            .strip_prefix("input ")
+            .unwrap()
+            .split(',')
+            .map(|c| u8::from_str_radix(c.strip_prefix("0x").unwrap(), 16).unwrap())
+            .collect();
+          self.hv.input(data);
+          None
         } else {
           Some(Response::Msg("invalid command".into()))
         }

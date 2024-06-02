@@ -2,7 +2,7 @@ use super::{Device, Error};
 
 pub type Byte = u8;
 pub type Addr = u16;
-pub type Data = [Byte; 4];
+pub type Word = [Byte; 4];
 pub type Seg = usize;
 
 const MAX_SEGMENTS: Seg = 16;
@@ -28,7 +28,7 @@ impl Bus {
     Ok(())
   }
 
-  pub fn read(&self, addr: Addr) -> Result<Data, Error> {
+  pub fn read(&self, addr: Addr) -> Result<Word, Error> {
     let seg = (addr >> 12) as Seg;
     let off = (addr & 0x0fff) as Addr;
 
@@ -40,7 +40,7 @@ impl Bus {
     Ok(dev.unwrap().read(off))
   }
 
-  pub fn write(&mut self, addr: Addr, data: Data) -> Result<(), Error> {
+  pub fn write(&mut self, addr: Addr, data: Word) -> Result<(), Error> {
     let seg = (addr >> 12) as Seg;
     let off = (addr & 0x0fff) as Addr;
 
@@ -111,7 +111,7 @@ mod tests {
 
   struct Written {
     addr: Option<Addr>,
-    data: Option<Data>,
+    data: Option<Word>,
   }
 
   struct Dev {
@@ -131,14 +131,14 @@ mod tests {
   }
 
   impl Device for Dev {
-    fn read(&self, addr: Addr) -> Data {
+    fn read(&self, addr: Addr) -> Word {
       match addr {
         0x0234 => [0x00, 0x00, 0x00, 0x12],
         _ => [0x00, 0x00, 0x00, 0x00],
       }
     }
 
-    fn write(&mut self, addr: Addr, data: Data) -> Result<(), Error> {
+    fn write(&mut self, addr: Addr, data: Word) -> Result<(), Error> {
       self.written.as_mut().unwrap().borrow_mut().addr = Some(addr);
       self.written.as_mut().unwrap().borrow_mut().data = Some(data);
 
