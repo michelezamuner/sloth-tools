@@ -1,10 +1,11 @@
-use crate::vm::{
-  BasicInput, Bus, Byte, Cli, CliOut, Device, Error, Input, Interrupt, Rom, Seg, Vm,
-};
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 use std::thread;
+use vm::device::cli_out::{Cli, CliOut};
+use vm::device::rom::Rom;
+use vm::device::stream_in::{Source, StreamIn};
+use vm::{Byte, Device, Error, Interrupt, Seg, Vm};
 
 #[derive(Debug, PartialEq)]
 pub enum Status {
@@ -57,12 +58,13 @@ impl Hv {
     let logs = Arc::clone(&self.logs);
     let input = Arc::clone(&self.input);
     self.handle = Some(thread::spawn(move || {
-      let mut bus = Bus::new();
+      let mut vm = Vm::new();
+
       if let Some((seg, code)) = plug_rom {
         let rom: Box<dyn Device> = Box::new(Rom::new(code));
-        let result = bus.register(rom, seg);
+        let result = vm.plug(rom, seg);
         if let Err(e) = result {
-          logs.lock().unwrap().push(String::from(e));
+          logs.lock().unwrap().push(error(e));
 
           return;
         }
@@ -71,9 +73,9 @@ impl Hv {
       if let Some(seg) = plug_cli {
         let log_cli = LogCli::new(Arc::clone(&logs));
         let cli_out: Box<dyn Device> = Box::new(CliOut::new(Rc::new(RefCell::new(log_cli))));
-        let result = bus.register(cli_out, seg);
+        let result = vm.plug(cli_out, seg);
         if let Err(e) = result {
-          logs.lock().unwrap().push(String::from(e));
+          logs.lock().unwrap().push(error(e));
 
           return;
         }
@@ -81,20 +83,18 @@ impl Hv {
 
       if let Some(seg) = plug_input {
         let hv_input = HvInput::new(Arc::clone(&input));
-        let basic_input: Box<dyn Device> =
-          Box::new(BasicInput::new(Rc::new(RefCell::new(hv_input))));
-        let result = bus.register(basic_input, seg);
+        let stream_in: Box<dyn Device> = Box::new(StreamIn::new(Rc::new(RefCell::new(hv_input))));
+        let result = vm.plug(stream_in, seg);
         if let Err(e) = result {
-          logs.lock().unwrap().push(String::from(e));
+          logs.lock().unwrap().push(error(e));
 
           return;
         }
       }
 
-      let mut vm = Vm::new(bus);
-      let result = vm.run(interrupt);
+      let result = vm.run(&interrupt);
       if let Err(e) = result {
-        logs.lock().unwrap().push(e.into())
+        logs.lock().unwrap().push(error(e))
       }
     }))
   }
@@ -135,7 +135,7 @@ impl HvInterrupt {
 }
 
 impl Interrupt for HvInterrupt {
-  fn power_off(&self) -> bool {
+  fn is_power_off(&self) -> bool {
     *self.power_off.lock().unwrap()
   }
 }
@@ -156,15 +156,25 @@ impl Cli for LogCli {
   }
 }
 
-impl From<Error> for String {
-  fn from(value: Error) -> Self {
-    match value {
-      Error::NoDevice => "Error: No starting device found".to_string(),
-      Error::InvalidSegment(seg) => {
-        format!("Error: Cannot register device on invalid segment {}", seg)
-      }
-      Error::CannotWriteToDevice => "Error: Cannot write to device".to_string(),
+// impl From<Error> for String {
+//   fn from(value: Error) -> Self {
+//     match value {
+//       Error::NoDevice => "Error: No starting device found".to_string(),
+//       Error::InvalidSegment(seg) => {
+//         format!("Error: Cannot register device on invalid segment {}", seg)
+//       }
+//       Error::CannotWriteToDevice => "Error: Cannot write to device".to_string(),
+//     }
+//   }
+// }
+
+fn error(e: Error) -> String {
+  match e {
+    Error::MissingDevice => "Error: No starting device found".to_string(),
+    Error::InvalidSegment(seg) => {
+      format!("Error: Cannot register device on invalid segmnet {}", seg)
     }
+    Error::CannotWriteToDevice => "Error: Cannot write to device".to_string(),
   }
 }
 
@@ -178,7 +188,7 @@ impl HvInput {
   }
 }
 
-impl Input for HvInput {
+impl Source for HvInput {
   fn fetch(&self) -> Option<Vec<Byte>> {
     self.data.lock().unwrap().clone()
   }

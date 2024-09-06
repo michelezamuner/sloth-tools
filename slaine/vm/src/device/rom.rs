@@ -1,4 +1,5 @@
-use crate::vm::{Addr, Byte, Device, Error, Word};
+use crate::bus::{Addr, Byte, Device, Word};
+use crate::Error;
 
 pub struct Rom {
   code: Vec<Byte>,

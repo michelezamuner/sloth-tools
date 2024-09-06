@@ -3,12 +3,5 @@
 version = 3
 
 [[package]]
-name = "hypervisor"
-version = "0.1.0"
-dependencies = [
- "vm",
-]
-
-[[package]]
-name = "vm"
+name = "slaine"
 version = "0.1.0"

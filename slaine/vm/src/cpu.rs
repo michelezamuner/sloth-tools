@@ -1,4 +1,4 @@
-use super::*;
+use super::{Addr, Bus, Byte, Error, Word};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -103,7 +103,7 @@ impl Cpu {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::vm::Device;
+  use crate::bus::Device;
   use std::cell::RefCell;
 
   #[test]
@@ -113,7 +113,7 @@ mod tests {
 
     let res = cpu.run(|| false);
 
-    assert!(matches!(res, Err(Error::NoDevice)));
+    assert!(matches!(res, Err(Error::MissingDevice)));
   }
 
   #[test]

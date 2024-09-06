@@ -1,4 +1,5 @@
-use crate::vm::{Addr, Device, Error, Word};
+use crate::bus::{Addr, Device, Word};
+use crate::Error;
 use std::cell::RefCell;
 use std::rc::Rc;
 

@@ -1,4 +1,4 @@
-use slaine::client::{Client, Response};
+use hypervisor::client::{Client, Response};
 use std::io::Write;
 
 fn main() {

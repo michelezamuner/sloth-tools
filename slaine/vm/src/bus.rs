@@ -1,4 +1,4 @@
-use super::{Device, Error};
+use super::Error;
 
 pub type Byte = u8;
 pub type Addr = u16;
@@ -6,6 +6,11 @@ pub type Word = [Byte; 4];
 pub type Seg = usize;
 
 const MAX_SEGMENTS: Seg = 16;
+
+pub trait Device {
+  fn read(&self, addr: Addr) -> Word;
+  fn write(&mut self, addr: Addr, data: Word) -> Result<(), Error>;
+}
 
 #[derive(Default)]
 pub struct Bus {
@@ -34,7 +39,7 @@ impl Bus {
 
     let dev = self.devices[seg].as_ref();
     if dev.is_none() {
-      return Err(Error::NoDevice);
+      return Err(Error::MissingDevice);
     }
 
     Ok(dev.unwrap().read(off))
@@ -46,7 +51,7 @@ impl Bus {
 
     let dev = self.devices[seg].as_mut();
     if dev.is_none() {
-      return Err(Error::NoDevice);
+      return Err(Error::MissingDevice);
     }
 
     dev.unwrap().write(off, data)
@@ -75,10 +80,10 @@ mod tests {
     let _ = bus.register(Box::new(dev), 0x00);
 
     let res_read = bus.read(0x1234);
-    assert!(matches!(res_read, Err(Error::NoDevice)));
+    assert!(matches!(res_read, Err(Error::MissingDevice)));
 
     let res_write = bus.write(0x1234, [0x00, 0x00, 0x00, 0x00]);
-    assert!(matches!(res_write, Err(Error::NoDevice)));
+    assert!(matches!(res_write, Err(Error::MissingDevice)));
   }
 
   #[test]

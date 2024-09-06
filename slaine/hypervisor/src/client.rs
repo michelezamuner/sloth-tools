@@ -1,5 +1,5 @@
 use crate::hv::{Hv, Status};
-use crate::vm::{Byte, Seg};
+use vm::{Byte, Seg};
 
 pub struct Client {
   hv: Hv,
