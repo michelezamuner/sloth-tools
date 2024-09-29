@@ -156,18 +156,6 @@ impl Cli for LogCli {
   }
 }
 
-// impl From<Error> for String {
-//   fn from(value: Error) -> Self {
-//     match value {
-//       Error::NoDevice => "Error: No starting device found".to_string(),
-//       Error::InvalidSegment(seg) => {
-//         format!("Error: Cannot register device on invalid segment {}", seg)
-//       }
-//       Error::CannotWriteToDevice => "Error: Cannot write to device".to_string(),
-//     }
-//   }
-// }
-
 fn error(e: Error) -> String {
   match e {
     Error::MissingDevice => "Error: No starting device found".to_string(),

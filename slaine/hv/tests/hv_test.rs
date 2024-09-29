@@ -1,4 +1,4 @@
-use hypervisor::client::{Client, Response};
+use hv::client::{Client, Response};
 use std::thread;
 use std::time::Duration;
 
@@ -68,19 +68,6 @@ fn stop_vm_when_quitting() {
   assert_eq!(status_response, Some(Response::Msg("off".into())));
 }
 
-// #[test]
-// fn stop_vm_via_halt_instruction() {
-//   let mut client = Client::new();
-//
-//   client.exec("plug rom 0 0xff,0x00,0x00,0x00");
-//
-//   client.exec("start");
-//   thread::sleep(Duration::from_millis(100));
-//
-//   let status_response = client.exec("status");
-//   assert_eq!(status_response, Some(Response::Msg("off".into())));
-// }
-
 // @todo: "log errors"
 #[test]
 fn log_error_if_starting_device_is_missing() {
@@ -98,27 +85,6 @@ fn log_error_if_starting_device_is_missing() {
     Some(Response::Msg("Error: No starting device found".into()))
   );
 }
-
-// #[test]
-// fn log_error_if_starting_device_is_plugged_to_an_invalid_segment() {
-//   let mut client = Client::new();
-//
-//   client.exec("plug rom 16 0x00,0x00,0x00,0x00");
-//
-//   client.exec("start");
-//   thread::sleep(Duration::from_millis(100));
-//
-//   let status_response = client.exec("status");
-//   assert_eq!(status_response, Some(Response::Msg("off".to_string())));
-//
-//   let logs_response = client.exec("logs");
-//   assert_eq!(
-//     logs_response,
-//     Some(Response::Msg(
-//       "Error: Cannot register device on invalid segment 16".to_string()
-//     ))
-//   );
-// }
 
 #[test]
 fn print_data_to_cli_device() {

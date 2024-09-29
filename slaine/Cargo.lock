@@ -3,7 +3,14 @@
 version = 3
 
 [[package]]
-name = "hypervisor"
+name = "cli"
+version = "0.1.0"
+dependencies = [
+ "hv",
+]
+
+[[package]]
+name = "hv"
 version = "0.1.0"
 dependencies = [
  "vm",

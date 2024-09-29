@@ -1,8 +1,9 @@
-use hypervisor::client::{Client, Response};
+use hv::client::{Client, Response};
 use std::io::Write;
 
 fn main() {
   let mut client = Client::new();
+
   loop {
     print!("> ");
     std::io::stdout().flush().unwrap();
