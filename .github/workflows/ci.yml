@@ -7,38 +7,32 @@ on:
 
 jobs:
 
-  test:
-    name: Test
+  ci:
+    name: CI
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./sabia
 
     steps:
-      - name: Build
-        uses: ./.github/workflows/build.yml
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Elixir
+        uses: erlef/setup-beam@61e01a43a562a89bfc54c7f9a378ff67b03e4a21 # v1.16.0
         with:
-          dir: sabia
-      - name: Run tests
-        run: cd sabia && mix test
-
-  credo:
-    name: Credo
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Build
-        uses: ./.github/workflows/build.yml
+          elixir-version: '1.15.2' # [Required] Define the Elixir version
+          otp-version: '26.0'      # [Required] Define the Erlang/OTP version
+      - name: Restore dependencies cache
+        uses: actions/cache@v3
         with:
-          dir: sabia
-      - name: Run credo
-        run: cd sabia && credo -a --strict
-
-  dialyzer:
-    name: Dialyzer
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Build
-        uses: ./.github/workflows/build.yml
-        with:
-          dir: sabia
-      - name: Run dialyzer
-        run: cd sabia && mix dialyzer
+          path: deps
+          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-
+      - name: Install dependencies
+        run: mix deps.get
+      - name: Test
+        run: mix test
+      - name: Credo
+        run: mix credo -a --strict
+      - name: Dialyzer
+        run: mix dialyzer
