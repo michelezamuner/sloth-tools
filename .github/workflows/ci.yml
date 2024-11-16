@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    paths:
+      - 'sabia/**'
+
+jobs:
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Build
+        uses: ./.github/workflows/build.yml
+        with:
+          dir: sabia
+      - name: Run tests
+        run: cd sabia && mix test
+
+  credo:
+    name: Credo
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Build
+        uses: ./.github/workflows/build.yml
+        with:
+          dir: sabia
+      - name: Run credo
+        run: cd sabia && credo -a --strict
+
+  dialyzer:
+    name: Dialyzer
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Build
+        uses: ./.github/workflows/build.yml
+        with:
+          dir: sabia
+      - name: Run dialyzer
+        run: cd sabia && mix dialyzer
