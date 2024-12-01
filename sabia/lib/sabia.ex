@@ -6,18 +6,18 @@ defmodule Sabia do
   alias Sabia.Vm
 
   def run do
-    vm = spawn(Vm, :listen, [])
+    vm = Vm.create()
+
+    Vm.start(vm)
 
     vm
   end
 
+  def halt(vm) do
+    Vm.halt(vm)
+  end
+
   def state(vm) do
-    send vm, {self(), :state}
-
-    state = receive do
-      {:ok, val} -> val
-    end
-
-    state
+    Vm.state(vm)
   end
 end
