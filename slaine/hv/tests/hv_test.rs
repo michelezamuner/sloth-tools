@@ -90,7 +90,7 @@ fn log_error_if_starting_device_is_missing() {
 fn print_data_to_cli_device() {
   let mut client = Client::new();
 
-  let code = vec![
+  let code = [
     0x01, 0x00, 0x12, 0x34, // mov a 0x1234
     0x10, 0x00, 0x10, 0x00, // write a 0x1000
     0xff, 0x00, 0x00, 0x08, // halt
@@ -116,7 +116,7 @@ fn print_data_to_cli_device() {
 fn read_from_input_device() {
   let mut client = Client::new();
 
-  let code = vec![
+  let code = [
     0x11, 0x00, 0x20, 0x00, // read a 0x2000
     0x31, 0x00, 0x00, 0x00, // jz a 0x0000
     0x11, 0x00, 0x20, 0x01, // read a 0x2001

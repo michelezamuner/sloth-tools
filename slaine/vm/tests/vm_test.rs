@@ -95,8 +95,8 @@ fn read_from_input_device() {
   let result = vm.run(&InterruptStub::new(None));
 
   assert!(result.is_ok());
-  assert_eq!(stream_spy.borrow().has_data.get(), true);
-  assert_eq!(stream_spy.borrow().has_finished, true);
+  assert!(stream_spy.borrow().has_data.get());
+  assert!(stream_spy.borrow().has_finished);
 }
 
 struct InterruptStub {
