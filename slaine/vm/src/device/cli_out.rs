@@ -42,7 +42,7 @@ mod tests {
     let cli = Rc::new(RefCell::new(CliSpy::new()));
     let mut dev = CliOut::new(Rc::clone(&cli) as Rc<RefCell<dyn Cli>>);
 
-    let result = dev.write(0u16, [0x12, 0x34, 0x56, 0x78].into());
+    let result = dev.write(0u16, [0x12, 0x34, 0x56, 0x78]);
 
     assert_eq!(result, Ok(()));
     assert_eq!(cli.borrow().printed(), Some("305419896"));
