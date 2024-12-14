@@ -1,0 +1,24 @@
+name: CI - Slaine
+
+on:
+  push:
+    paths:
+      - '.github/**'
+      - 'slaine/**'
+
+jobs:
+
+  ci:
+    name: CI - Slaine
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./slaine
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Lint
+        run: cargo clippy
+      - name: Test
+        run: cargo test
