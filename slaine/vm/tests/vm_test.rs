@@ -2,7 +2,7 @@ use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 use std::thread;
-use vm::device::cli_out::{Cli, CliOut};
+use vm::device::output::Output;
 use vm::device::rom::Rom;
 use vm::device::stream_in::{Source, StreamIn};
 use vm::{Byte, Device, Error, Interrupt, Vm};
@@ -61,17 +61,22 @@ fn prints_data_to_cli_device() {
     0xff, 0x00, 0x00, 0x08, // halt
   ];
   let rom: Box<dyn Device> = Box::new(Rom::new(code));
-  let cli_spy = Rc::new(RefCell::new(CliOutSpy::new()));
-  let cli: Box<dyn Device> = Box::new(CliOut::new(Rc::clone(&cli_spy) as Rc<RefCell<dyn Cli>>));
+  let received = Rc::new(RefCell::new(None));
+  let received2 = Rc::clone(&received);
+  let output: Box<dyn Device> = Box::new(Output::new(move |data| {
+    received2.replace(Some(data));
+
+    Ok(())
+  }));
 
   let mut vm = Vm::new();
   let _ = vm.plug(rom, 0x00);
-  let _ = vm.plug(cli, 0x01);
+  let _ = vm.plug(output, 0x01);
 
   let result = vm.run(&InterruptStub::new(None));
 
   assert!(result.is_ok());
-  assert_eq!(cli_spy.borrow().printed.as_ref().unwrap(), "4660");
+  assert_eq!(*received, Some([0x00, 0x00, 0x12, 0x34]).into())
 }
 
 #[test]
@@ -115,22 +120,6 @@ impl Interrupt for InterruptStub {
       Some(is_power_off) => *is_power_off.lock().unwrap(),
       None => false,
     }
-  }
-}
-
-struct CliOutSpy {
-  pub printed: Option<String>,
-}
-
-impl CliOutSpy {
-  pub fn new() -> Self {
-    Self { printed: None }
-  }
-}
-
-impl Cli for CliOutSpy {
-  fn print(&mut self, text: String) {
-    self.printed = Some(text)
   }
 }
 

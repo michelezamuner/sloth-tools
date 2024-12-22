@@ -32,7 +32,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Lint
-        run: cargo clippy --all-targets --all-features
+        run: cargo clippy --all-targets --all-features --verbose -- -D warnings
 
   test:
     name: Test 
