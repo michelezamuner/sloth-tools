@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 use std::thread;
-use vm::device::cli_out::{Cli, CliOut};
+use vm::device::output::Output;
 use vm::device::rom::Rom;
 use vm::device::stream_in::{Source, StreamIn};
 use vm::{Byte, Device, Error, Interrupt, Seg, Vm};
@@ -71,9 +71,16 @@ impl Hv {
       }
 
       if let Some(seg) = plug_cli {
-        let log_cli = LogCli::new(Arc::clone(&logs));
-        let cli_out: Box<dyn Device> = Box::new(CliOut::new(Rc::new(RefCell::new(log_cli))));
-        let result = vm.plug(cli_out, seg);
+        let logs2 = Arc::clone(&logs);
+        let output: Box<dyn Device> = Box::new(Output::new(move |data| {
+          logs2
+            .lock()
+            .unwrap()
+            .push(u32::from_be_bytes(data).to_string());
+
+          Ok(())
+        }));
+        let result = vm.plug(output, seg);
         if let Err(e) = result {
           logs.lock().unwrap().push(error(e));
 
@@ -140,27 +147,11 @@ impl Interrupt for HvInterrupt {
   }
 }
 
-struct LogCli {
-  logs: Arc<Mutex<Vec<String>>>,
-}
-
-impl LogCli {
-  pub fn new(logs: Arc<Mutex<Vec<String>>>) -> Self {
-    Self { logs }
-  }
-}
-
-impl Cli for LogCli {
-  fn print(&mut self, text: String) {
-    self.logs.lock().unwrap().push(text)
-  }
-}
-
 fn error(e: Error) -> String {
   match e {
     Error::MissingDevice => "Error: No starting device found".to_string(),
     Error::InvalidSegment(seg) => {
-      format!("Error: Cannot register device on invalid segmnet {}", seg)
+      format!("Error: Cannot register device on invalid segment {}", seg)
     }
     Error::CannotWriteToDevice => "Error: Cannot write to device".to_string(),
   }
