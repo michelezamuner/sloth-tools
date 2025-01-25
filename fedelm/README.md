@@ -1,3 +1,3 @@
 # Fedelm
 
-Virtual machine architecture definition.
+Runtime architecture definition.
