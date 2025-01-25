@@ -1,3 +1,3 @@
 # Heber
 
-Virtual machine for the Fedelm architecture.
+Runtime for the Fedelm architecture.
