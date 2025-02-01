@@ -16,10 +16,6 @@ exports.parse = code => {
       baseIndentation++;
     }
 
-    if (!hasCodeStarted && char === '\n') {
-      baseIndentation = 0;
-    }
-
     if (hasCodeStarted && char === '\n') {
       isNewLine = true;
 

@@ -1,4 +1,5 @@
 const { parse } = require('../src/lexer');
+const { s, z } = require('./utils');
 
 describe('lexer', () => {
   it('parses single lexeme', () => {
@@ -13,7 +14,7 @@ describe('lexer', () => {
 
   it('parses sum type definition', () => {
     const code = `
-      Type:  First|  Second|Third
+      Type${z()}:${z()}First${z()}|${z()}Second${z()}|${z()}Third
     `;
 
     const lexemes = parse(code);
@@ -34,7 +35,7 @@ describe('lexer', () => {
 
   it('parses function definition', () => {
     const code = `
-      fun: First, Second -> Return = first, second -> value
+      fun${z()}:${z()}First${z()},${z()}Second${z()}->${z()}Return${z()}=${z()}first${z()},${z()}second${z()}->${z()}value
     `;
 
     const lexemes = parse(code);
@@ -58,7 +59,7 @@ describe('lexer', () => {
 
   it('parses evaluation expression', () => {
     const code = `
-      function arg1 arg2
+      function${s()}arg1${s()}arg2
     `;
 
     const lexemes = parse(code);

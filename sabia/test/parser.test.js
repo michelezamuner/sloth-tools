@@ -3,7 +3,9 @@ const Lexer = require('../src/lexer');
 
 describe('parser', () => {
   it('parses identity expression', () => {
-    const code = 'A';
+    const code = `
+      A
+    `;
     const lexemes = Lexer.parse(code);
 
     const ast = parse(lexemes);
@@ -16,7 +18,9 @@ describe('parser', () => {
   });
 
   it('parses sum type definition with single variant', () => {
-    const code = 'T: A';
+    const code = `
+      T: A
+    `;
     const lexemes = Lexer.parse(code);
 
     const ast = parse(lexemes);
@@ -30,7 +34,9 @@ describe('parser', () => {
   });
 
   it('parses sum type definition with multiple variants', () => {
-    const code = 'T: A | B | C';
+    const code = `
+      T: A | B | C
+    `;
     const lexemes = Lexer.parse(code);
 
     const ast = parse(lexemes);
