@@ -6,13 +6,15 @@ High-level language experiment for a top-down design strategy.
 
 ### Types
 
+Types must be uppercase.
+
 Enum type definition:
 
 ```
-<type> = @<cons> | ...
+<type> = <cons> | ...
 ```
 ```
-T = @A | @B | @C
+T = A | B | C
 ```
 
 Record type definition:
@@ -24,7 +26,7 @@ Record type definition:
 T = { a: TA, b: TB }
 ```
 
-Function type definition:
+Function type definition (@TODO: leave this?):
 
 ```
 <type> = <type> ... -> <type>
@@ -33,15 +35,35 @@ Function type definition:
 T = A B -> C
 ```
 
-### Scalar expressions
+### Definitions
+
+Reference definition:
+
+```
+<ref> = <exp>
+```
+```
+a = T.A
+```
+
+### Expressions
+
+Reference expression:
+
+```
+<ref>
+```
+```
+a
+```
 
 Enum value expression:
 
 ```
-<cons>
+<type>.<cons>
 ```
 ```
-@A
+T.A
 ```
 
 Record value expression:
@@ -50,41 +72,16 @@ Record value expression:
 { <field>: <exp>, ... }
 ```
 ```
-{ a: @A, b: @B }
+{ a: T.A, b: T.B }
 ```
 
-### Declarations
-
-Identifier declaration:
+Function expression:
 
 ```
-<id>: <type> = <exp>
+<pat>:<type> ... -> <exp>
 ```
 ```
-a: A = @A
-```
-
-### Compound expressions
-
-Block expression:
-
-```
-<dec>
-...
-<exp>
-```
-```
-a: A = @A
-a
-```
-
-Function value expression (function definition):
-
-```
-<pat> ... -> <exp>
-```
-```
-a b -> c
+a: A b: B -> c
 ```
 
 Evaluation expression:
@@ -98,15 +95,16 @@ f a b
 
 ### Modules
 
-Module definition:
+Module declaration:
 
 ```
-.mod.name =
-  a: A = .ext.mod.def
+::mod::name
+  # external definition
+  a = ::ext::mod::def
 
-  # identifiers starting with "." are exported
-  .A = @A | @B
+  # identifiers starting with "::" are public
+  ::T = A | B
 
-  # identifiers not starting with "." are not exported
-  a: A = a -> b
+  # identifiers not starting with "::" are private
+  f = a: A -> b
 ```
