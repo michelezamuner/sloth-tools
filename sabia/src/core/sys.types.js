@@ -1,2 +1,10 @@
-exports.process = 'Process';
-exports.exit = 'Exit';
+exports.Process = {
+  elem: 'type',
+  var: 'id',
+  id: 'Process',
+};
+exports.Exit = {
+  elem: 'type',
+  var: 'id',
+  id: 'Exit',
+};

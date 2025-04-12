@@ -1,40 +1,30 @@
 const { parse } = require('../src/lexer');
+const { s, z } = require('./utils');
 
 describe('lexer', () => {
   it('parses single lexeme', () => {
     const code = `
-      A
+      a
     `;
 
     const lexemes = parse(code);
 
-    expect(lexemes).toStrictEqual(['A']);
+    expect(lexemes).toStrictEqual(['a', { scope: -1 }]);
   });
 
-  it('parses sum type definition', () => {
+  it('parses enum definition', () => {
     const code = `
-      Type:  First|  Second|Third
+      Type${z()}=${z()}First${z()}|${z()}Second${z()}|${z()}Third
     `;
 
     const lexemes = parse(code);
 
-    expect(lexemes).toStrictEqual(['Type', ':', 'First', '|', 'Second', '|', 'Third']);
-  });
-
-  it('parses sequence', () => {
-    const code = `
-      Type: First | Second
-      First
-    `;
-
-    const lexemes = parse(code);
-
-    expect(lexemes).toStrictEqual(['Type', ':', 'First', '|', 'Second', { i: 0 }, 'First']);
+    expect(lexemes).toStrictEqual(['Type', '=', 'First', '|', 'Second', '|', 'Third', { scope: -1 }]);
   });
 
   it('parses function definition', () => {
     const code = `
-      fun: First, Second -> Return = first, second -> value
+      fun${z()}:${z()}Type${z()}=${z()}first${z()}second${z()}->${z()}value
     `;
 
     const lexemes = parse(code);
@@ -42,28 +32,34 @@ describe('lexer', () => {
     expect(lexemes).toStrictEqual([
       'fun',
       ':',
-      'First',
-      ',',
-      'Second',
-      '->',
-      'Return',
+      'Type',
       '=',
       'first',
-      ',',
       'second',
       '->',
       'value',
+      { scope: -1 },
     ]);
   });
 
   it('parses evaluation expression', () => {
     const code = `
-      function arg1 arg2
+      function${s()}arg1${s()}arg2
     `;
 
     const lexemes = parse(code);
 
-    expect(lexemes).toStrictEqual(['function', 'arg1', 'arg2']);
+    expect(lexemes).toStrictEqual(['function', 'arg1', 'arg2', { scope: -1 }]);
+  });
+
+  it('parses external reference', () => {
+    const code = `
+      alias = some::external::ref
+    `;
+
+    const lexemes = parse(code);
+
+    expect(lexemes).toStrictEqual(['alias', '=', 'some::external::ref', { scope: -1 }]);
   });
 
   it('parses code in parenthesis', () => {
@@ -72,7 +68,7 @@ describe('lexer', () => {
     `;
     const lexemes = parse(code);
 
-    expect(lexemes).toStrictEqual(['(', 'fun', 'arg1', 'arg2', ')']);
+    expect(lexemes).toStrictEqual(['(', 'fun', 'arg1', 'arg2', ')', { scope: -1 }]);
   });
 
   it('parses code with indentation', () => {
@@ -84,6 +80,6 @@ describe('lexer', () => {
 
     const lexemes = parse(code);
 
-    expect(lexemes).toStrictEqual(['f', { i: 2 }, 'a', { i: 4 }, 'b']);
+    expect(lexemes).toStrictEqual(['f', { scope: 2 }, 'a', { scope: 4 }, 'b', { scope: -1 }]);
   });
 });

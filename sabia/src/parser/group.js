@@ -1,4 +1,6 @@
-exports.parse = (lexemes, innerParse) => {
+const innerParse = require('../parser').parse;
+
+const parse = lexemes => {
   const out = [[]];
   for (const lexeme of lexemes) {
     if (lexeme === '(') {
@@ -18,5 +20,7 @@ exports.parse = (lexemes, innerParse) => {
     out[out.length - 1].push(lexeme);
   }
 
-  return out[out.length - 1];
+  return innerParse(out[out.length - 1]);
 };
+
+exports.parse = parse;

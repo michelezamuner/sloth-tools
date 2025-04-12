@@ -1,4 +1,5 @@
-const stoppers = [':', '|', ',', '(', ')'];
+const stoppers = [':', '=', '|', '(', ')'];
+const nonStoppers = ['::'];
 
 exports.parse = code => {
   const lexemes = [];
@@ -7,17 +8,16 @@ exports.parse = code => {
   let baseIndentation = 0;
   let indentation = 0;
   let isNewLine = false;
-  for (const char of code.split('')) {
+  for (let i in code.split('')) {
+    const char = code[i];
+    const prev = code[+i - 1];
+    const next = code[+i + 1];
     if (!hasCodeStarted && char.trim() !== '') {
       hasCodeStarted = true;
     }
 
     if (!hasCodeStarted && char.trim() === '' && char !== '\n') {
       baseIndentation++;
-    }
-
-    if (!hasCodeStarted && char === '\n') {
-      baseIndentation = 0;
     }
 
     if (hasCodeStarted && char === '\n') {
@@ -31,12 +31,16 @@ exports.parse = code => {
     }
 
     if (isNewLine && char.trim() !== '') {
-      lexemes.push({ i: (indentation - baseIndentation) });
+      if (lexeme.length) {
+        lexemes.push(lexeme.join(''));
+        lexeme.length = 0;
+      }
+      lexemes.push({ scope: (indentation - baseIndentation) });
       isNewLine = false;
       indentation = 0;
     }
 
-    if (char.trim() === '' || stoppers.includes(char)) {
+    if (char.trim() === '' || isStopper(char, prev, next)) {
       if (lexeme.length) {
         lexemes.push(lexeme.join(''));
         lexeme.length = 0;
@@ -44,7 +48,7 @@ exports.parse = code => {
     }
 
     if (char.trim() !== '') {
-      if (stoppers.includes(char)) {
+      if (isStopper(char, prev, next)) {
         lexemes.push(char);
       } else {
         lexeme.push(char);
@@ -56,5 +60,13 @@ exports.parse = code => {
     lexemes.push(lexeme.join(''));
   }
 
+  lexemes.push({ scope: -1 });
+
   return lexemes;
+};
+
+const isStopper = (char, prev, next) => {
+  return stoppers.includes(char)
+    && !nonStoppers.includes(`${prev}${char}`)
+    && !nonStoppers.includes(`${char}${next}`);
 };

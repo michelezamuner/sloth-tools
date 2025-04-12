@@ -1,15 +1,19 @@
 const { process } = require('../src/processor');
 const Lexer = require('../src/lexer');
-const Parser = require('../src/parser');
+const Parser = require('../src/parser/group');
 const Indexer = require('../src/indexer');
 const Typer = require('../src/typer');
 
 describe('processor', () => {
   it('processes main function', () => {
     const code = `
-      dbg: .core.lang.debug
-      A: A
-      main: A -> A = _ -> dbg A
+      ::_
+        then = ::core::lang::then
+        dbg = ::core::lang::debug
+        Proc = ::core::sys::Process
+        Exit = ::core::sys::Exit
+        T = A
+        main = _: Proc -> then (dbg T.A) Exit.OK
     `;
     const lexemes = Lexer.parse(code);
     const ast = Parser.parse(lexemes);
@@ -24,8 +28,9 @@ describe('processor', () => {
       },
     };
 
-    process(runtime, typedAst, index);
+    const status = process(runtime, typedAst, index);
 
-    expect(buffer).toBe('[A] A\n');
+    expect(status).toBe(0);
+    expect(buffer).toBe('[T] A\n');
   });
 });

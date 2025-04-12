@@ -1,5 +1,5 @@
 const Lexer = require('./lexer');
-const Parser = require('./parser');
+const Parser = require('./parser/group');
 const Normalizer = require('./normalizer');
 const Indexer = require('./indexer');
 const Typer = require('./typer');
@@ -13,7 +13,8 @@ exports.run = process => {
     const untypedAst = Normalizer.normalize(rawAst);
     const index = Indexer.index(untypedAst);
     const ast = Typer.type(untypedAst, index);
-    Processor.process({ process }, ast, index);
+
+    return Processor.process({ process }, ast, index);
   }
 
   return 0;

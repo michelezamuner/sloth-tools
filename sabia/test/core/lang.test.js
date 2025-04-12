@@ -1,7 +1,7 @@
 const { debug } = require('../../src/core/lang');
 
 describe('lang', () => {
-  it('prints debug representation of identity expression', () => {
+  it('prints debug representation of enum expression', () => {
     let written = undefined;
     const runtime = {
       process: {
@@ -12,9 +12,9 @@ describe('lang', () => {
     };
     const ast = {
       elem: 'exp',
-      var: 'id',
+      var: 'enum',
       type: { elem: 'type', var: 'id', id: 'T' },
-      id: 'A',
+      body: { elem: 'cons', id: 'A' },
     };
 
     debug(runtime, [ast]);

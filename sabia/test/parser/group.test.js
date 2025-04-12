@@ -8,9 +8,17 @@ describe('group parser', () => {
     `;
     const lexemes = Lexer.parse(code);
 
-    const parsedLexemes = parse(lexemes, () => {});
+    const ast = parse(lexemes);
 
-    expect(parsedLexemes).toStrictEqual(lexemes);
+    expect(ast).toStrictEqual({
+      elem: 'exp',
+      var: 'eval',
+      fun: { elem: 'exp', var: 'id', id: 'a' },
+      args: [
+        { elem: 'exp', var: 'id', id: 'b' },
+        { elem: 'exp', var: 'id', id: 'c' }
+      ],
+    });
   });
 
   it('parses code in parenthesis', () => {
@@ -19,12 +27,56 @@ describe('group parser', () => {
     `;
     const lexemes = Lexer.parse(code);
 
-    const parsedLexemes = parse(lexemes, tkns => {
-      if (JSON.stringify(tkns) === '["b","c"]') {
-        return 'parsed';
-      }
-    });
+    const ast = parse(lexemes);
 
-    expect(parsedLexemes).toStrictEqual(['a', 'parsed']);
+    expect(ast).toStrictEqual({
+      elem: 'exp',
+      var: 'eval',
+      fun: { elem: 'exp', var: 'id', id: 'a' },
+      args: [
+        {
+          elem: 'exp',
+          var: 'eval',
+          fun: { elem: 'exp', var: 'id', id: 'b' },
+          args: [{ elem: 'exp', var: 'id', id: 'c' }],
+        },
+      ],
+    });
+  });
+
+  it('parses code in nested parenthesis', () => {
+    const code = `
+      a (b (c d) (e f))
+    `;
+    const lexemes = Lexer.parse(code);
+
+    const ast = parse(lexemes);
+
+    expect(ast).toStrictEqual({
+      elem: 'exp',
+      var: 'eval',
+      fun: { elem: 'exp', var: 'id', id: 'a' },
+      args: [
+        {
+          elem: 'exp',
+          var: 'eval',
+          fun: { elem: 'exp', var: 'id', id: 'b' },
+          args: [
+            {
+              elem: 'exp',
+              var: 'eval',
+              fun: { elem: 'exp', var: 'id', id: 'c' },
+              args: [{ elem: 'exp', var: 'id', id: 'd' }],
+            },
+            {
+              elem: 'exp',
+              var: 'eval',
+              fun: { elem: 'exp', var: 'id', id: 'e' },
+              args: [{ elem: 'exp', var: 'id', id: 'f' }],
+            },
+          ],
+        },
+      ],
+    });
   });
 });
