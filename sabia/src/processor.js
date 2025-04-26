@@ -1,29 +1,23 @@
-const process = (runtime, ast, index, mod) => {
+const exec = (runtime, ast, index) => {
   if (ast.elem === 'exp' && ast.var === 'enum') {
     return ast;
   }
 
   if (ast.elem === 'exp' && ast.var === 'eval') {
-    const funId = ast.fun.id.startsWith('::')
-      ? ast.fun.id
-      : `${mod}::${ast.fun.id}`;
-    const parts = index[funId].ast.body.id.split('::');
+    const parts = index[ast.fun.id].body.id.split('::');
     if (parts[1] === 'core') {
       const lib = require(`./${parts[1]}/${parts[2]}`);
       const fun = lib[parts[3]];
-      const args = ast.args.map(ast => process(runtime, ast, index, mod));
-
+      const args = ast.args.map(ast => exec(runtime, ast, index));
       return (fun)(runtime, args);
     }
   }
+};
 
-  if (ast.elem === 'mod') {
-    const main = ast.body.find(ast => ast.id === 'main');
-    const status = process(runtime, main.body.body, index, ast.id);
-
-    if (status.type.id === 'Exit' && status.body.id === 'OK') {
-      return 0;
-    }
+const process = (runtime, index, main) => {
+  const status = exec(runtime, index[main].body.body, index);
+  if (status.type.id === '::_::Exit' && status.body.id === 'OK') {
+    return 0;
   }
 };
 

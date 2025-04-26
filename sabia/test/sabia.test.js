@@ -9,6 +9,6 @@ describe('sabia', () => {
 
     const output = exec(`bin/run --inline "${code}"`);
 
-    expect(output.toString()).toStrictEqual('[T] A\n');
+    expect(output.toString()).toStrictEqual('[::_::T] A\n');
   });
 });

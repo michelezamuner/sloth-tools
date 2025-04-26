@@ -1,26 +1,11 @@
-const type = (ast, index, mod = null, innerIndex = {}) => {
-  if (ast.elem === 'mod') {
-    for (let i in ast.body) {
-      ast.body[i] = type(ast.body[i], index, ast.id, innerIndex);
-    }
+const typeElem = (ast, statCtx = {}, dynCtx = {}) => {
+  if (ast.elem === 'def' && ast.var === 'ref') {
+    ast.body = typeElem(ast.body, statCtx, dynCtx);
+    ast.type = ast.body.type;
   }
-
-  if (ast.elem === 'exp' && ast.var === 'id') {
-    if (innerIndex[ast.id]) {
-      ast.type = innerIndex[ast.id].type;
-    } else {
-      ast.type = index[`${mod}::${ast.id}`].ast.type;
-    }
-  }
-
   if (ast.elem === 'exp' && ast.var === 'eval') {
-    const funName = ast.fun.id;
-    const fun = index[`${mod}::${funName}`].ast;
-    ast.fun.type = fun.type;
-    for (let i in ast.args) {
-      ast.args[i] = type(ast.args[i], index, mod, innerIndex);
-    }
-
+    ast.args = ast.args.map(arg => typeElem(arg, statCtx, dynCtx));
+    ast.fun = typeElem(ast.fun, statCtx, dynCtx);
     if (ast.fun.type.ret.var === 'gen') {
       const genRet = ast.fun.type.ret.gen;
       let concrete = null;
@@ -34,27 +19,19 @@ const type = (ast, index, mod = null, innerIndex = {}) => {
       ast.type = ast.fun.type.ret;
     }
   }
-
   if (ast.elem === 'exp' && ast.var === 'fun') {
-    const argsTypes = [];
-    for (const arg of ast.args) {
-      argsTypes.push(arg.type);
-      innerIndex[arg.id] = arg;
+    const type = { elem: 'type', var: 'fun', args: [] };
+    for (let i in ast.args) {
+      type.args[i] = ast.args[i].type;
     }
-    ast.body = type(ast.body, index, mod, innerIndex);
-    for (const arg of ast.args) {
-      delete innerIndex[arg.id];
-    }
-    const retType = ast.body.type;
-    const funType = {
-      elem: 'type',
-      var: 'fun',
-      args: argsTypes,
-      ret: retType,
-    };
-    ast.type = funType;
-  }
+    ast.body = typeElem(ast.body, statCtx, { ...dynCtx, ...ast.ctx });
+    type.ret = ast.body.type;
 
+    ast.type = type;
+  }
+  if (ast.elem === 'exp' && ast.var === 'id' ) {
+    ast.type = dynCtx[ast.id] ? dynCtx[ast.id].type : statCtx[ast.id].type;
+  }
   if (ast.elem === 'ext') {
     const parts = ast.id.split('::');
     if (parts[1] === 'core') {
@@ -64,12 +41,15 @@ const type = (ast, index, mod = null, innerIndex = {}) => {
     }
   }
 
-  if (ast.elem === 'def' && ast.var === 'ref') {
-    ast.body = type(ast.body, index, mod, innerIndex);
-    ast.type = ast.body.type;
+  return ast;
+};
+
+const type = index => {
+  for (let i in index) {
+    index[i] = typeElem(index[i], index);
   }
 
-  return ast;
+  return index;
 };
 
 exports.type = type;

@@ -2,21 +2,6 @@ const { parse } = require('../src/parser');
 const Lexer = require('../src/lexer');
 
 describe('parser', () => {
-  it('parses identifier expression', () => {
-    const code = `
-      a
-    `;
-    const lexemes = Lexer.parse(code);
-
-    const ast = parse(lexemes);
-
-    expect(ast).toStrictEqual({
-      elem: 'exp',
-      var: 'id',
-      id: 'a',
-    });
-  });
-
   it('parses enum expression', () => {
     const code = `
       T.A
@@ -33,6 +18,21 @@ describe('parser', () => {
     });
   });
 
+  it('parses id expression', () => {
+    const code = `
+      a
+    `;
+    const lexemes = Lexer.parse(code);
+
+    const ast = parse(lexemes);
+
+    expect(ast).toStrictEqual({
+      elem: 'exp',
+      var: 'id',
+      id: 'a',
+    });
+  });
+
   it('parses ast expression', () => {
     const lexemes = [{ ast: 'ast' }];
 
@@ -41,7 +41,7 @@ describe('parser', () => {
     expect(ast).toStrictEqual({ ast: 'ast' });
   });
 
-  it('parses evaluation expression with single argument', () => {
+  it('parses eval expression with single argument', () => {
     const code = `
       f T.A
     `;
@@ -64,7 +64,7 @@ describe('parser', () => {
     });
   });
 
-  it('parses evaluation expression with multiple arguments', () => {
+  it('parses eval expression with multiple arguments', () => {
     const code = `
       f T.A T.B
     `;
@@ -93,7 +93,7 @@ describe('parser', () => {
     });
   });
 
-  it('parses evaluation expression with ast function', () => {
+  it('parses eval expression with ast function', () => {
     const lexemes = [{ ast: 'ast' }, 'a'];
 
     const ast = parse(lexemes);
@@ -106,7 +106,7 @@ describe('parser', () => {
     });
   });
 
-  it('parses evaluation expression with ast arg', () => {
+  it('parses eval expression with ast arg', () => {
     const lexemes = ['f', { ast: 'ast' }, 'a'];
 
     const ast = parse(lexemes);
@@ -121,45 +121,7 @@ describe('parser', () => {
       ],
     });
   });
-
-  it('parses enum definition with single variant', () => {
-    const code = `
-      T = A
-    `;
-    const lexemes = Lexer.parse(code);
-
-    const ast = parse(lexemes);
-
-    expect(ast).toStrictEqual({
-      elem: 'def',
-      var: 'enum',
-      id: 'T',
-      vis: 'priv',
-      body: [{ elem: 'cons', id: 'A' }],
-    });
-  });
-
-  it('parses enum definition with multiple variants', () => {
-    const code = `
-      T = A | B | C
-    `;
-    const lexemes = Lexer.parse(code);
-
-    const ast = parse(lexemes);
-
-    expect(ast).toStrictEqual({
-      elem: 'def',
-      var: 'enum',
-      id: 'T',
-      vis: 'priv',
-      body: [
-        { elem: 'cons', id: 'A' },
-        { elem: 'cons', id: 'B' },
-        { elem: 'cons', id: 'C' },
-      ],
-    });
-  });
-
+  
   it('parses function expression with single argument', () => {
     const code = `
       a: A -> b
@@ -218,7 +180,7 @@ describe('parser', () => {
     });
   });
 
-  it('parses function expression with evaluation body', () => {
+  it('parses function expression with eval body', () => {
     const code = `
       a: A -> b c d
     `;
@@ -246,6 +208,44 @@ describe('parser', () => {
           { elem: 'exp', var: 'id', id: 'd' },
         ],
       },
+    });
+  });
+
+  it('parses enum definition with single variant', () => {
+    const code = `
+      T = A
+    `;
+    const lexemes = Lexer.parse(code);
+
+    const ast = parse(lexemes);
+
+    expect(ast).toStrictEqual({
+      elem: 'def',
+      var: 'enum',
+      id: 'T',
+      vis: 'priv',
+      body: [{ elem: 'cons', id: 'A' }],
+    });
+  });
+
+  it('parses enum definition with multiple variants', () => {
+    const code = `
+      T = A | B | C
+    `;
+    const lexemes = Lexer.parse(code);
+
+    const ast = parse(lexemes);
+
+    expect(ast).toStrictEqual({
+      elem: 'def',
+      var: 'enum',
+      id: 'T',
+      vis: 'priv',
+      body: [
+        { elem: 'cons', id: 'A' },
+        { elem: 'cons', id: 'B' },
+        { elem: 'cons', id: 'C' },
+      ],
     });
   });
 
@@ -362,7 +362,7 @@ describe('parser', () => {
 
     expect(ast).toStrictEqual({
       elem: 'mod',
-      id: '::_',
+      id: '_',
       body: [
         {
           elem: 'def',
@@ -377,7 +377,7 @@ describe('parser', () => {
 
   it('parses module definition', () => {
     const code = `
-      ::a
+      ::_
         a = ::ax
         b = ::bx
 
@@ -393,7 +393,7 @@ describe('parser', () => {
 
     expect(ast).toStrictEqual({
       elem: 'mod',
-      id: '::a',
+      id: '_',
       body: [
         {
           elem: 'def',

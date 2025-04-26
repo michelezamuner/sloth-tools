@@ -17,8 +17,7 @@ describe('processor', () => {
     `;
     const lexemes = Lexer.parse(code);
     const ast = Parser.parse(lexemes);
-    const index = Indexer.index(ast);
-    const typedAst = Typer.type(ast, index);
+    const index = Typer.type(Indexer.index(ast));
     let buffer = undefined;
     const runtime = {
       process: {
@@ -28,9 +27,9 @@ describe('processor', () => {
       },
     };
 
-    const status = process(runtime, typedAst, index);
+    const status = process(runtime, index, '::_::main');
 
     expect(status).toBe(0);
-    expect(buffer).toBe('[T] A\n');
+    expect(buffer).toBe('[::_::T] A\n');
   });
 });

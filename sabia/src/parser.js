@@ -176,10 +176,6 @@ const states = {
       sub_context.ast.body = { elem: 'cons', id: lexeme.split('.')[1] };
 
       break;
-    case lexeme === '->':
-      exec('exp_fun', context);
-
-      return;
     default:
       sub_context.ast.elem = 'exp';
       sub_context.ast.var = 'id';
@@ -187,9 +183,6 @@ const states = {
     }
 
     context.ast.args.push(sub_context.ast);
-    if (sub_context.target_scope !== undefined) {
-      context.target_scope = sub_context.target_scope;
-    }
 
     exec_next('exp_eval_args', context);
   },
@@ -269,10 +262,6 @@ const states = {
   },
   'def_enum_sep': (lexeme, context) => {
     switch (true) {
-    case lexeme !== '|':
-      exec('def', context);
-
-      break;
     default:
       exec_next('def_enum_cons', context);
     }
@@ -312,6 +301,7 @@ const states = {
     switch (true) {
     case context.ast.elem !== 'mod':
       context.ast.elem = 'mod',
+      context.ast.id = context.ast.id.substr(2);
       context.ast.body = [];
 
       exec_next('mod', context);

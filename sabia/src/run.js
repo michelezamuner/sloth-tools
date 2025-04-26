@@ -9,12 +9,10 @@ exports.run = process => {
   if (process.argv[2] === '--inline') {
     const code = process.argv[3];
     const lexemes = Lexer.parse(code);
-    const rawAst = Parser.parse(lexemes);
-    const untypedAst = Normalizer.normalize(rawAst);
-    const index = Indexer.index(untypedAst);
-    const ast = Typer.type(untypedAst, index);
+    const ast = Normalizer.normalize(Parser.parse(lexemes));
+    const index = Typer.type(Indexer.index(ast));
 
-    return Processor.process({ process }, ast, index);
+    return Processor.process({ process }, index, '::_::main');
   }
 
   return 0;
