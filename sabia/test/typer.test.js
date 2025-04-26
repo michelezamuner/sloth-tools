@@ -1,373 +1,337 @@
 const { type } = require('../src/typer');
 const Lexer = require('../src/lexer');
-const Parser = require('../src/parser');
+const Parser = require('../src/parser/group');
 const Indexer = require('../src/indexer');
 
 describe('typer', () => {
-  it('adds type to function arguments', () => {
+  it('type enum expression', () => {
     const code = `
       ::_
-        A = B
-        C = D
-        f = a: A b: A -> C.D
+        T = A
+        a = T.A
     `;
     const lexemes = Lexer.parse(code);
     const ast = Parser.parse(lexemes);
-    const index = Indexer.index(ast);
+    const rawIndex = Indexer.index(ast);
 
-    const typedAst = type(ast, index);
+    const index = type(rawIndex);
 
-    expect(typedAst).toStrictEqual({
-      elem: 'mod',
-      id: '::_',
-      body: [
-        {
-          elem: 'def',
+    expect(index).toStrictEqual({
+      '::_::T': {
+        elem: 'def',
+        var: 'enum',
+        id: '::_::T',
+        body: [{ elem: 'cons', id: 'A' }],
+      },
+      '::_::a': {
+        elem: 'def',
+        var: 'ref',
+        id: '::_::a',
+        type: { elem: 'type', var: 'id', id: '::_::T' },
+        body: {
+          elem: 'exp',
           var: 'enum',
-          id: 'A',
-          vis: 'priv',
-          body: [{ elem: 'cons', id: 'B' }],
+          type: { elem: 'type', var: 'id', id: '::_::T' },
+          body: { elem: 'cons', id: 'A' },
         },
-        {
-          elem: 'def',
-          var: 'enum',
-          id: 'C',
-          vis: 'priv',
-          body: [{ elem: 'cons', id: 'D' }],
-        },
-        {
-          elem: 'def',
-          var: 'ref',
-          id: 'f',
-          vis: 'priv',
-          type: {
-            elem: 'type',
-            var: 'fun',
-            args: [
-              { elem: 'type', var: 'id', id: 'A' },
-              { elem: 'type', var: 'id', id: 'A' }
-            ],
-            ret: { elem: 'type', var: 'id', id: 'C' },
-          },
-          body: {
-            elem: 'exp',
-            var: 'fun',
-            type: {
-              elem: 'type',
-              var: 'fun',
-              args: [
-                { elem: 'type', var: 'id', id: 'A' },
-                { elem: 'type', var: 'id', id: 'A' }
-              ],
-              ret: { elem: 'type', var: 'id', id: 'C' },
-            },
-            args: [
-              {
-                elem: 'pat',
-                var: 'id',
-                id: 'a',
-                type: { elem: 'type', var: 'id', id: 'A' },
-              },
-              {
-                elem: 'pat',
-                var: 'id',
-                id: 'b',
-                type: { elem: 'type', var: 'id', id: 'A' },
-              },
-            ],
-            body: {
-              elem: 'exp',
-              var: 'enum',
-              type: { elem: 'type', var: 'id', id: 'C' },
-              body: { elem: 'cons', id: 'D' },
-            },
-          },
-        },
-      ],
+      },
     });
   });
 
-  it('adds type to argument reference expression', () => {
+  it('type id expression', () => {
     const code = `
       ::_
-        A = A
-        f = a: A -> a
-    `;
-    const lexemes = Lexer.parse(code);
-    const ast = Parser.parse(lexemes);
-    const index = Indexer.index(ast);
-
-    const typedAst = type(ast, index);
-
-    expect(typedAst).toStrictEqual({
-      elem: 'mod',
-      id: '::_',
-      body: [
-        {
-          elem: 'def',
-          var: 'enum',
-          id: 'A',
-          vis: 'priv',
-          body: [{ elem: 'cons', id: 'A' }],
-        },
-        {
-          elem: 'def',
-          var: 'ref',
-          id: 'f',
-          vis: 'priv',
-          type: {
-            elem: 'type',
-            var: 'fun',
-            args: [{ elem: 'type', var: 'id', id: 'A' }],
-            ret: { elem: 'type', var: 'id', id: 'A' },
-          },
-          body: {
-            elem: 'exp',
-            var: 'fun',
-            type: {
-              elem: 'type',
-              var: 'fun',
-              args: [{ elem: 'type', var: 'id', id: 'A' }],
-              ret: { elem: 'type', var: 'id', id: 'A' },
-            },
-            args: [
-              {
-                elem: 'pat',
-                var: 'id',
-                id: 'a',
-                type: { elem: 'type', var: 'id', id: 'A' },
-              }
-            ],
-            body: {
-              elem: 'exp',
-              var: 'id',
-              type: { elem: 'type', var: 'id', id: 'A' },
-              id: 'a',
-            },
-          },
-        },
-      ],
-    });
-  });
-
-  it('adds type to id reference expression', () => {
-    const code = `
-      ::_
-        A = A
-        a = A.A
+        T = A
+        a = T.A
         b = a
-        f = _: _ -> b
     `;
     const lexemes = Lexer.parse(code);
     const ast = Parser.parse(lexemes);
-    const index = Indexer.index(ast);
+    const rawIndex = Indexer.index(ast);
 
-    const typedAst = type(ast, index);
+    const index = type(rawIndex);
 
-    expect(typedAst).toStrictEqual({
-      elem: 'mod',
-      id: '::_',
-      body: [
-        {
-          elem: 'def',
+    expect(index).toStrictEqual({
+      '::_::T': {
+        elem: 'def',
+        var: 'enum',
+        id: '::_::T',
+        body: [{ elem: 'cons', id: 'A' }],
+      },
+      '::_::a': {
+        elem: 'def',
+        var: 'ref',
+        id: '::_::a',
+        type: { elem: 'type', var: 'id', id: '::_::T' },
+        body: {
+          elem: 'exp',
           var: 'enum',
-          id: 'A',
-          vis: 'priv',
-          body: [{ elem: 'cons', id: 'A' }],
+          type: { elem: 'type', var: 'id', id: '::_::T' },
+          body: { elem: 'cons', id: 'A' },
         },
-        {
-          elem: 'def',
-          var: 'ref',
-          id: 'a',
-          vis: 'priv',
-          type: { elem: 'type', var: 'id', id: 'A' },
+      },
+      '::_::b': {
+        elem: 'def',
+        var: 'ref',
+        id: '::_::b',
+        type: { elem: 'type', var: 'id', id: '::_::T' },
+        body: {
+          elem: 'exp',
+          var: 'id',
+          type: { elem: 'type', var: 'id', id: '::_::T' },
+          id: '::_::a',
+        },
+      },
+    });
+  });
+
+  it('type function expression with enum body', () => {
+    const code = `
+      ::_
+        T1 = A
+        T2 = A
+        f = a: T1 b: T2 -> T2.A
+    `;
+    const lexemes = Lexer.parse(code);
+    const ast = Parser.parse(lexemes);
+    const rawIndex = Indexer.index(ast);
+
+    const index = type(rawIndex);
+
+    expect(index).toStrictEqual({
+      '::_::T1': {
+        elem: 'def',
+        var: 'enum',
+        id: '::_::T1',
+        body: [{ elem: 'cons', id: 'A' }],
+      },
+      '::_::T2': {
+        elem: 'def',
+        var: 'enum',
+        id: '::_::T2',
+        body: [{ elem: 'cons', id: 'A' }],
+      },
+      '::_::f': {
+        elem: 'def',
+        var: 'ref',
+        id: '::_::f',
+        type: {
+          elem: 'type',
+          var: 'fun',
+          args: [
+            { elem: 'type', var: 'id', id: '::_::T1' },
+            { elem: 'type', var: 'id', id: '::_::T2' }
+          ],
+          ret: { elem: 'type', var: 'id', id: '::_::T2' },
+        },
+        body: {
+          elem: 'exp',
+          var: 'fun',
+          type: {
+            elem: 'type',
+            var: 'fun',
+            args: [
+              { elem: 'type', var: 'id', id: '::_::T1' },
+              { elem: 'type', var: 'id', id: '::_::T2' }
+            ],
+            ret: { elem: 'type', var: 'id', id: '::_::T2' },
+          },
+          args: [
+            {
+              elem: 'pat',
+              var: 'id',
+              id: '::_::a',
+              type: { elem: 'type', var: 'id', id: '::_::T1' },
+            },
+            {
+              elem: 'pat',
+              var: 'id',
+              id: '::_::b',
+              type: { elem: 'type', var: 'id', id: '::_::T2' },
+            },
+          ],
           body: {
             elem: 'exp',
             var: 'enum',
-            type: { elem: 'type', var: 'id', id: 'A' },
+            type: { elem: 'type', var: 'id', id: '::_::T2' },
             body: { elem: 'cons', id: 'A' },
           },
-        },
-        {
-          elem: 'def',
-          var: 'ref',
-          id: 'b',
-          vis: 'priv',
-          type: { elem: 'type', var: 'id', id: 'A' },
-          body: {
-            elem: 'exp',
-            var: 'id',
-            type: { elem: 'type', var: 'id', id: 'A' },
-            id: 'a',
-          },
-        },
-        {
-          elem: 'def',
-          var: 'ref',
-          id: 'f',
-          vis: 'priv',
-          type: {
-            elem: 'type',
-            var: 'fun',
-            args: [{ elem: 'type', var: 'id', id: '_' }],
-            ret: { elem: 'type', var: 'id', id: 'A' },
-          },
-          body: {
-            elem: 'exp',
-            var: 'fun',
-            type: {
-              elem: 'type',
-              var: 'fun',
-              args: [{ elem: 'type', var: 'id', id: '_' }],
-              ret: { elem: 'type', var: 'id', id: 'A' },
-            },
-            args: [
-              {
-                elem: 'pat',
-                var: 'id',
-                id: '_',
-                type: { elem: 'type', var: 'id', id: '_' },
-              }
-            ],
-            body: {
-              elem: 'exp',
+          ctx: {
+            '::_::a': {
+              elem: 'pat',
               var: 'id',
-              type: { elem: 'type', var: 'id', id: 'A' },
-              id: 'b',
+              id: '::_::a',
+              type: { elem: 'type', var: 'id', id: '::_::T1' },
+            },
+            '::_::b': {
+              elem: 'pat',
+              var: 'id',
+              id: '::_::b',
+              type: { elem: 'type', var: 'id', id: '::_::T2' },
             },
           },
         },
-      ],
+      },
     });
   });
 
-  it('adds type to enum evaluation expression', () => {
+  it('type function expression with id body', () => {
     const code = `
       ::_
-        A = A
-        B = B
-        f1 = _: _ -> B.B
-        f2 = _: A -> f1 A.A
+        T = A
+        a = T.A
+        b = a
+        f = a: T -> b
     `;
     const lexemes = Lexer.parse(code);
     const ast = Parser.parse(lexemes);
-    const index = Indexer.index(ast);
+    const rawIndex = Indexer.index(ast);
 
-    const typedAst = type(ast, index);
+    const index = type(rawIndex);
 
-    expect(typedAst).toStrictEqual({
-      elem: 'mod',
-      id: '::_',
-      body: [
-        {
-          elem: 'def',
+    expect(index).toStrictEqual({
+      '::_::T': {
+        elem: 'def',
+        var: 'enum',
+        id: '::_::T',
+        body: [{ elem: 'cons', id: 'A' }],
+      },
+      '::_::a': {
+        elem: 'def',
+        var: 'ref',
+        id: '::_::a',
+        type: { elem: 'type', var: 'id', id: '::_::T' },
+        body: {
+          elem: 'exp',
           var: 'enum',
-          id: 'A',
-          vis: 'priv',
-          body: [{ elem: 'cons', id: 'A' }],
+          type: { elem: 'type', var: 'id', id: '::_::T' },
+          body: { elem: 'cons', id: 'A' },
         },
-        {
-          elem: 'def',
-          var: 'enum',
-          id: 'B',
-          vis: 'priv',
-          body: [{ elem: 'cons', id: 'B' }],
+      },
+      '::_::b': {
+        elem: 'def',
+        var: 'ref',
+        id: '::_::b',
+        type: { elem: 'type', var: 'id', id: '::_::T' },
+        body: {
+          elem: 'exp',
+          var: 'id',
+          type: { elem: 'type', var: 'id', id: '::_::T' },
+          id: '::_::a',
         },
-        {
-          elem: 'def',
-          var: 'ref',
-          id: 'f1',
-          vis: 'priv',
+      },
+      '::_::f': {
+        elem: 'def',
+        var: 'ref',
+        id: '::_::f',
+        type: {
+          elem: 'type',
+          var: 'fun',
+          args: [{ elem: 'type', var: 'id', id: '::_::T' }],
+          ret: { elem: 'type', var: 'id', id: '::_::T' },
+        },
+        body: {
+          elem: 'exp',
+          var: 'fun',
           type: {
             elem: 'type',
             var: 'fun',
-            args: [{ elem: 'type', var: 'id', id: '_' }],
-            ret: { elem: 'type', var: 'id', id: 'B' },
+            args: [{ elem: 'type', var: 'id', id: '::_::T' }],
+            ret: { elem: 'type', var: 'id', id: '::_::T' },
           },
+          args: [
+            {
+              elem: 'pat',
+              var: 'id',
+              id: '::_::a',
+              type: { elem: 'type', var: 'id', id: '::_::T' },
+            }
+          ],
           body: {
             elem: 'exp',
-            var: 'fun',
-            type: {
-              elem: 'type',
-              var: 'fun',
-              args: [{ elem: 'type', var: 'id', id: '_' }],
-              ret: { elem: 'type', var: 'id', id: 'B' },
-            },
-            args: [
-              {
-                elem: 'pat',
-                var: 'id',
-                id: '_',
-                type: { elem: 'type', var: 'id', id: '_' },
-              },
-            ],
-            body: {
-              elem: 'exp',
-              var: 'enum',
-              type: { elem: 'type', var: 'id', id: 'B' },
-              body: { elem: 'cons', id: 'B' },
-            },
+            var: 'id',
+            type: { elem: 'type', var: 'id', id: '::_::T' },
+            id: '::_::b',
+          },
+          ctx: {
+            '::_::a': {
+              elem: 'pat',
+              var: 'id',
+              id: '::_::a',
+              type: { elem: 'type', var: 'id', id: '::_::T' },
+            }
           },
         },
-        {
-          elem: 'def',
-          var: 'ref',
-          id: 'f2',
-          vis: 'priv',
-          type: {
-            elem: 'type',
-            var: 'fun',
-            args: [{ elem: 'type', var: 'id', id: 'A' }],
-            ret: { elem: 'type', var: 'id', id: 'B' },
-          },
-          body: {
-            elem: 'exp',
-            var: 'fun',
-            type: {
-              elem: 'type',
-              var: 'fun',
-              args: [{ elem: 'type', var: 'id', id: 'A' }],
-              ret: { elem: 'type', var: 'id', id: 'B' },
-            },
-            args: [
-              {
-                elem: 'pat',
-                var: 'id',
-                id: '_',
-                type: { elem: 'type', var: 'id', id: 'A' },
-              },
-            ],
-            body: {
-              elem: 'exp',
-              var: 'eval',
-              fun: {
-                elem: 'exp',
-                var: 'id',
-                id: 'f1',
-                type: {
-                  elem: 'type',
-                  var: 'fun',
-                  args: [{ elem: 'type', var: 'id', id: '_' }],
-                  ret: { elem: 'type', var: 'id', id: 'B' },
-                },
-              },
-              type: { elem: 'type', var: 'id', id: 'B' },
-              args: [
-                {
-                  elem: 'exp',
-                  var: 'enum',
-                  type: { elem: 'type', var: 'id', id: 'A' },
-                  body: { elem: 'cons', id: 'A' },
-                },
-              ],
-            },
-          },
-        },
-      ],
+      },
     });
   });
 
-  it('adds type to argument evaluation expression', () => {
+  it('type function expression with arg body', () => {
+    const code = `
+      ::_
+        T = A
+        f = a: T -> a
+    `;
+    const lexemes = Lexer.parse(code);
+    const ast = Parser.parse(lexemes);
+    const rawIndex = Indexer.index(ast);
+
+    const index = type(rawIndex);
+
+    expect(index).toStrictEqual({
+      '::_::T': {
+        elem: 'def',
+        var: 'enum',
+        id: '::_::T',
+        body: [{ elem: 'cons', id: 'A' }],
+      },
+      '::_::f': {
+        elem: 'def',
+        var: 'ref',
+        id: '::_::f',
+        type: {
+          elem: 'type',
+          var: 'fun',
+          args: [{ elem: 'type', var: 'id', id: '::_::T' }],
+          ret: { elem: 'type', var: 'id', id: '::_::T' },
+        },
+        body: {
+          elem: 'exp',
+          var: 'fun',
+          type: {
+            elem: 'type',
+            var: 'fun',
+            args: [{ elem: 'type', var: 'id', id: '::_::T' }],
+            ret: { elem: 'type', var: 'id', id: '::_::T' },
+          },
+          args: [
+            {
+              elem: 'pat',
+              var: 'id',
+              id: '::_::a',
+              type: { elem: 'type', var: 'id', id: '::_::T' },
+            }
+          ],
+          body: {
+            elem: 'exp',
+            var: 'id',
+            type: { elem: 'type', var: 'id', id: '::_::T' },
+            id: '::_::a',
+          },
+          ctx: {
+            '::_::a': {
+              elem: 'pat',
+              var: 'id',
+              id: '::_::a',
+              type: { elem: 'type', var: 'id', id: '::_::T' },
+            },
+          },
+        },
+      },
+    });
+  });
+
+  it('type function expression with arg eval body', () => {
     const code = `
       ::_
         A = A
@@ -377,227 +341,311 @@ describe('typer', () => {
     `;
     const lexemes = Lexer.parse(code);
     const ast = Parser.parse(lexemes);
-    const index = Indexer.index(ast);
+    const rawIndex = Indexer.index(ast);
 
-    const typedAst = type(ast, index);
+    const index = type(rawIndex);
 
-    expect(typedAst).toStrictEqual({
-      elem: 'mod',
-      id: '::_',
-      body: [
-        {
-          elem: 'def',
-          var: 'enum',
-          id: 'A',
-          vis: 'priv',
-          body: [{ elem: 'cons', id: 'A' }],
+    expect(index).toStrictEqual({
+      '::_::A': {
+        elem: 'def',
+        var: 'enum',
+        id: '::_::A',
+        body: [{ elem: 'cons', id: 'A' }],
+      },
+      '::_::B': {
+        elem: 'def',
+        var: 'enum',
+        id: '::_::B',
+        body: [{ elem: 'cons', id: 'B' }],
+      },
+      '::_::f': {
+        elem: 'def',
+        var: 'ref',
+        id: '::_::f',
+        type: {
+          elem: 'type',
+          var: 'fun',
+          args: [{ elem: 'type', var: 'id', id: '::_::A' }],
+          ret: { elem: 'type', var: 'id', id: '::_::B' },
         },
-        {
-          elem: 'def',
-          var: 'enum',
-          id: 'B',
-          vis: 'priv',
-          body: [{ elem: 'cons', id: 'B' }],
-        },
-        {
-          elem: 'def',
-          var: 'ref',
-          id: 'f',
-          vis: 'priv',
+        body: {
+          elem: 'exp',
+          var: 'fun',
           type: {
             elem: 'type',
             var: 'fun',
-            args: [{ elem: 'type', var: 'id', id: 'A' }],
-            ret: { elem: 'type', var: 'id', id: 'B' },
+            args: [{ elem: 'type', var: 'id', id: '::_::A' }],
+            ret: { elem: 'type', var: 'id', id: '::_::B' },
           },
+          args: [
+            {
+              elem: 'pat',
+              var: 'id',
+              id: '::_::_',
+              type: { elem: 'type', var: 'id', id: '::_::A' },
+            }
+          ],
           body: {
             elem: 'exp',
-            var: 'fun',
-            type: {
-              elem: 'type',
-              var: 'fun',
-              args: [{ elem: 'type', var: 'id', id: 'A' }],
-              ret: { elem: 'type', var: 'id', id: 'B' },
-            },
-            args: [
-              {
-                elem: 'pat',
-                var: 'id',
-                id: '_',
-                type: { elem: 'type', var: 'id', id: 'A' },
-              }
-            ],
-            body: {
-              elem: 'exp',
-              var: 'enum',
-              type: { elem: 'type', var: 'id', id: 'B' },
-              body: { elem: 'cons', id: 'B' },
+            var: 'enum',
+            type: { elem: 'type', var: 'id', id: '::_::B' },
+            body: { elem: 'cons', id: 'B' },
+          },
+          ctx: {
+            '::_::_': {
+              elem: 'pat',
+              var: 'id',
+              id: '::_::_',
+              type: { elem: 'type', var: 'id', id: '::_::A' },
             },
           },
         },
-        {
-          elem: 'def',
-          var: 'ref',
-          id: 'g',
-          vis: 'priv',
+      },
+      '::_::g': {
+        elem: 'def',
+        var: 'ref',
+        id: '::_::g',
+        type: {
+          elem: 'type',
+          var: 'fun',
+          args: [{ elem: 'type', var: 'id', id: '::_::A' }],
+          ret: { elem: 'type', var: 'id', id: '::_::B' },
+        },
+        body: {
+          elem: 'exp',
+          var: 'fun',
           type: {
             elem: 'type',
             var: 'fun',
-            args: [{ elem: 'type', var: 'id', id: 'A' }],
-            ret: { elem: 'type', var: 'id', id: 'B' },
+            args: [{ elem: 'type', var: 'id', id: '::_::A' }],
+            ret: { elem: 'type', var: 'id', id: '::_::B' },
           },
+          args: [
+            {
+              elem: 'pat',
+              var: 'id',
+              id: '::_::a',
+              type: { elem: 'type', var: 'id', id: '::_::A' },
+            }
+          ],
           body: {
             elem: 'exp',
-            var: 'fun',
-            type: {
-              elem: 'type',
-              var: 'fun',
-              args: [{ elem: 'type', var: 'id', id: 'A' }],
-              ret: { elem: 'type', var: 'id', id: 'B' },
+            var: 'eval',
+            fun: {
+              elem: 'exp',
+              var: 'id',
+              id: '::_::f',
+              type: {
+                elem: 'type',
+                var: 'fun',
+                args: [{ elem: 'type', var: 'id', id: '::_::A' }],
+                ret: { elem: 'type', var: 'id', id: '::_::B' },
+              },
             },
+            type: { elem: 'type', var: 'id', id: '::_::B' },
             args: [
               {
-                elem: 'pat',
-                var: 'id',
-                id: 'a',
-                type: { elem: 'type', var: 'id', id: 'A' },
-              }
-            ],
-            body: {
-              elem: 'exp',
-              var: 'eval',
-              fun: {
                 elem: 'exp',
                 var: 'id',
-                id: 'f',
-                type: {
-                  elem: 'type',
-                  var: 'fun',
-                  args: [{ elem: 'type', var: 'id', id: 'A' }],
-                  ret: { elem: 'type', var: 'id', id: 'B' },
-                },
+                type: { elem: 'type', var: 'id', id: '::_::A' },
+                id: '::_::a',
               },
-              type: { elem: 'type', var: 'id', id: 'B' },
-              args: [
-                {
-                  elem: 'exp',
-                  var: 'id',
-                  type: { elem: 'type', var: 'id', id: 'A' },
-                  id: 'a',
-                },
-              ],
+            ],
+          },
+          ctx: {
+            '::_::a': {
+              elem: 'pat',
+              var: 'id',
+              id: '::_::a',
+              type: { elem: 'type', var: 'id', id: '::_::A' },
             },
           },
         },
-      ],
+      },
     });
   });
 
-  it('adds type to argument evaluation with external definition calling enum', () => {
+  it('type eval expression', () => {
+    const code = `
+      ::_
+        T = A
+        a = (a: T -> a) T.A
+    `;
+    const lexemes = Lexer.parse(code);
+    const ast = Parser.parse(lexemes);
+    const rawIndex = Indexer.index(ast);
+
+    const index = type(rawIndex);
+
+    expect(index).toStrictEqual({
+      '::_::T': {
+        elem: 'def',
+        var: 'enum',
+        id: '::_::T',
+        body: [{ elem: 'cons', id: 'A' }],
+      },
+      '::_::a': {
+        elem: 'def',
+        var: 'ref',
+        id: '::_::a',
+        type: { elem: 'type', var: 'id', id: '::_::T' },
+        body: {
+          elem: 'exp',
+          var: 'eval',
+          type: { elem: 'type', var: 'id', id: '::_::T' },
+          fun: {
+            elem: 'exp',
+            var: 'fun',
+            type: {
+              elem: 'type',
+              var: 'fun',
+              args: [
+                { elem: 'type', var: 'id', id: '::_::T' },
+              ],
+              ret: { elem: 'type', var: 'id', id: '::_::T' },
+            },
+            args: [
+              {
+                elem: 'pat',
+                var: 'id',
+                id: '::_::a',
+                type: { elem: 'type', var: 'id', id: '::_::T' },
+              },
+            ],
+            body: {
+              elem: 'exp',
+              var: 'id',
+              type: { elem: 'type', var: 'id', id: '::_::T' },
+              id: '::_::a'
+            },
+            ctx: {
+              '::_::a': {
+                elem: 'pat',
+                var: 'id',
+                id: '::_::a',
+                type: { elem: 'type', var: 'id', id: '::_::T' },
+              },
+            },
+          },
+          args: [
+            {
+              elem: 'exp',
+              var: 'enum',
+              type: { elem: 'type', var: 'id', id: '::_::T' },
+              body: { elem: 'cons', id: 'A' },
+            },
+          ],
+        },
+      },
+    });
+  });
+
+  it('type function expression with ext enum eval body', () => {
     const code = `
       ::_
         dbg = ::core::lang::debug
         A = A
-        f = _: _ -> dbg A.A
+        f = _: A -> dbg A.A
     `;
     const lexemes = Lexer.parse(code);
     const ast = Parser.parse(lexemes);
-    const index = Indexer.index(ast);
+    const rawIndex = Indexer.index(ast);
 
-    const typedAst = type(ast, index);
+    const index = type(rawIndex);
 
-    expect(typedAst).toStrictEqual({
-      elem: 'mod',
-      id: '::_',
-      body: [
-        {
-          elem: 'def',
-          var: 'ref',
-          id: 'dbg',
-          vis: 'priv',
+    expect(index).toStrictEqual({
+      '::_::dbg': {
+        elem: 'def',
+        var: 'ref',
+        id: '::_::dbg',
+        type: {
+          elem: 'type',
+          var: 'fun',
+          args: [{ elem: 'type', var: 'gen', gen: '<T>' }],
+          ret: { elem: 'type', var: 'gen', gen: '<T>' },
+        },
+        body: {
+          elem: 'ext',
+          id: '::core::lang::debug',
           type: {
             elem: 'type',
             var: 'fun',
             args: [{ elem: 'type', var: 'gen', gen: '<T>' }],
             ret: { elem: 'type', var: 'gen', gen: '<T>' },
           },
-          body: {
-            elem: 'ext',
-            id: '::core::lang::debug',
-            type: {
-              elem: 'type',
-              var: 'fun',
-              args: [{ elem: 'type', var: 'gen', gen: '<T>' }],
-              ret: { elem: 'type', var: 'gen', gen: '<T>' },
-            },
-          },
         },
-        {
-          elem: 'def',
-          var: 'enum',
-          id: 'A',
-          vis: 'priv',
-          body: [{ elem: 'cons', id: 'A' }],
+      },
+      '::_::A': {
+        elem: 'def',
+        var: 'enum',
+        id: '::_::A',
+        body: [{ elem: 'cons', id: 'A' }],
+      },
+      '::_::f': {
+        elem: 'def',
+        var: 'ref',
+        id: '::_::f',
+        type: {
+          elem: 'type',
+          var: 'fun',
+          args: [{ elem: 'type', var: 'id', id: '::_::A' }],
+          ret: { elem: 'type', var: 'id', id: '::_::A' },
         },
-        {
-          elem: 'def',
-          var: 'ref',
-          id: 'f',
-          vis: 'priv',
+        body: {
+          elem: 'exp',
+          var: 'fun',
           type: {
             elem: 'type',
             var: 'fun',
-            args: [{ elem: 'type', var: 'id', id: '_' }],
-            ret: { elem: 'type', var: 'id', id: 'A' },
+            args: [{ elem: 'type', var: 'id', id: '::_::A' }],
+            ret: { elem: 'type', var: 'id', id: '::_::A' },
           },
+          args: [
+            {
+              elem: 'pat',
+              var: 'id',
+              id: '::_::_',
+              type: { elem: 'type', var: 'id', id: '::_::A' },
+            }
+          ],
           body: {
             elem: 'exp',
-            var: 'fun',
-            type: {
-              elem: 'type',
-              var: 'fun',
-              args: [{ elem: 'type', var: 'id', id: '_' }],
-              ret: { elem: 'type', var: 'id', id: 'A' },
+            var: 'eval',
+            fun: {
+              elem: 'exp',
+              var: 'id',
+              id: '::_::dbg',
+              type: {
+                elem: 'type',
+                var: 'fun',
+                args: [{ elem: 'type', var: 'gen', gen: '<T>' }],
+                ret: { elem: 'type', var: 'gen', gen: '<T>' },
+              },
             },
+            type: { elem: 'type', var: 'id', id: '::_::A' },
             args: [
               {
-                elem: 'pat',
-                var: 'id',
-                id: '_',
-                type: { elem: 'type', var: 'id', id: '_' },
-              }
-            ],
-            body: {
-              elem: 'exp',
-              var: 'eval',
-              fun: {
                 elem: 'exp',
-                var: 'id',
-                id: 'dbg',
-                type: {
-                  elem: 'type',
-                  var: 'fun',
-                  args: [{ elem: 'type', var: 'gen', gen: '<T>' }],
-                  ret: { elem: 'type', var: 'gen', gen: '<T>' },
-                },
+                var: 'enum',
+                type: { elem: 'type', var: 'id', id: '::_::A' },
+                body: { elem: 'cons', id: 'A' },
               },
-              type: { elem: 'type', var: 'id', id: 'A' },
-              args: [
-                {
-                  elem: 'exp',
-                  var: 'enum',
-                  type: { elem: 'type', var: 'id', id: 'A' },
-                  body: { elem: 'cons', id: 'A' },
-                },
-              ],
+            ],
+          },
+          ctx: {
+            '::_::_': {
+              elem: 'pat',
+              var: 'id',
+              id: '::_::_',
+              type: { elem: 'type', var: 'id', id: '::_::A' },
             },
           },
         },
-      ],
+      },
     });
   });
 
-  it('adds type to argument evaluation with external definition calling argument', () => {
+  it('type function expression with ext arg eval body', () => {
     const code = `
       ::_
         dbg = ::core::lang::debug
@@ -606,216 +654,217 @@ describe('typer', () => {
     `;
     const lexemes = Lexer.parse(code);
     const ast = Parser.parse(lexemes);
-    const index = Indexer.index(ast);
+    const rawIndex = Indexer.index(ast);
 
-    const typedAst = type(ast, index);
+    const index = type(rawIndex);
 
-    expect(typedAst).toStrictEqual({
-      elem: 'mod',
-      id: '::_',
-      body: [
-        {
-          elem: 'def',
-          var: 'ref',
-          id: 'dbg',
-          vis: 'priv',
+    expect(index).toStrictEqual({
+      '::_::dbg': {
+        elem: 'def',
+        var: 'ref',
+        id: '::_::dbg',
+        type: {
+          elem: 'type',
+          var: 'fun',
+          args: [{ elem: 'type', var: 'gen', gen: '<T>' }],
+          ret: { elem: 'type', var: 'gen', gen: '<T>' },
+        },
+        body: {
+          elem: 'ext',
+          id: '::core::lang::debug',
           type: {
             elem: 'type',
             var: 'fun',
             args: [{ elem: 'type', var: 'gen', gen: '<T>' }],
             ret: { elem: 'type', var: 'gen', gen: '<T>' },
           },
-          body: {
-            elem: 'ext',
-            id: '::core::lang::debug',
-            type: {
-              elem: 'type',
-              var: 'fun',
-              args: [{ elem: 'type', var: 'gen', gen: '<T>' }],
-              ret: { elem: 'type', var: 'gen', gen: '<T>' },
-            },
-          },
         },
-        {
-          elem: 'def',
-          var: 'enum',
-          id: 'A',
-          vis: 'priv',
-          body: [{ elem: 'cons', id: 'A' }],
+      },
+      '::_::A': {
+        elem: 'def',
+        var: 'enum',
+        id: '::_::A',
+        body: [{ elem: 'cons', id: 'A' }],
+      },
+      '::_::f': {
+        elem: 'def',
+        var: 'ref',
+        id: '::_::f',
+        type: {
+          elem: 'type',
+          var: 'fun',
+          args: [{ elem: 'type', var: 'id', id: '::_::A' }],
+          ret: { elem: 'type', var: 'id', id: '::_::A' },
         },
-        {
-          elem: 'def',
-          var: 'ref',
-          id: 'f',
-          vis: 'priv',
+        body: {
+          elem: 'exp',
+          var: 'fun',
           type: {
             elem: 'type',
             var: 'fun',
-            args: [{ elem: 'type', var: 'id', id: 'A' }],
-            ret: { elem: 'type', var: 'id', id: 'A' },
+            args: [{ elem: 'type', var: 'id', id: '::_::A' }],
+            ret: { elem: 'type', var: 'id', id: '::_::A' },
           },
+          args: [
+            {
+              elem: 'pat',
+              var: 'id',
+              id: '::_::a',
+              type: { elem: 'type', var: 'id', id: '::_::A' },
+            }
+          ],
           body: {
             elem: 'exp',
-            var: 'fun',
-            type: {
-              elem: 'type',
-              var: 'fun',
-              args: [{ elem: 'type', var: 'id', id: 'A' }],
-              ret: { elem: 'type', var: 'id', id: 'A' },
+            var: 'eval',
+            fun: {
+              elem: 'exp',
+              var: 'id',
+              id: '::_::dbg',
+              type: {
+                elem: 'type',
+                var: 'fun',
+                args: [{ elem: 'type', var: 'gen', gen: '<T>' }],
+                ret: { elem: 'type', var: 'gen', gen: '<T>' },
+              },
             },
+            type: { elem: 'type', var: 'id', id: '::_::A' },
             args: [
               {
-                elem: 'pat',
-                var: 'id',
-                id: 'a',
-                type: { elem: 'type', var: 'id', id: 'A' },
-              }
-            ],
-            body: {
-              elem: 'exp',
-              var: 'eval',
-              fun: {
                 elem: 'exp',
                 var: 'id',
-                id: 'dbg',
-                type: {
-                  elem: 'type',
-                  var: 'fun',
-                  args: [{ elem: 'type', var: 'gen', gen: '<T>' }],
-                  ret: { elem: 'type', var: 'gen', gen: '<T>' },
-                },
+                type: { elem: 'type', var: 'id', id: '::_::A' },
+                id: '::_::a',
               },
-              type: { elem: 'type', var: 'id', id: 'A' },
-              args: [
-                {
-                  elem: 'exp',
-                  var: 'id',
-                  type: { elem: 'type', var: 'id', id: 'A' },
-                  id: 'a',
-                },
-              ],
+            ],
+          },
+          ctx: {
+            '::_::a': {
+              elem: 'pat',
+              var: 'id',
+              id: '::_::a',
+              type: { elem: 'type', var: 'id', id: '::_::A' },
             },
           },
         },
-      ],
+      },
     });
   });
 
-  it('adds type to argument evaluation with external definition calling ref', () => {
+  it('type function expression with ext ref eval body', () => {
     const code = `
       ::_
         dbg = ::core::lang::debug
         A = A
         a = A.A
-        f = _: _ -> dbg a
+        f = _: A -> dbg a
     `;
     const lexemes = Lexer.parse(code);
     const ast = Parser.parse(lexemes);
-    const index = Indexer.index(ast);
+    const rawIndex = Indexer.index(ast);
 
-    const typedAst = type(ast, index);
+    const index = type(rawIndex);
 
-    expect(typedAst).toStrictEqual({
-      elem: 'mod',
-      id: '::_',
-      body: [
-        {
-          elem: 'def',
-          var: 'ref',
-          id: 'dbg',
-          vis: 'priv',
+    expect(index).toStrictEqual({
+      '::_::dbg': {
+        elem: 'def',
+        var: 'ref',
+        id: '::_::dbg',
+        type: {
+          elem: 'type',
+          var: 'fun',
+          args: [{ elem: 'type', var: 'gen', gen: '<T>' }],
+          ret: { elem: 'type', var: 'gen', gen: '<T>' },
+        },
+        body: {
+          elem: 'ext',
+          id: '::core::lang::debug',
           type: {
             elem: 'type',
             var: 'fun',
             args: [{ elem: 'type', var: 'gen', gen: '<T>' }],
             ret: { elem: 'type', var: 'gen', gen: '<T>' },
           },
-          body: {
-            elem: 'ext',
-            id: '::core::lang::debug',
-            type: {
-              elem: 'type',
-              var: 'fun',
-              args: [{ elem: 'type', var: 'gen', gen: '<T>' }],
-              ret: { elem: 'type', var: 'gen', gen: '<T>' },
-            },
-          },
         },
-        {
-          elem: 'def',
+      },
+      '::_::A': {
+        elem: 'def',
+        var: 'enum',
+        id: '::_::A',
+        body: [{ elem: 'cons', id: 'A' }],
+      },
+      '::_::a': {
+        elem: 'def',
+        var: 'ref',
+        id: '::_::a',
+        type: { elem: 'type', var: 'id', id: '::_::A' },
+        body: {
+          elem: 'exp',
           var: 'enum',
-          id: 'A',
-          vis: 'priv',
-          body: [{ elem: 'cons', id: 'A' }],
+          type: { elem: 'type', var: 'id', id: '::_::A' },
+          body: { elem: 'cons', id: 'A' },
         },
-        {
-          elem: 'def',
-          var: 'ref',
-          id: 'a',
-          vis: 'priv',
-          type: { elem: 'type', var: 'id', id: 'A' },
-          body: {
-            elem: 'exp',
-            var: 'enum',
-            type: { elem: 'type', var: 'id', id: 'A' },
-            body: { elem: 'cons', id: 'A' },
-          },
+      },
+      '::_::f': {
+        elem: 'def',
+        var: 'ref',
+        id: '::_::f',
+        type: {
+          elem: 'type',
+          var: 'fun',
+          args: [{ elem: 'type', var: 'id', id: '::_::A' }],
+          ret: { elem: 'type', var: 'id', id: '::_::A' },
         },
-        {
-          elem: 'def',
-          var: 'ref',
-          id: 'f',
-          vis: 'priv',
+        body: {
+          elem: 'exp',
+          var: 'fun',
           type: {
             elem: 'type',
             var: 'fun',
-            args: [{ elem: 'type', var: 'id', id: '_' }],
-            ret: { elem: 'type', var: 'id', id: 'A' },
+            args: [{ elem: 'type', var: 'id', id: '::_::A' }],
+            ret: { elem: 'type', var: 'id', id: '::_::A' },
           },
+          args: [
+            {
+              elem: 'pat',
+              var: 'id',
+              id: '::_::_',
+              type: { elem: 'type', var: 'id', id: '::_::A' },
+            },
+          ],
           body: {
             elem: 'exp',
-            var: 'fun',
-            type: {
-              elem: 'type',
-              var: 'fun',
-              args: [{ elem: 'type', var: 'id', id: '_' }],
-              ret: { elem: 'type', var: 'id', id: 'A' },
+            var: 'eval',
+            fun: {
+              elem: 'exp',
+              var: 'id',
+              id: '::_::dbg',
+              type: {
+                elem: 'type',
+                var: 'fun',
+                args: [{ elem: 'type', var: 'gen', gen: '<T>' }],
+                ret: { elem: 'type', var: 'gen', gen: '<T>' },
+              },
             },
+            type: { elem: 'type', var: 'id', id: '::_::A' },
             args: [
               {
-                elem: 'pat',
-                var: 'id',
-                id: '_',
-                type: { elem: 'type', var: 'id', id: '_' },
-              }
-            ],
-            body: {
-              elem: 'exp',
-              var: 'eval',
-              fun: {
                 elem: 'exp',
                 var: 'id',
-                id: 'dbg',
-                type: {
-                  elem: 'type',
-                  var: 'fun',
-                  args: [{ elem: 'type', var: 'gen', gen: '<T>' }],
-                  ret: { elem: 'type', var: 'gen', gen: '<T>' },
-                },
+                type: { elem: 'type', var: 'id', id: '::_::A' },
+                id: '::_::a',
               },
-              type: { elem: 'type', var: 'id', id: 'A' },
-              args: [
-                {
-                  elem: 'exp',
-                  var: 'id',
-                  type: { elem: 'type', var: 'id', id: 'A' },
-                  id: 'a',
-                },
-              ],
+            ],
+          },
+          ctx: {
+            '::_::_': {
+              elem: 'pat',
+              var: 'id',
+              id: '::_::_',
+              type: { elem: 'type', var: 'id', id: '::_::A' },
             },
           },
         },
-      ],
+      },
     });
   });
 });

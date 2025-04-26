@@ -31,10 +31,6 @@ exports.parse = code => {
     }
 
     if (isNewLine && char.trim() !== '') {
-      if (lexeme.length) {
-        lexemes.push(lexeme.join(''));
-        lexeme.length = 0;
-      }
       lexemes.push({ scope: (indentation - baseIndentation) });
       isNewLine = false;
       indentation = 0;
@@ -54,10 +50,6 @@ exports.parse = code => {
         lexeme.push(char);
       }
     }
-  }
-
-  if (lexeme.length) {
-    lexemes.push(lexeme.join(''));
   }
 
   lexemes.push({ scope: -1 });
