@@ -6,7 +6,7 @@ const Indexer = require('../src/indexer');
 describe('typer', () => {
   it('type enum expression', () => {
     const code = `
-      ::_
+      ::_ =
         T = A
         a = T.A
     `;
@@ -40,7 +40,7 @@ describe('typer', () => {
 
   it('type id expression', () => {
     const code = `
-      ::_
+      ::_ =
         T = A
         a = T.A
         b = a
@@ -87,7 +87,7 @@ describe('typer', () => {
 
   it('type function expression with enum body', () => {
     const code = `
-      ::_
+      ::_ =
         T1 = A
         T2 = A
         f = a: T1 b: T2 -> T2.A
@@ -177,7 +177,7 @@ describe('typer', () => {
 
   it('type function expression with id body', () => {
     const code = `
-      ::_
+      ::_ =
         T = A
         a = T.A
         b = a
@@ -268,7 +268,7 @@ describe('typer', () => {
 
   it('type function expression with arg body', () => {
     const code = `
-      ::_
+      ::_ =
         T = A
         f = a: T -> a
     `;
@@ -333,7 +333,7 @@ describe('typer', () => {
 
   it('type function expression with arg eval body', () => {
     const code = `
-      ::_
+      ::_ =
         A = A
         B = B
         f = _: A -> B.B
@@ -467,7 +467,7 @@ describe('typer', () => {
 
   it('type eval expression', () => {
     const code = `
-      ::_
+      ::_ =
         T = A
         a = (a: T -> a) T.A
     `;
@@ -540,9 +540,9 @@ describe('typer', () => {
     });
   });
 
-  it('type function expression with ext enum eval body', () => {
+  it('type function expression with fqid enum eval body', () => {
     const code = `
-      ::_
+      ::_ =
         dbg = ::core::lang::debug
         A = A
         f = _: A -> dbg A.A
@@ -565,7 +565,8 @@ describe('typer', () => {
           ret: { elem: 'type', var: 'gen', gen: '<T>' },
         },
         body: {
-          elem: 'ext',
+          elem: 'exp',
+          var: 'id',
           id: '::core::lang::debug',
           type: {
             elem: 'type',
@@ -645,9 +646,9 @@ describe('typer', () => {
     });
   });
 
-  it('type function expression with ext arg eval body', () => {
+  it('type function expression with fqid arg eval body', () => {
     const code = `
-      ::_
+      ::_ =
         dbg = ::core::lang::debug
         A = A
         f = a: A -> dbg a
@@ -670,7 +671,8 @@ describe('typer', () => {
           ret: { elem: 'type', var: 'gen', gen: '<T>' },
         },
         body: {
-          elem: 'ext',
+          elem: 'exp',
+          var: 'id',
           id: '::core::lang::debug',
           type: {
             elem: 'type',
@@ -750,9 +752,9 @@ describe('typer', () => {
     });
   });
 
-  it('type function expression with ext ref eval body', () => {
+  it('type function expression with fqid ref eval body', () => {
     const code = `
-      ::_
+      ::_ =
         dbg = ::core::lang::debug
         A = A
         a = A.A
@@ -776,7 +778,8 @@ describe('typer', () => {
           ret: { elem: 'type', var: 'gen', gen: '<T>' },
         },
         body: {
-          elem: 'ext',
+          elem: 'exp',
+          var: 'id',
           id: '::core::lang::debug',
           type: {
             elem: 'type',
@@ -838,6 +841,102 @@ describe('typer', () => {
               elem: 'exp',
               var: 'id',
               id: '::_::dbg',
+              type: {
+                elem: 'type',
+                var: 'fun',
+                args: [{ elem: 'type', var: 'gen', gen: '<T>' }],
+                ret: { elem: 'type', var: 'gen', gen: '<T>' },
+              },
+            },
+            type: { elem: 'type', var: 'id', id: '::_::A' },
+            args: [
+              {
+                elem: 'exp',
+                var: 'id',
+                type: { elem: 'type', var: 'id', id: '::_::A' },
+                id: '::_::a',
+              },
+            ],
+          },
+          ctx: {
+            '::_::_': {
+              elem: 'pat',
+              var: 'id',
+              id: '::_::_',
+              type: { elem: 'type', var: 'id', id: '::_::A' },
+            },
+          },
+        },
+      },
+    });
+  });
+
+  it('type function expression with fqid inline eval body', () => {
+    const code = `
+      ::_ =
+        A = A
+        a = A.A
+        f = _: A -> ::core::lang::debug a
+    `;
+    const lexemes = Lexer.parse(code);
+    const ast = Parser.parse(lexemes);
+    const rawIndex = Indexer.index(ast);
+
+    const index = type(rawIndex);
+
+    expect(index).toStrictEqual({
+      '::_::A': {
+        elem: 'def',
+        var: 'enum',
+        id: '::_::A',
+        body: [{ elem: 'cons', id: 'A' }],
+      },
+      '::_::a': {
+        elem: 'def',
+        var: 'ref',
+        id: '::_::a',
+        type: { elem: 'type', var: 'id', id: '::_::A' },
+        body: {
+          elem: 'exp',
+          var: 'enum',
+          type: { elem: 'type', var: 'id', id: '::_::A' },
+          body: { elem: 'cons', id: 'A' },
+        },
+      },
+      '::_::f': {
+        elem: 'def',
+        var: 'ref',
+        id: '::_::f',
+        type: {
+          elem: 'type',
+          var: 'fun',
+          args: [{ elem: 'type', var: 'id', id: '::_::A' }],
+          ret: { elem: 'type', var: 'id', id: '::_::A' },
+        },
+        body: {
+          elem: 'exp',
+          var: 'fun',
+          type: {
+            elem: 'type',
+            var: 'fun',
+            args: [{ elem: 'type', var: 'id', id: '::_::A' }],
+            ret: { elem: 'type', var: 'id', id: '::_::A' },
+          },
+          args: [
+            {
+              elem: 'pat',
+              var: 'id',
+              id: '::_::_',
+              type: { elem: 'type', var: 'id', id: '::_::A' },
+            },
+          ],
+          body: {
+            elem: 'exp',
+            var: 'eval',
+            fun: {
+              elem: 'exp',
+              var: 'id',
+              id: '::core::lang::debug',
               type: {
                 elem: 'type',
                 var: 'fun',

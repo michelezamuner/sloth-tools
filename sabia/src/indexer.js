@@ -15,7 +15,7 @@ const index = (ast, _index = {}, parent = undefined, parentCtx = {}) => {
 
   if (ast.elem === 'exp' && ast.var === 'eval') {
     if (ast.fun.id) {
-      ast.fun.id = `${parent}::${ast.fun.id}`;
+      ast.fun.id = ast.fun.id.startsWith('::') ? ast.fun.id : `${parent}::${ast.fun.id}`;
     } else {
       ast.fun = index(ast.fun, _index, parent, parentCtx);
     }
@@ -26,7 +26,7 @@ const index = (ast, _index = {}, parent = undefined, parentCtx = {}) => {
     ast.ctx = { ...parentCtx };
     ast.args = ast.args.map(a => {
       a.id = `${parent}::${a.id}`;
-      a.type.id = `${parent}::${a.type.id}`;
+      a.type.id = a.type.id.startsWith('::') ? a.type.id : `${parent}::${a.type.id}`;
       ast.ctx[a.id] = a;
 
       return a;
@@ -35,11 +35,13 @@ const index = (ast, _index = {}, parent = undefined, parentCtx = {}) => {
   }
 
   if (ast.elem === 'exp' && ast.var === 'id') {
-    ast.id = `${parent}::${ast.id}`;
+    if (!ast.id.startsWith('::')) {
+      ast.id = `${parent}::${ast.id}`;
+    }
   }
 
   if (ast.elem === 'exp' && ast.var === 'enum') {
-    ast.type.id = `${parent}::${ast.type.id}`;
+    ast.type.id = ast.type.id.startsWith('::') ? ast.type.id : `${parent}::${ast.type.id}`;
   }
 
   return ast;

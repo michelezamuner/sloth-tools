@@ -33,8 +33,24 @@ describe('parser', () => {
     });
   });
 
+  it('parses fqid expression', () => {
+    const code = `
+      ::a::b
+    `;
+
+    const lexemes = Lexer.parse(code);
+
+    const ast = parse(lexemes);
+
+    expect(ast).toStrictEqual({
+      elem: 'exp',
+      var: 'id',
+      id: '::a::b',
+    });
+  });
+
   it('parses ast expression', () => {
-    const lexemes = [{ ast: 'ast' }];
+    const lexemes = [{ ast: 'ast' }, { scope: -1 }];
 
     const ast = parse(lexemes);
 
@@ -94,7 +110,7 @@ describe('parser', () => {
   });
 
   it('parses eval expression with ast function', () => {
-    const lexemes = [{ ast: 'ast' }, 'a'];
+    const lexemes = [{ ast: 'ast' }, 'a', { scope: -1 }];
 
     const ast = parse(lexemes);
 
@@ -107,7 +123,7 @@ describe('parser', () => {
   });
 
   it('parses eval expression with ast arg', () => {
-    const lexemes = ['f', { ast: 'ast' }, 'a'];
+    const lexemes = ['f', { ast: 'ast' }, 'a', { scope: -1 }];
 
     const ast = parse(lexemes);
 
@@ -121,7 +137,111 @@ describe('parser', () => {
       ],
     });
   });
-  
+
+  it('parses eval expression with fqid function', () => {
+    const code = `
+      ::mod::f a
+    `;
+
+    const lexemes = Lexer.parse(code);
+    const ast = parse(lexemes);
+
+    expect(ast).toStrictEqual({
+      elem: 'exp',
+      var: 'eval',
+      fun: { elem: 'exp', var: 'id', id: '::mod::f' },
+      args: [{ elem: 'exp', var: 'id', id: 'a' }],
+    });
+  });
+
+  it('parses eval expression with fqid arg', () => {
+    const code = `
+      f ::mod::a
+    `;
+
+    const lexemes = Lexer.parse(code);
+    const ast = parse(lexemes);
+
+    expect(ast).toStrictEqual({
+      elem: 'exp',
+      var: 'eval',
+      fun: { elem: 'exp', var: 'id', id: 'f' },
+      args: [{ elem: 'exp', var: 'id', id: '::mod::a' }],
+    });
+  });
+
+  it('parses multiline eval expression with first arg inline', () => {
+    const code = `
+      f a
+        b
+    `;
+    const lexemes = Lexer.parse(code);
+
+    const ast = parse(lexemes);
+
+    expect(ast).toStrictEqual({
+      elem: 'exp',
+      var: 'eval',
+      fun: { elem: 'exp', var: 'id', id: 'f' },
+      args: [
+        { elem: 'exp', var: 'id', id: 'a' },
+        { elem: 'exp', var: 'id', id: 'b' },
+      ],
+    });
+  });
+
+  it('parses multiline eval expression', () => {
+    const code = `
+      f
+        a
+        b
+    `;
+    const lexemes = Lexer.parse(code);
+
+    const ast = parse(lexemes);
+
+    expect(ast).toStrictEqual({
+      elem: 'exp',
+      var: 'eval',
+      fun: { elem: 'exp', var: 'id', id: 'f' },
+      args: [
+        { elem: 'exp', var: 'id', id: 'a' },
+        { elem: 'exp', var: 'id', id: 'b' },
+      ],
+    });
+  });
+
+  it('parses multiline eval expression with eval arg', () => {
+    const code = `
+      f
+        a
+          b
+    `;
+    const lexemes = Lexer.parse(code);
+
+    const ast = parse(lexemes);
+
+    expect(ast).toStrictEqual({
+      elem: 'exp',
+      var: 'eval',
+      fun: { elem: 'exp', var: 'id', id: 'f' },
+      args: [
+        {
+          elem: 'exp',
+          var: 'eval',
+          fun: { elem: 'exp', var: 'id', id: 'a' },
+          args: [
+            {
+              elem: 'exp',
+              var: 'id',
+              id: 'b'
+            },
+          ],
+        },
+      ],
+    });
+  });
+
   it('parses function expression with single argument', () => {
     const code = `
       a: A -> b
@@ -183,6 +303,73 @@ describe('parser', () => {
   it('parses function expression with eval body', () => {
     const code = `
       a: A -> b c d
+    `;
+    const lexemes = Lexer.parse(code);
+
+    const ast = parse(lexemes);
+
+    expect(ast).toStrictEqual({
+      elem: 'exp',
+      var: 'fun',
+      args: [
+        {
+          elem: 'pat',
+          var: 'id',
+          id: 'a',
+          type: { elem: 'type', var: 'id', id: 'A' },
+        },
+      ],
+      body: {
+        elem: 'exp',
+        var: 'eval',
+        fun: { elem: 'exp', var: 'id', id: 'b' },
+        args: [
+          { elem: 'exp', var: 'id', id: 'c' },
+          { elem: 'exp', var: 'id', id: 'd' },
+        ],
+      },
+    });
+  });
+
+  it('parses multiline function expression with first token inline', () => {
+    const code = `
+      a: A -> b
+        c
+        d
+    `;
+    const lexemes = Lexer.parse(code);
+
+    const ast = parse(lexemes);
+
+    expect(ast).toStrictEqual({
+      elem: 'exp',
+      var: 'fun',
+      args: [
+        {
+          elem: 'pat',
+          var: 'id',
+          id: 'a',
+          type: { elem: 'type', var: 'id', id: 'A' },
+        },
+      ],
+      body: {
+        elem: 'exp',
+        var: 'eval',
+        fun: { elem: 'exp', var: 'id', id: 'b' },
+        args: [
+          { elem: 'exp', var: 'id', id: 'c' },
+          { elem: 'exp', var: 'id', id: 'd' },
+        ],
+      },
+    });
+  });
+
+  it('parses multiline function expression', () => {
+    const code = `
+      a: A ->
+        b
+          c
+          d
     `;
     const lexemes = Lexer.parse(code);
 
@@ -302,8 +489,49 @@ describe('parser', () => {
     });
   });
 
+  it('parses definition of reference to multiline function value', () => {
+    const code = `
+      f = a: A ->
+        b
+          c
+          d
+    `;
+
+    const lexemes = Lexer.parse(code);
+
+    const ast = parse(lexemes);
+
+    expect(ast).toStrictEqual({
+      elem: 'def',
+      var: 'ref',
+      id: 'f',
+      vis: 'priv',
+      body: {
+        elem: 'exp',
+        var: 'fun',
+        args: [
+          {
+            elem: 'pat',
+            var: 'id',
+            id: 'a',
+            type: { elem: 'type', var: 'id', id: 'A' },
+          },
+        ],
+        body: {
+          elem: 'exp',
+          var: 'eval',
+          fun: { elem: 'exp', var: 'id', id: 'b' },
+          args: [
+            { elem: 'exp', var: 'id', id: 'c' },
+            { elem: 'exp', var: 'id', id: 'd' },
+          ],
+        },
+      },
+    });
+  });
+
   it('parses definition of reference to ast', () => {
-    const lexemes = ['a', '=', { ast: 'ast' }];
+    const lexemes = ['a', '=', { ast: 'ast' }, { scope: -1 }];
 
     const ast = parse(lexemes);
 
@@ -316,7 +544,7 @@ describe('parser', () => {
     });
   });
 
-  it('parses definition of reference to external reference', () => {
+  it('parses definition of reference to fqid', () => {
     const code = `
       a = ::a::b
     `;
@@ -329,7 +557,7 @@ describe('parser', () => {
       var: 'ref',
       id: 'a',
       vis: 'priv',
-      body: { elem: 'ext', id: '::a::b' },
+      body: { elem: 'exp', var: 'id', id: '::a::b' },
     });
   });
 
@@ -350,12 +578,11 @@ describe('parser', () => {
     });
   });
 
-  it('parses module definition with single definition', () => {
+  it('parses single def mod definition', () => {
     const code = `
-      ::_
-        T = A
+      ::_ =
+        a = ::ax
     `;
-
     const lexemes = Lexer.parse(code);
 
     const ast = parse(lexemes);
@@ -366,23 +593,23 @@ describe('parser', () => {
       body: [
         {
           elem: 'def',
-          var: 'enum',
-          id: 'T',
+          var: 'ref',
+          id: 'a',
           vis: 'priv',
-          body: [{ elem: 'cons', id: 'A' }],
+          body: { elem: 'exp', var: 'id', id: '::ax' },
         },
       ],
     });
   });
 
-  it('parses module definition', () => {
+  it('parses multiple def mod definition', () => {
     const code = `
-      ::_
+      ::_ =
         a = ::ax
         b = ::bx
 
         ::C = C
-        ::d = d: D -> d
+        ::d = d: D -> d e
         e = E.E
         f = F.F
     `;
@@ -400,14 +627,14 @@ describe('parser', () => {
           var: 'ref',
           id: 'a',
           vis: 'priv',
-          body: { elem: 'ext', id: '::ax' },
+          body: { elem: 'exp', var: 'id', id: '::ax' },
         },
         {
           elem: 'def',
           var: 'ref',
           id: 'b',
           vis: 'priv',
-          body: { elem: 'ext', id: '::bx' },
+          body: { elem: 'exp', var: 'id', id: '::bx' },
         },
         {
           elem: 'def',
@@ -432,7 +659,16 @@ describe('parser', () => {
                 type: { elem: 'type', var: 'id', id: 'D' },
               },
             ],
-            body: { elem: 'exp', var: 'id', id: 'd' },
+            body: {
+              elem: 'exp',
+              var: 'eval',
+              fun: {
+                elem: 'exp',
+                var: 'id',
+                id: 'd',
+              },
+              args: [{ elem: 'exp', var: 'id', id: 'e' }],
+            },
           },
         },
         {
@@ -457,6 +693,54 @@ describe('parser', () => {
             var: 'enum',
             type: { elem: 'type', var: 'id', id: 'F' },
             body: { elem: 'cons', id: 'F' },
+          },
+        },
+      ],
+    });
+  });
+
+  it('parses multiline def mod definition', () => {
+    const code = `
+      ::_ =
+        f = _: ::A ->
+          ::b
+            c
+            d
+    `;
+
+    const lexemes = Lexer.parse(code);
+
+    const ast = parse(lexemes);
+
+    expect(ast).toStrictEqual({
+      elem: 'mod',
+      id: '_',
+      body: [
+        {
+          elem: 'def',
+          var: 'ref',
+          id: 'f',
+          vis: 'priv',
+          body: {
+            elem: 'exp',
+            var: 'fun',
+            args: [
+              {
+                elem: 'pat',
+                var: 'id',
+                id: '_',
+                type: { elem: 'type', var: 'id', id: '::A' },
+              },
+            ],
+            body: {
+              elem: 'exp',
+              var: 'eval',
+              fun: { elem: 'exp', var: 'id', id: '::b' },
+              args: [
+                { elem: 'exp', var: 'id', id: 'c' },
+                { elem: 'exp', var: 'id', id: 'd' },
+              ],
+            },
           },
         },
       ],

@@ -23,6 +23,11 @@ exports.parse = code => {
     if (hasCodeStarted && char === '\n') {
       isNewLine = true;
 
+      if (lexeme.length) {
+        lexemes.push(lexeme.join(''));
+        lexeme.length = 0;
+      }
+
       continue;
     }
 
@@ -52,6 +57,9 @@ exports.parse = code => {
     }
   }
 
+  if (lexeme.length) {
+    lexemes.push(lexeme.join(''));
+  }
   lexemes.push({ scope: -1 });
 
   return lexemes;

@@ -3,12 +3,8 @@ const Parser = require('./parser/group');
 
 exports.normalize = ast => {
   const defaultAst = Parser.parse(Lexer.parse(`
-    ::_
-      dbg = ::core::lang::debug
-      then = ::core::lang::then
-      Proc = ::core::sys::Process
-      Exit = ::core::sys::Exit
-      main = _: Proc -> then (dbg _) Exit.OK
+    ::_ =
+      main = _: ::core::sys::Process -> ::core::lang::then (::core::lang::debug _) ::core::sys::Exit.OK
   `));
   for (const item of ast.body) {
     if (item.elem === 'def') {

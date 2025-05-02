@@ -10,6 +10,7 @@ const parse = lexemes => {
     }
 
     if (lexeme === ')') {
+      out[out.length - 1].push({ scope: -1 });
       out[out.length - 2].push(innerParse(out[out.length - 1]));
       delete out[out.length - 1];
       out.length--;
