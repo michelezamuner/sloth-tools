@@ -5,7 +5,7 @@ const Parser = require('../src/parser/group');
 describe('indexer', () => {
   it('indexes enum definition', () => {
     const code = `
-      ::_
+      ::_ =
         T = A
     `;
     const lexemes = Lexer.parse(code);
@@ -25,7 +25,7 @@ describe('indexer', () => {
 
   it('indexes enum expression', () => {
     const code = `
-      ::_
+      ::_ =
         T = A
         a = T.A
     `;
@@ -57,7 +57,7 @@ describe('indexer', () => {
 
   it('indexes id expression', () => {
     const code = `
-      ::_
+      ::_ =
         T = A
         a = T.A
         b = a
@@ -98,9 +98,33 @@ describe('indexer', () => {
     });
   });
 
+  it('indexes id expression of fqid', () => {
+    const code = `
+      ::_ =
+        a = ::a::b
+    `;
+    const lexemes = Lexer.parse(code);
+    const ast = Parser.parse(lexemes);
+
+    const _index = index(ast);
+
+    expect(_index).toStrictEqual({
+      '::_::a': {
+        elem: 'def',
+        var: 'ref',
+        id: '::_::a',
+        body: {
+          elem: 'exp',
+          var: 'id',
+          id: '::a::b',
+        },
+      },
+    });
+  });
+
   it('indexes function expression with enum body', () => {
     const code = `
-      ::_
+      ::_ =
         T = A
         f = a: T -> T.A
     `;
@@ -152,7 +176,7 @@ describe('indexer', () => {
 
   it('indexes function expression with id body', () => {
     const code = `
-      ::_
+      ::_ =
         T = A
         a = T.A
         f = b: T -> a
@@ -215,7 +239,7 @@ describe('indexer', () => {
 
   it('indexes function expression with arg body', () => {
     const code = `
-      ::_
+      ::_ =
         T = A
         f = a: T -> a
     `;
@@ -266,7 +290,7 @@ describe('indexer', () => {
 
   it('indexes function expression with eval body', () => {
     const code = `
-      ::_
+      ::_ =
         T = A
         f = a: T -> (b: T -> b) a
     `;
@@ -327,13 +351,7 @@ describe('indexer', () => {
                 },
               },
             },
-            args: [
-              {
-                elem: 'exp',
-                var: 'id',
-                id: '::_::a',
-              },
-            ],
+            args: [{ elem: 'exp', var: 'id', id: '::_::a' }],
           },
           ctx: {
             '::_::a': {
@@ -341,6 +359,60 @@ describe('indexer', () => {
               var: 'id',
               id: '::_::a',
               type: { elem: 'type', var: 'id', id: '::_::T' },
+            },
+          },
+        },
+      },
+    });
+  });
+
+  it('indexes function expression with fqid arg and body', () => {
+    const code = `
+      ::_ =
+        f = a: ::a::b::C -> ::a::b::c
+          ::a::b::d
+          ::a::b::e
+    `;
+    const lexemes = Lexer.parse(code);
+    const ast = Parser.parse(lexemes);
+
+    const _index = index(ast);
+
+    expect(_index).toStrictEqual({
+      '::_::f': {
+        elem: 'def',
+        var: 'ref',
+        id: '::_::f',
+        body: {
+          elem: 'exp',
+          var: 'fun',
+          args: [
+            {
+              elem: 'pat',
+              var: 'id',
+              id: '::_::a',
+              type: { elem: 'type', var: 'id', id: '::a::b::C' },
+            },
+          ],
+          body: {
+            elem: 'exp',
+            var: 'eval',
+            fun: {
+              elem: 'exp',
+              var: 'id',
+              id: '::a::b::c',
+            },
+            args: [
+              { elem: 'exp', var: 'id', id: '::a::b::d' },
+              { elem: 'exp', var: 'id', id: '::a::b::e' },
+            ],
+          },
+          ctx: {
+            '::_::a': {
+              elem: 'pat',
+              var: 'id',
+              id: '::_::a',
+              type: { elem: 'type', var: 'id', id: '::a::b::C' },
             },
           },
         },

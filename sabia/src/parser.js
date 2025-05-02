@@ -18,6 +18,7 @@ const parse = (lexemes, context) => {
     if (context.current >= lexemes.length) {
       context.stop = true;
     }
+    // console.log('ASTS', JSON.stringify(asts, null, 2));
   }
 
   return asts.reduce((acc, v) => {
@@ -44,27 +45,15 @@ const exec = (state, context) => {
   }
 
   if (lexeme.scope !== undefined) {
-    if (lexeme.scope >= context.scope) {
-      context.target_scope === undefined;
-      context.scope = lexeme.scope;
-    } else {
-      context.target_scope = lexeme.scope;
-      context.scope -= 2;
-    }
-
     if (context.lexemes[context.current + 1] !== undefined) {
       context.current++;
     }
 
-    // End of block
+    context.base_scope = context.scope;
+    context.scope = lexeme.scope;
     if (lexeme.scope < context.base_scope) {
       context.stop = true;
 
-      return;
-    }
-
-    // New line
-    else if (lexeme.scope === context.base_scope) {
       return;
     }
   }
@@ -72,253 +61,238 @@ const exec = (state, context) => {
   states[state](context.lexemes[context.current], context);
 };
 
-const exec_next = (state, context) => {
-  context.current++;
-  exec(state, context);
-};
-
-const new_context = (context, scope) => ({
+const new_context = (context) => ({
   lexemes: context.lexemes,
   current: context.current,
   stop: false,
-  base_scope: scope !== undefined ? scope : context.scope,
-  scope: scope !== undefined ? scope : context.scope,
-  target_scope: undefined,
+  base_scope: context.base_scope,
+  scope: context.scope,
   ast: {},
 });
 
 const states = {
   'start': (lexeme, context) => {
+    let isDef = false;
+
     switch (true) {
-    case context.target_scope !== undefined && context.scope > context.target_scope:
-      context.stop = true;
+    case lexeme.includes && lexeme.includes('.'):
+      exec('exp_enum', context);
+      break;
+    case lexeme.startsWith && lexeme.startsWith('::') && context.lexemes[context.current + 4] === '=':
+      exec('mod', context);
+      break;
+    case context.lexemes[context.current + 1] && context.lexemes[context.current + 1] === '=':
+      isDef = true;
+
+      exec('def', context);
+      break;
+    case context.lexemes[context.current + 1] && context.lexemes[context.current + 1] === ':':
+      exec('exp_fun', context);
       break;
     default:
-      exec('exp_start', context);
-    }
-  },
-  'end': (lexeme, context) => {
-    switch (true) {
-    case !lexeme.scope:
-      context.current++;
+      exec('exp_maybe_id', context);
       break;
     }
-  },
-  'exp_start': (lexeme, context) => {
-    switch (true) {
-    case lexeme instanceof Object:
-      context.ast = lexeme;
 
-      break;
-    case lexeme.includes('.'):
+    if (!isDef) {
+      context.stop = true;
+    }
+    if (context.lexemes[context.current + 1] && context.lexemes[context.current + 1].scope !== undefined) {
+      context.current++;
+    }
+  },
+  'exp_enum': (lexeme, context) => {
+    switch (true) {
+    default:
       context.ast.elem = 'exp';
       context.ast.var = 'enum';
       context.ast.type = { elem: 'type', var: 'id', id: lexeme.split('.')[0] };
       context.ast.body = { elem: 'cons', id: lexeme.split('.')[1] };
-
-      break;
-    case lexeme.startsWith('::'):
-      context.ast.id = lexeme;
-      exec('maybe_mod', context);
-
-      return;
-
-    default:
-      context.ast.elem = 'exp';
-      context.ast.var = 'id';
-      context.ast.id = lexeme;
     }
-
-    exec_next('exp_next', context);
   },
-  'exp_next': (lexeme, context) => {
+  'exp_maybe_id': (lexeme, context) => {
+    const next = context.lexemes[context.current + 1];
     switch (true) {
-    case lexeme === '=':
-      exec('def', context);
-
-      break;
-    case lexeme === ':':
-      exec('exp_fun', context);
-
+    case next.scope <= context.base_scope:
+      exec('exp_id', context);
       break;
     default:
       exec('exp_eval', context);
     }
   },
-  'exp_eval': (lexeme, context) => {
+  'exp_id': (lexeme, context) => {
     switch (true) {
-    case context.ast.id !== undefined:
-      context.ast.fun = { elem: 'exp', var: 'id', id: context.ast.id };
-      delete context.ast.id;
+    case lexeme instanceof Object:
+      context.ast = lexeme;
 
       break;
     default:
-      context.ast = { elem: 'exp', fun: context.ast };
+      context.ast.elem = 'exp';
+      context.ast.var = 'id';
+      context.ast.id = lexeme;
+    }
+  },
+  'exp_eval': (lexeme, context) => {
+    switch (true) {
+    case lexeme instanceof Object:
+      context.ast = { elem: 'exp', fun: lexeme };
+
+      break;
+    default:
+      context.ast = { fun: { elem: 'exp', var: 'id', id: lexeme } };
+
+      break;
     }
 
+    context.ast.elem = 'exp';
     context.ast.var = 'eval';
     context.ast.args = [];
 
+    if (!context.lexemes[context.current + 1].scope) {
+      context.scope += 2;
+    }
+    context.current++;
     exec('exp_eval_args', context);
   },
   'exp_eval_args': (lexeme, context) => {
-    const sub_context = new_context(context, context.scope + 2);
+    let ast = {};
 
     switch (true) {
+    case context.lexemes[context.current + 1].scope && context.lexemes[context.current + 1].scope > context.scope: {
+      const sub_context = new_context(context);
+      ast = parse(sub_context.lexemes, sub_context);
+      context.current = sub_context.current;
+
+      break;
+    }
     case lexeme instanceof Object:
-      sub_context.ast = lexeme;
+      ast = lexeme;
 
       break;
-    case lexeme.includes('.'):
-      sub_context.ast.elem = 'exp';
-      sub_context.ast.var = 'enum';
-      sub_context.ast.type = { elem: 'type', var: 'id', id: lexeme.split('.')[0] };
-      sub_context.ast.body = { elem: 'cons', id: lexeme.split('.')[1] };
-
-      break;
-    default:
-      sub_context.ast.elem = 'exp';
-      sub_context.ast.var = 'id';
-      sub_context.ast.id = lexeme;
+    default: {
+      const sub_context = new_context(context);
+      sub_context.lexemes = [lexeme, { scope: -1 }];
+      sub_context.current = 0;
+      ast = parse(sub_context.lexemes, sub_context);
+    }
     }
 
-    context.ast.args.push(sub_context.ast);
+    context.ast.args.push(ast);
 
-    exec_next('exp_eval_args', context);
+    if (context.lexemes[context.current + 1] && (!context.lexemes[context.current + 1].scope || context.lexemes[context.current + 1].scope === context.scope)) {
+      context.current++;
+      exec('exp_eval_args', context);
+    }
   },
   'exp_fun': (lexeme, context) => {
     switch (true) {
-    case lexeme === ':' && context.ast.var !== 'fun':
+    case context.ast.elem === undefined:
+      context.ast.elem = 'exp';
       context.ast.var = 'fun';
-      context.ast.args = [{ elem: 'pat', var: 'id', id: context.ast.id }];
-      delete context.ast.id;
+      context.ast.args = [{ elem: 'pat', var: 'id', id: lexeme }];
 
-      exec_next('exp_fun', context);
-      break;
-    case lexeme === ':':
-      exec_next('exp_fun', context);
+      context.current += 2;
+      exec('exp_fun', context);
       break;
     case context.ast.args[context.ast.args.length - 1].type === undefined:
       context.ast.args[context.ast.args.length - 1].type = { elem: 'type', var: 'id', id: lexeme };
 
-      exec_next('exp_fun', context);
+      context.current++;
+      exec('exp_fun', context);
       break;
     case context.ast.args[context.ast.args.length - 1].type !== undefined && lexeme !== '->' && context.ast.body === undefined: {
       context.ast.args.push({ elem: 'pat', var: 'id', id: lexeme });
 
-      exec_next('exp_fun', context);
+      context.current += 2;
+      exec('exp_fun', context);
       break;
     }
     case lexeme === '->': {
       context.ast.body = {};
 
-      exec_next('exp_fun', context);
+      if (!context.lexemes[context.current + 1].scope) {
+        context.scope += 2;
+      }
+      context.current++;
+      exec('exp_fun', context);
       break;
     }
     default: {
-      const scope = lexeme.scope !== undefined ? context.scope : context.scope + 2;
-      const sub_context = new_context(context, scope);
+      const sub_context = new_context(context);
       const sub_ast = parse(sub_context.lexemes, sub_context);
       context.ast.body = sub_ast;
       context.current = sub_context.current;
-      if (sub_context.target_scope !== undefined) {
-        context.target_scope = sub_context.target_scope;
-      }
     }
     }
   },
   'def': (lexeme, context) => {
-    context.ast.vis = 'priv';
-    if (context.ast.id.startsWith('::')) {
-      context.ast.id = context.ast.id.substr(2);
-      context.ast.vis = 'pub';
-    }
-
     switch (true) {
-    case typeof context.lexemes[context.current + 1] === 'string' && context.lexemes[context.current + 1].startsWith('::'):
+    case context.ast.id === undefined:
       context.ast.elem = 'def';
-      exec_next('def_ext', context);
+      if (lexeme.startsWith('::')) {
+        context.ast.id = lexeme.substr(2);
+        context.ast.vis = 'pub';
+      } else {
+        context.ast.id = lexeme;
+        context.ast.vis = 'priv';
+      }
 
+      context.current += 2;
+      exec('def', context);
       break;
     case context.ast.id !== context.ast.id.toUpperCase():
-      context.ast.elem = 'def';
       context.ast.var = 'ref';
-      exec_next('def_ref', context);
 
+      exec('def_ref', context);
       break;
     default:
-      context.ast.elem = 'def';
       context.ast.body = [];
-      exec('def_enum', context);
+      context.ast.var = 'enum';
+
+      exec('def_enum_cons', context);
     }
-  },
-  'def_enum': (lexeme, context) => {
-    context.ast.var = 'enum';
-    exec_next('def_enum_cons', context);
   },
   'def_enum_cons': (lexeme, context) => {
     context.ast.body.push({ elem: 'cons', id: lexeme });
-    exec_next('def_enum_sep', context);
-  },
-  'def_enum_sep': (lexeme, context) => {
-    switch (true) {
-    default:
-      exec_next('def_enum_cons', context);
-    }
-  },
-  'def_ext': (lexeme, context) => {
-    switch (true) {
-    default:
-      context.ast.var = 'ref';
-      context.ast.body = { elem: 'ext', id: lexeme };
-    }
 
-    exec('end', context);
+    if (context.lexemes[context.current + 1] === '|') {
+      context.current += 2;
+      exec('def_enum_cons', context);
+    }
   },
   'def_ref': (lexeme, context) => {
     switch (true) {
     default: {
-      const sub_context = new_context(context, context.scope + 2);
+      const sub_context = new_context(context);
       const sub_ast = parse(sub_context.lexemes, sub_context);
       context.ast.body = sub_ast;
       context.current = sub_context.current;
-      if (sub_context.target_scope !== undefined) {
-        context.target_scope = sub_context.target_scope;
-      }
     }
-    }
-  },
-  'maybe_mod': (lexeme, context) => {
-    switch (true) {
-    case context.lexemes[context.current + 1].scope > context.scope:
-      exec('mod', context);
-      break;
-    default:
-      exec_next('def', context);
     }
   },
   'mod': (lexeme, context) => {
     switch (true) {
     case context.ast.elem !== 'mod':
       context.ast.elem = 'mod',
-      context.ast.id = context.ast.id.substr(2);
+      context.ast.id = lexeme.substr(2);
       context.ast.body = [];
 
-      exec_next('mod', context);
+      context.scope = context.lexemes[context.current + 2].scope;
+      context.base_scope = context.scope;
+      context.current += 2;
+      exec('mod', context);
       break;
     default: {
-      const sub_context = new_context(context, context.scope);
+      const sub_context = new_context(context);
       let sub_ast = parse(sub_context.lexemes, sub_context);
       if (sub_ast.elem !== 'blk') {
         sub_ast = { body: [sub_ast] };
       }
       context.ast.body = sub_ast.body;
       context.current = sub_context.current;
-      if (sub_context.target_scope !== undefined) {
-        context.target_scope = sub_context.target_scope;
-      }
 
-      exec_next('mod', context);
+      context.current++;
+      exec('mod', context);
     }
     }
   },

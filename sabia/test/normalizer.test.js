@@ -14,12 +14,8 @@ describe('normalizer', () => {
     const normalizedAst = normalize(ast);
 
     const expectedAst = Parser.parse(Lexer.parse(`
-      ::_
-        dbg = ::core::lang::debug
-        then = ::core::lang::then
-        Proc = ::core::sys::Process
-        Exit = ::core::sys::Exit
-        main = _: Proc -> then (dbg T.A) Exit.OK
+      ::_ =
+        main = _: ::core::sys::Process -> ::core::lang::then (::core::lang::debug T.A) ::core::sys::Exit.OK
         T = A
     `));
     expect(normalizedAst).toStrictEqual(expectedAst);

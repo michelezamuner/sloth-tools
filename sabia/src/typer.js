@@ -30,14 +30,17 @@ const typeElem = (ast, statCtx = {}, dynCtx = {}) => {
     ast.type = type;
   }
   if (ast.elem === 'exp' && ast.var === 'id' ) {
-    ast.type = dynCtx[ast.id] ? dynCtx[ast.id].type : statCtx[ast.id].type;
-  }
-  if (ast.elem === 'ext') {
-    const parts = ast.id.split('::');
-    if (parts[1] === 'core') {
-      const lib = require(`./core/${parts[2]}.types`);
-      const type = lib[parts[3]];
-      ast.type = type;
+    if (dynCtx[ast.id]) {
+      ast.type = dynCtx[ast.id].type;
+    } else if (statCtx[ast.id]) {
+      ast.type = statCtx[ast.id].type;
+    } else {
+      const parts = ast.id.split('::');
+      if (parts[1] === 'core') {
+        const lib = require(`./core/${parts[2]}.types`);
+        const type = lib[parts[3]];
+        ast.type = type;
+      }
     }
   }
 

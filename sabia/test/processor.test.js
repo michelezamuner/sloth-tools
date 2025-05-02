@@ -7,13 +7,12 @@ const Typer = require('../src/typer');
 describe('processor', () => {
   it('processes main function', () => {
     const code = `
-      ::_
-        then = ::core::lang::then
-        dbg = ::core::lang::debug
-        Proc = ::core::sys::Process
-        Exit = ::core::sys::Exit
+      ::_ =
         T = A
-        main = _: Proc -> then (dbg T.A) Exit.OK
+        main = _: ::core::sys::Process ->
+          ::core::lang::then
+            (::core::lang::debug T.A)
+            ::core::sys::Exit.OK
     `;
     const lexemes = Lexer.parse(code);
     const ast = Parser.parse(lexemes);

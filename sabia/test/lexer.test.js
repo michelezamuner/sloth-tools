@@ -71,15 +71,25 @@ describe('lexer', () => {
     expect(lexemes).toStrictEqual(['(', 'fun', 'arg1', 'arg2', ')', { scope: -1 }]);
   });
 
+  it('parses code with newlines', () => {
+    const code = 'T = A | B\nT.A';
+    const lexemes = parse(code);
+
+    expect(lexemes).toStrictEqual(['T', '=', 'A', '|', 'B', { scope: 0 }, 'T.A', { scope: -1 }]);
+  });
+
   it('parses code with indentation', () => {
     const code = `
       f
         a
           b
+      c
+        d
+      e
     `;
 
     const lexemes = parse(code);
 
-    expect(lexemes).toStrictEqual(['f', { scope: 2 }, 'a', { scope: 4 }, 'b', { scope: -1 }]);
+    expect(lexemes).toStrictEqual(['f', { scope: 2 }, 'a', { scope: 4 }, 'b', { scope: 0 }, 'c', { scope: 2 }, 'd', { scope: 0 }, 'e', { scope: -1 }]);
   });
 });
