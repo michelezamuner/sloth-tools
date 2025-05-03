@@ -1,10 +1,11 @@
-const Lexer = require('./lexer');
-const Parser = require('./parser/group');
+const Lexer = require('../../lexer');
+const Parser = require('../../parser/group');
 
-exports.normalize = ast => {
+exports.normalize = (ast, main) => {
+  const parts = main.split('::');
   const defaultAst = Parser.parse(Lexer.parse(`
-    ::_ =
-      main = _: ::core::sys::Process -> ::core::lang::then (::core::lang::debug _) ::core::sys::Exit.OK
+    ::${parts[1]} =
+      ${parts[2]} = _: ::core::sys::Process -> ::core::lang::then (::core::lang::debug _) ::core::sys::Exit.OK
   `));
   for (const item of ast.body) {
     if (item.elem === 'def') {

@@ -1,6 +1,6 @@
-const { normalize } = require('../src/normalizer');
-const Lexer = require('../src/lexer');
-const Parser = require('../src/parser/group');
+const { normalize } = require('../../../src/clients/inline/normalizer');
+const Lexer = require('../../../src/lexer');
+const Parser = require('../../../src/parser/group');
 
 describe('normalizer', () => {
   it('normalize inline program', () => {
@@ -11,10 +11,10 @@ describe('normalizer', () => {
     const lexemes = Lexer.parse(code);
     const ast = Parser.parse(lexemes);
 
-    const normalizedAst = normalize(ast);
+    const normalizedAst = normalize(ast, '::mod::main');
 
     const expectedAst = Parser.parse(Lexer.parse(`
-      ::_ =
+      ::mod =
         main = _: ::core::sys::Process -> ::core::lang::then (::core::lang::debug T.A) ::core::sys::Exit.OK
         T = A
     `));

@@ -1,18 +1,10 @@
-const Lexer = require('./lexer');
-const Parser = require('./parser/group');
-const Normalizer = require('./normalizer');
-const Indexer = require('./indexer');
-const Typer = require('./typer');
-const Processor = require('./processor');
+const Inline = require('./clients/inline');
 
 exports.run = process => {
   if (process.argv[2] === '--inline') {
     const code = process.argv[3];
-    const lexemes = Lexer.parse(code);
-    const ast = Normalizer.normalize(Parser.parse(lexemes));
-    const index = Typer.type(Indexer.index(ast));
-
-    return Processor.process({ process }, index, '::_::main');
+    const main = process.env.SLOTH_MAIN || '::_::main';
+    return Inline.exec(code, main);
   }
 
   return 0;
