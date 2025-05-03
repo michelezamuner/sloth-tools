@@ -1,13 +1,13 @@
-const Inline = require('../../src/clients/inline');
+const Client = require('../../../src/clients/inline/client');
 
 describe('inline client', () => {
-  it('test', () => {
+  it('exec inline program', () => {
     const code = `
       ::_ =
         main = _: ::core::sys::Process -> ::core::sys::Exit.OK
     `;
 
-    const result = Inline.exec(code, '::_::main');
+    const result = Client.exec(code, '::_::main');
 
     expect(result).toBe(0);
   });

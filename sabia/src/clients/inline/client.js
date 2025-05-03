@@ -1,9 +1,9 @@
-const Lexer = require('../lexer');
-const Parser = require('../parser/group');
-const Normalizer = require('./inline/normalizer');
-const Indexer = require('../indexer');
-const Typer = require('../typer');
-const Processor = require('../processor');
+const Lexer = require('../../lexer');
+const Parser = require('../../parser/group');
+const Normalizer = require('./normalizer');
+const Indexer = require('../../indexer');
+const Typer = require('../../typer');
+const Processor = require('../../processor');
 
 exports.exec = (code, main) => {
   // @todo: call frontend
