@@ -1,6 +1,6 @@
 const Lexer = require('../../../src/frontends/enlil/lexer');
 
-describe('Enlil lexer', () => {
+describe('enlil lexer', () => {
   it('parses enum expression', () => {
     const code = `
       T.A
