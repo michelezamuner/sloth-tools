@@ -12,12 +12,12 @@ describe('lang', () => {
     };
     const ast = {
       elem: 'exp',
-      var: 'enum',
-      type: { elem: 'type', var: 'id', id: 'T' },
-      body: { elem: 'cons', id: 'A' },
+      var: 'cons',
+      type: { elem: 'type', name: 'T', params: [] },
+      name: 'A',
     };
 
-    debug(runtime, [ast]);
+    debug(runtime, ast);
 
     expect(written).toBe('[T] A\n');
   });

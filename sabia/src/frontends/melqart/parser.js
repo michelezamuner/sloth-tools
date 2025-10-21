@@ -1,4 +1,4 @@
-exports.parse = lexemes => {
+const parse = lexemes => {
   return {
     elem: 'exp',
     var: 'enum',
@@ -6,3 +6,5 @@ exports.parse = lexemes => {
     body: { elem: 'cons', id: 'A' },
   };
 };
+
+exports.parse = parse;

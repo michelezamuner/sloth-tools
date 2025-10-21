@@ -1,8 +1,10 @@
 exports.debug = {
   elem: 'type',
-  var: 'fun',
-  args: [{ elem: 'type', var: 'gen', gen: '<T>' }],
-  ret: { elem: 'type', var: 'gen', gen: '<T>' },
+  name: 'core::lang::Fun',
+  params: [
+    {elem: 'type', name: '<T>', params: []},
+    {elem: 'type', name: '<T>', params: []},
+  ],
 };
 
 exports.then = {

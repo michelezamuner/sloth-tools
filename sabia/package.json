@@ -8,11 +8,12 @@
   },
   "devDependencies": {
     "eslint": "^7.31.0",
-    "jest": "^28.1.2"
+    "jest": "^30.0.0"
   },
   "scripts": {
     "lint": "npx eslint .",
-    "test": "npx jest",
+    "debug": "node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand",
+    "test": "npx jest --detectOpenHandles",
     "coverage": "npx jest --coverage"
   },
   "jest": {
@@ -21,6 +22,7 @@
       "./test"
     ],
     "testEnvironment": "node",
+    "maxWorkers": "50%",
     "verbose": true,
     "coverageDirectory": "/tmp",
     "coveragePathIgnorePatterns": [],
@@ -35,6 +37,10 @@
         "lines": 100,
         "statements": 100
       }
+    },
+    "globals": {
+      "randomPicks": 3,
+      "randomBase": 2
     }
   },
   "eslintConfig": {
@@ -76,7 +82,9 @@
       "describe": "readonly",
       "it": "readonly",
       "expect": "readonly",
-      "beforeEach": "readonly"
+      "beforeEach": "readonly",
+      "randomPicks": "readonly",
+      "randomBase": "readonly"
     }
   }
 }

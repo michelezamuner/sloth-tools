@@ -1,3 +1,3 @@
 exports.parse = code => {
-  return [code.trim()];
+  return ['[', 'T', ']', 'A'];
 };

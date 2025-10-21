@@ -1,8 +1,9 @@
 const Lexer = require('./lexer');
 const Resolver = require('./resolver');
+const Parser = require('./parser');
 
 exports.parse = code => {
-  const lexemes = Lexer.parse(code);
+  const lexemes = Resolver.parse(Lexer.parse(code));
 
-  return Resolver.parse(lexemes);
+  return Parser.parse(lexemes);
 };
