@@ -239,32 +239,47 @@ const type_defs = mix(
     },
   },
   {
-    code: `${v.code}Type<${s}U${s}>${s}=${s}${c} ${s}U${s}|${s}${c}${s};`,
+    code: `${v.code}Type<U>${s}=${s}${c} ${s}U${s}|${s}${c}${s};`,
     lex: v.lex.concat(['Type', '<', 'U', '>', '=', c, 'U', '|', c, ';']),
     ast: {
       elem: 'def',
       var: 'type',
       name: 'Type',
-      params: ['U'],
+      params: [{ elem: 'type', name: 'U', params: [] }],
       vis: v.ast,
       body: [
-        { elem: 'cons', name: c, arg: 'U' },
+        {
+          elem: 'cons',
+          name: c,
+          arg: { elem: 'type', name: 'U', params: [] },
+        },
         { elem: 'cons', name: c, arg: null },
       ],
     },
   },
   {
-    code: `${v.code}Type<${s}U${s},${s}V${s}>${s}=${s}${c} ${s}U${s}|${s}${c} ${s}V${s};`,
+    code: `${v.code}Type<U, V>${s}=${s}${c} ${s}U${s}|${s}${c} ${s}V${s};`,
     lex: v.lex.concat(['Type', '<', 'U', ',', 'V', '>', '=', c, 'U', '|', c, 'V', ';']),
     ast: {
       elem: 'def',
       var: 'type',
       name: 'Type',
-      params: ['U', 'V'],
+      params: [
+        { elem: 'type', name: 'U', params: [] },
+        { elem: 'type', name: 'V', params: [] },
+      ],
       vis: v.ast,
       body: [
-        { elem: 'cons', name: c, arg: 'U' },
-        { elem: 'cons', name: c, arg: 'V' },
+        {
+          elem: 'cons',
+          name: c,
+          arg: { elem: 'type', name: 'U', params: [] },
+        },
+        {
+          elem: 'cons',
+          name: c,
+          arg: { elem: 'type', name: 'V', params: [] },
+        },
       ],
     },
   },

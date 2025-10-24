@@ -284,14 +284,12 @@ const states = {
     return 'refdef';
   },
   typedef: (lexeme, context) => {
-    if (context.ast.at(-1).elem === 'type') {
-      const name = context.ast.at(-1).name;
-      const params = context.ast.at(-1).params.map(p => p.name);
+    if (context.ast.at(-1).elem === 'type' && (!context.ast.at(-2) || context.ast.at(-2).elem !== 'cons')) {
       context.ast[context.ast.length - 1] = {
         elem: 'def',
         var: 'type',
-        name: name,
-        params: params,
+        name: context.ast.at(-1).name,
+        params: context.ast.at(-1).params,
         vis: context.ast.at(-1).vis || 'priv',
         body: [],
       };
@@ -311,6 +309,11 @@ const states = {
     }
 
     if (lexeme === '|') {
+      if (context.ast.at(-1).elem === 'type') {
+        const type = context.ast.pop();
+        context.ast.at(-1).arg = type;
+      }
+
       const ast = context.ast.pop();
       context.ast.at(-1).body.push(ast);
 
@@ -322,13 +325,6 @@ const states = {
       });
 
       return 'typedef';
-    }
-
-    if (lexeme === ';') {
-      const ast = context.ast.pop();
-      context.ast.at(-1).body.push(ast);
-
-      return context.return.pop();
     }
 
     if (!context.ast.at(-1).elem) {
@@ -359,12 +355,26 @@ const states = {
       return 'typedef';
     }
 
-    context.ast.at(-1).arg = lexeme;
-    context.current++; // cons definition
+    if (context.ast.at(-1).elem === 'type') {
+      const type = context.ast.pop();
+      context.ast.at(-1).arg = type;
 
-    return 'typedef';
+      return 'typedef';
+    }
+
+    if (lexeme === ';') {
+      const ast = context.ast.pop();
+      context.ast.at(-1).body.push(ast);
+
+      return context.return.pop();
+    }
+
+    context.ast.push({});
+    context.return.push('typedef');
+
+    return 'type';
   },
-  'refdef': (lexeme, context, next) => {
+  refdef: (lexeme, context, next) => {
     if (!context.ast.at(-1).elem) {
       context.ast[context.ast.length - 1] = {
         elem: 'def',

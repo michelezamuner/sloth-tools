@@ -17,7 +17,13 @@ function exec(runtime, ast, index) {
   }
 
   if (ast.elem === 'exp' && ast.var === 'eval') {
+    const arg = exec(runtime, ast.arg, index);
+
     let fun = null;
+    if (ast.fun.var === 'cons') {
+      return ast;
+    }
+
     const funAst = ast.fun.var === 'ref' ? ast.fun : exec(runtime, ast.fun, index);
     if (typeof funAst === 'function') {
       fun = funAst;
@@ -27,7 +33,6 @@ function exec(runtime, ast, index) {
       const lib = require(`./${parts[0]}/${parts[1]}`);
       fun = lib[parts[2]];
     }
-    const arg = exec(runtime, ast.arg, index);
 
     return (fun)(runtime, arg);
   }
