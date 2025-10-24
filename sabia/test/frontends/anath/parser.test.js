@@ -63,11 +63,7 @@ describe('anath parser', () => {
     expect(ast).toStrictEqual({
       elem: 'exp',
       var: 'cons',
-      type: {
-        elem: 'type',
-        name: 'Type',
-        params: [],
-      },
+      type: { elem: 'type', name: 'Type', params: [] },
       name: 'Cons',
     });
   });
@@ -717,7 +713,29 @@ describe('anath parser', () => {
       name: 'Type',
       params: [],
       vis: 'priv',
-      body: [ { elem: 'cons', name: 'Cons', arg: null }],
+      body: [{ elem: 'cons', name: 'Cons', arg: null }],
+    });
+  });
+
+  it('parses type definition with argument', () => {
+    const code = 'Type = Cons Type1;';
+    const lexemes = Lexer.parse(code);
+
+    const ast = Parser.parse(lexemes);
+
+    expect(ast).toStrictEqual({
+      elem: 'def',
+      var: 'type',
+      name: 'Type',
+      params: [],
+      vis: 'priv',
+      body: [
+        {
+          elem: 'cons',
+          name: 'Cons',
+          arg: { elem: 'type', name: 'Type1', params: [] },
+        },
+      ],
     });
   });
 
@@ -731,9 +749,15 @@ describe('anath parser', () => {
       elem: 'def',
       var: 'type',
       name: 'Type',
-      params: ['T'],
+      params: [{ elem: 'type', name: 'T', params: [] }],
       vis: 'priv',
-      body: [ { elem: 'cons', name: 'Cons', arg: 'T' }],
+      body: [
+        {
+          elem: 'cons',
+          name: 'Cons',
+          arg: { elem: 'type', name: 'T', params: [] },
+        },
+      ],
     });
   });
 
@@ -747,11 +771,22 @@ describe('anath parser', () => {
       elem: 'def',
       var: 'type',
       name: 'Type',
-      params: ['U', 'V'],
+      params: [
+        { elem: 'type', name: 'U', params: [] },
+        { elem: 'type', name: 'V', params: [] },
+      ],
       vis: 'priv',
       body: [
-        { elem: 'cons', name: 'Cons1', arg: 'U' },
-        { elem: 'cons', name: 'Cons2', arg: 'V' },
+        {
+          elem: 'cons',
+          name: 'Cons1',
+          arg: { elem: 'type', name: 'U', params: [] },
+        },
+        {
+          elem: 'cons',
+          name: 'Cons2',
+          arg: { elem: 'type', name: 'V', params: [] },
+        },
       ],
     });
   });

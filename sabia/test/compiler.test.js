@@ -50,14 +50,48 @@ describe('compiler', () => {
           body: {
             elem: 'exp',
             var: 'eval',
+            type: { elem: 'type', name: 'app::T', params: [] },
             fun: {
               elem: 'exp',
               var: 'eval',
-              fun: { elem: 'exp', var: 'ref', name: 'core::lang::then' },
+              type: { elem: 'type', name: 'app::T', params: [] },
+              fun: {
+                elem: 'exp',
+                var: 'ref',
+                type: {
+                  elem: 'type',
+                  name: 'core::lang::Fun',
+                  params: [
+                    { elem: 'type', name: '<T>', params: [] },
+                    {
+                      elem: 'type',
+                      name: 'core::lang::Fun',
+                      params: [
+                        { elem: 'type', name: '<T>', params: [] },
+                        { elem: 'type', name: '<U>', params: [] },
+                      ],
+                    },
+                  ],
+                },
+                name: 'core::lang::then'
+              },
               arg: {
                 elem: 'exp',
                 var: 'eval',
-                fun: { elem: 'exp', var: 'ref', name: 'core::lang::debug' },
+                type: { elem: 'type', name: 'app::T', params: [] },
+                fun: {
+                  elem: 'exp',
+                  var: 'ref',
+                  type: {
+                    elem: 'type',
+                    name: 'core::lang::Fun',
+                    params: [
+                      { elem: 'type', name: '<T>', params: [] },
+                      { elem: 'type', name: '<T>', params: [] },
+                    ],
+                  },
+                  name: 'core::lang::debug'
+                },
                 arg: {
                   elem: 'exp',
                   var: 'cons',
