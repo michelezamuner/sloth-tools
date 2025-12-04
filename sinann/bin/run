@@ -1,0 +1,35 @@
+#!/usr/bin/env node --use_strict --unhandled-rejections=strict --experimental-vm-modules
+
+import Bus from '../src/bus.js';
+import Rom from '../src/rom.js';
+import Processor from '../src/processor.js';
+import Noop from '../src/processor/instruction/noop.js';
+import Put from '../src/processor/instruction/put.js';
+import Read from '../src/processor/instruction/read.js';
+import Write from '../src/processor/instruction/write.js';
+
+const bus = new Bus();
+
+const rom = new Rom([
+  0x0003, 0x0100
+]);
+
+const processor = new Processor(bus);
+processor.set([
+  new Noop(),
+  new Put(processor),
+  new Read(processor, bus),
+  new Write(processor, bus),
+]);
+
+bus.register(0x00, rom);
+bus.register(0x01, processor);
+
+(async() => {
+  try {
+  await processor.run();
+  console.log('VM terminated');
+  } catch (e) {
+    console.log(`ERROR: ${e}`);
+  }
+})();
