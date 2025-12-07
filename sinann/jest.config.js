@@ -1,4 +1,3 @@
-/** @type {import('jest').Config} */
 const config = {
   roots: ['./src/', './tests'],
   testEnvironment: 'node',

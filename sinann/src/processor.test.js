@@ -1,72 +1,91 @@
-import Processor from './processor';
-import { jest } from '@jest/globals';
+const Processor = require('./processor');
 
 describe('processor', () => {
   it('executes instructions read from bus in sequence', async() => {
-    const operands = [];
-    const instructions = [
-      {
-        exec(op) {
-          operands[0] = op;
-        }, // 0x0000
-      },
-      {
-        exec(op) {
-          operands[1] = op;
-        }, // 0x0001
-      },
-      {
-        exec(op) {
-          operands[2] = op;
-        }, // 0x0002
-      },
-    ];
+    const registers = [];
     const program = [
-      0x0000, 0x0102, // inst 1
-      0x0001, 0x0304, // inst 2
-      0x0002, 0x0506, // inst 3
+      0x00, 0x01, 0x02, 0x03,
+      0x01, 0x11, 0x12, 0x13,
+      0x02, 0x21, 0x22, 0x23,
     ];
     const bus = {
-      read: jest.fn(addr => program[addr]),
+      read: jest.fn(addr => program.slice(addr, addr + 2)),
     };
-    const processor = new Processor(bus);
-    processor.set(instructions);
+    const instructions = [
+      // 0x00
+      (_reg, _bus) => {
+        if (_reg === registers && _bus === bus) {
+          return {
+            exec(op1, op2, op3) {
+              expect(op1).toBe(0x01);
+              expect(op2).toBe(0x02);
+              expect(op3).toBe(0x03);
+            },
+          };
+        }
+      },
+      // 0x01
+      (_reg, _bus) => {
+        if (_reg === registers && _bus === bus) {
+          return {
+            exec(op1, op2, op3) {
+              expect(op1).toBe(0x11);
+              expect(op2).toBe(0x12);
+              expect(op3).toBe(0x13);
+            },
+          };
+        }
+      },
+      // 0x02
+      (_reg, _bus) => {
+        if (_reg === registers && _bus === bus) {
+          return {
+            exec(op1, op2, op3) {
+              expect(op1).toBe(0x21);
+              expect(op2).toBe(0x22);
+              expect(op3).toBe(0x23);
+              throw 'Last instruction';
+            },
+          };
+        }
+      },
+    ];
+    const processor = new Processor(registers, instructions, bus);
 
-    await expect(processor.run()).rejects.toMatch('Execution error');
+    await expect(processor.run()).rejects.toMatch('Last instruction');
     expect(bus.read.mock.calls[0][0]).toBe(0x0000);
-    expect(bus.read.mock.calls[1][0]).toBe(0x0001);
-    expect(bus.read.mock.calls[2][0]).toBe(0x0002);
-    expect(bus.read.mock.calls[3][0]).toBe(0x0003);
-    expect(bus.read.mock.calls[4][0]).toBe(0x0004);
-    expect(bus.read.mock.calls[5][0]).toBe(0x0005);
-    expect(operands[0]).toStrictEqual(0x0102);
-    expect(operands[1]).toStrictEqual(0x0304);
-    expect(operands[2]).toStrictEqual(0x0506);
+    expect(bus.read.mock.calls[1][0]).toBe(0x0002);
+    expect(bus.read.mock.calls[2][0]).toBe(0x0004);
+    expect(bus.read.mock.calls[3][0]).toBe(0x0006);
+    expect(bus.read.mock.calls[4][0]).toBe(0x0008);
+    expect(bus.read.mock.calls[5][0]).toBe(0x000A);
   });
 
   it('runs until shutdown signal is received', async() => {
     let processor;
-    const instructions = [
-      {
-        exec() {}, // noop
-      },
-      {
-        exec() {
-          processor.write(0x00, 0x0000);
-        },
-      },
-    ];
     const program = [
-      0x0000, 0x0000, // noop
-      0x0000, 0x0000, // noop
-      0x0001, 0x0000, // shutdown
+      0x00, 0x00, 0x00, 0x00,
+      0x01, 0x00, 0x00, 0x00,
     ];
     const bus = {
-      read: addr => program[addr],
+      read: jest.fn(addr => program.slice(addr, addr + 2)),
     };
-    processor = new Processor(bus);
-    processor.set(instructions);
+    const instructions = [
+      // 0x00
+      () => ({
+        exec() {},
+      }),
+      // 0x01
+      () => ({
+        exec() {
+          processor.write(0x00, [0x12, 0x34]);
+        },
+      }),
+    ];
+    processor = new Processor([], instructions, bus);
 
-    await expect(processor.run()).resolves.not.toThrow();
+    const output = await processor.run();
+
+    expect(output).toBe(0x1234);
   });
 });

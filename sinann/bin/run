@@ -1,34 +1,66 @@
-#!/usr/bin/env node --use_strict --unhandled-rejections=strict --experimental-vm-modules
+#!/usr/bin/env node --use_strict --unhandled-rejections=strict
 
-import Bus from '../src/bus.js';
-import Rom from '../src/rom.js';
-import Processor from '../src/processor.js';
-import Noop from '../src/processor/instruction/noop.js';
-import Put from '../src/processor/instruction/put.js';
-import Read from '../src/processor/instruction/read.js';
-import Write from '../src/processor/instruction/write.js';
-
-const bus = new Bus();
-
-const rom = new Rom([
-  0x0003, 0x0100
-]);
-
-const processor = new Processor(bus);
-processor.set([
-  new Noop(),
-  new Put(processor),
-  new Read(processor, bus),
-  new Write(processor, bus),
-]);
-
-bus.register(0x00, rom);
-bus.register(0x01, processor);
+const Bus = require('../src/bus.js');
+const Memory = require('../src/device/memory.js');
+const Processor = require('../src/processor.js');
+const Noop = require('../src/processor/instruction/noop.js');
+const Movi = require('../src/processor/instruction/movi.js');
+const Read = require('../src/processor/instruction/read.js');
+const Writei = require('../src/processor/instruction/writei.js');
+const Rom = require('../src/device/rom.js');
 
 (async() => {
+  let confFile = './conf.js';
+  let conf;
+  for (const i in process.argv) {
+    if (process.argv[i] === '--conf') {
+      confFile = '../' + process.argv[+i + 1];
+    }
+    if (process.argv[i] === '--inline-conf') {
+      conf = JSON.parse(process.argv[+i + 1]);
+    }
+  }
+
+  conf = conf || (await import(confFile)).default;
+
+  const bus = new Bus(new Memory);
+
+  const firmware = (await import(`../${conf.firmware}`)).default;
+  const rom = new Rom(firmware);
+  bus.registerRom(rom);
+
+  const instructions = [
+    /* 0x00 */ () => new Noop(),
+    /* 0x01 */ r => new Movi(r),
+    /* 0x02 */ () => {}, // @TODO: mov
+    /* 0x03 */ () => {}, // @TODO: readi
+    /* 0x04 */ (r, b) => new Read(r, b),
+    /* 0x05 */ (r, b) => new Writei(r, b),
+    /* 0x06 */ () => {}, // @TODO: write
+  ];
+  const processor = new Processor([], instructions, bus);
+  bus.registerProcessor(processor);
+
+  let memory;
+  if (conf.memory && conf.memory.type) {
+    console.log(conf.memory.type);
+    const memoryClass = (await import(`../src/device/${conf.memory.type}.js`)).default;
+    memory = new memoryClass();
+  } else {
+    memory = new Memory([]);
+  }
+  bus.registerMemory(memory);
+
+  for (const segment in conf.devices) {
+    const deviceConfig = conf.devices[segment];
+    const deviceClass = (await import(`../src/device/${deviceConfig.type}.js`)).default;
+    const device = new deviceClass();
+    bus.register(+segment, device);
+  }
+
   try {
-  await processor.run();
-  console.log('VM terminated');
+    await processor.run();
+    console.log('VM terminated');
   } catch (e) {
     console.log(`ERROR: ${e}`);
   }

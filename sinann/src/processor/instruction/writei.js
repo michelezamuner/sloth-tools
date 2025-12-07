@@ -1,4 +1,4 @@
-module.exports = class Read {
+module.exports = class Writei {
   constructor(registers, bus) {
     this._registers = registers;
     this._bus = bus;
@@ -7,7 +7,7 @@ module.exports = class Read {
   async exec(op1, op2, op3) {
     const reg = op1;
     const addr = op2 * 256 + op3;
-    const data = await this._bus.read(addr);
-    this._registers[reg] = data;
+    const data = this._registers[reg];
+    this._bus.write(addr, data);
   }
 }
