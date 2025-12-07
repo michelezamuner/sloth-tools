@@ -1,42 +1,41 @@
-class Processor {
-  constructor(bus) {
-    this._instructions = [];
+module.exports = class Processor {
+  constructor(registers, instructions, bus) {
+    this._registers = registers;
+    this._instructions = instructions.map(build => build(registers, bus));
     this._bus = bus;
-    this._stop = false;
+    // always starts from default ROM location
     this._ip = 0x0000;
-    this.accumulator = 0;
+    this._stop = false;
+    this._output = undefined;
   }
 
-  set(instructions) {
-    this._instructions = instructions;
-  }
-
-  write() {
+  write(addr, data) {
+    if (addr !== 0x00) {
+      return;
+    }
     this._stop = true;
+    this._output = data[0] * 256 + data[1];
   }
 
   async run() {
     return new Promise((resolve, reject) => {
-      const exec = () => {
+      const exec = async() => {
         try {
-          const opcode = this._bus.read(this._ip);
-          const operand = this._bus.read(this._ip + 1);
-          this._instructions['' + opcode].exec(operand);
+          const [opcode, op1] = await this._bus.read(this._ip);
+          const [op2, op3] = await this._bus.read(this._ip + 2);
+          this._instructions['' + opcode].exec(op1, op2, op3);
 
           if (this._stop) {
-            return resolve();
+            return resolve(this._output);
           }
 
-          this._ip += 2;
+          this._ip += 4;
           setImmediate(exec);
         } catch (e) {
-          console.log(e);
-          reject('Execution error');
+          reject(e.toString());
         }
       };
       setImmediate(exec);
     });
   }
 }
-
-export default Processor;

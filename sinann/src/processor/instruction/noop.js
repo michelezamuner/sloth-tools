@@ -1,6 +1,4 @@
-class Noop {
-  exec() {
+module.exports = class Noop {
+  async exec() {
   }
 }
-
-export default Noop;

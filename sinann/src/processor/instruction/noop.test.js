@@ -1,10 +1,10 @@
-import Noop from './noop';
+const Noop = require('./noop');
 
 describe('noop', () => {
-  it('does nothing when executed', () => {
-    const instruction = new Noop();
+  it('does nothing when executed', async() => {
+    const instruction = new Noop([], {});
 
-    instruction.exec();
+    await instruction.exec();
 
     expect.assertions(0);
   });

@@ -2,10 +2,9 @@
   "name": "habits",
   "description": "Habits application",
   "license": "MIT",
-  "type": "module",
   "scripts": {
     "lint": "eslint bin/ src/ tests/",
-    "test": "node --use_strict --unhandled-rejections=strict --experimental-vm-modules node_modules/.bin/jest",
+    "test": "node --use_strict --unhandled-rejections=strict node_modules/.bin/jest",
     "coverage": "node --use_strict --unhandled-rejections=strict node_modules/.bin/jest --coverage"
   },
   "devDependencies": {

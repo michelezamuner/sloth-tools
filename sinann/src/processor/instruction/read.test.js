@@ -1,23 +1,19 @@
-import Read from './read';
+const Read = require('./read');
 
 describe('read', () => {
-  it('reads from bus address into accumulator', () => {
-    const addr = 0x1234;
-    const data = 0x5678;
-    const processor = {
-      accumulator: 0,
-    };
+  it('reads from bus address into register', async() => {
+    const registers = [];
     const bus = {
-      read: a => {
-        if (a === addr) {
-          return data;
+      read: async a => {
+        if (a === 0x1234) {
+          return [0x56, 0x78];
         }
       },
     };
-    const instruction = new Read(processor, bus);
+    const instruction = new Read(registers, bus);
 
-    instruction.exec(addr);
+    await instruction.exec(0x00, 0x12, 0x34);
 
-    expect(processor.accumulator).toBe(data);
+    expect(registers[0x00]).toStrictEqual([0x56, 0x78]);
   });
 });

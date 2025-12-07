@@ -9,21 +9,35 @@ The execution model of Sinann is the single sequential thread with static memory
 - static memory: there is only a single area of memory where data is read and stored by directly accessing it, so no registers, no stack and no heap
 - RISC: only a handful of basic instructions are available
 
-Additionally, the computer supports fixed sized, 5 bytes instructions, with 2 bytes addresses, and one 2-bytes sized accumulator register.
+Additionally, the computer supports fixed sized, 4 bytes instructions, with 2 bytes addresses, and 4 2 bytes registers.
 
 Instruction set:
 
-- `noop`: no operation
-- `put 0x1234`: put immediate `0x1234` into the accumulator register
-- `read 0x1234`: read 2 bytes of data from memory address `0x1234` into the accumulator
-- `write 0x1234`: write accumulator data into memory address `0x1234`
-- `add 0x1234`: add accumulator data to data at memory address `0x1234` and store the result into the accumulator
-- `sub 0x1234'`: subtract from accumulator data, data at `0x1234`, and store the result into the accumulator
-- `jmp 0x1234`: jump execution to instruction at `0x1234`
-- `cmp 0x1234`: compare accumulator data with data at `0x1234`, and store result into the accumulator
-- `je 0x1234`: jump execution to instruction at `0x1324` if accumulator data contains "equals" result
-- `jg 0x1234`: jump execution to instruction at `0x1234` if accumulator data contains "greater than" result
-- `jl 0x1234`: jump execution to instruction at `0x1234` if accumulator data contains "less than" result
+- `noop 0x?? 0x?? 0x??`: no operation
+- `movi 0x01 0x1234`: store into register `0x01` immediate value `0x1234`
+- `mov 0x01 0x02 0x??`: store into register `0x01` register `0x02`
+- `read 0x01 0x02 0x??`: read two bytes of data into register `0x01` from memory pointed to by register `0x02`
+- `write 0x01 0x02 0x??`: write data from register `0x01` into memory pointed to by `0x02`
+- `andi 0x01 0x1234`: perform a logical AND between register `0x01` and immediate value `0x1234` and store result to register `0x01`
+- `and 0x01 0x02 0x??`: perform a logical AND between register `0x01` and register `0x02'` and store result to register `0x01`
+- `ori 0x01 0x1234`: perform a logical OR between register `0x01` and immediate value `0x1234` and store result to register `0x01`
+- `or 0x01 0x02 0x??`: perform a logical OR between register `0x01` and register `0x02'` and store result to register `0x01`
+- `addi 0x01 0x1234`: add to register `0x01` immediate value `0x1234`, and store result to register `0x01`
+- `add 0x01 0x02 0x??`: add to register `0x01` register `0x02`, and store the result into register `0x01`
+- `subi 0x01 0x1234`: subtract from register `0x01` immediate value `0x1234`, and store result into register `0x01`
+- `sub 0x01 0x02 0x??`: subtract from register `0x01` register `0x02`, and store the result into register `0x01`
+- `jmpi 0x1234 0x??`: jump execution to instruction at immediate address `0x1234`
+- `jmp 0x01 0x?? 0x??`: jump execution to instruction pointed to by register `0x01`
+- `cmpi 0x01 0x1234`: compare register `0x01` with immediate value `0x1234`, and store result into register `0x01`
+- `cmp 0x01 0x02 0x??`: compare register `0x01` with register `0x02`, and store the result into register `0x01`
+- `je 0x01 0x02 0x??`: jump execution to instruction pointed to by register `0x02`, if register `0x01` contains "equals"
+- `jne 0x01 0x02 0x??`: jump execution to instruction pointed to by register `0x02`, if register `0x01` does not contain "equals"
+- `jg 0x01 0x02 0x??`: jump execution to instruction pointed to by register `0x02`, if register `0x01` contains "greater than"
+- `jng 0x01 0x02 0x??`: jump execution to instruction pointed to by register `0x02`, if register `0x01` does not contain "greater than"
+- `jl 0x01 0x02 0x??`: jump execution to instruction pointed to by register `0x02`, if register `0x01` contains "less than"
+- `jnl 0x01 0x02 0x??`: jump execution to instruction pointed to by register `0x02`, if register `0x01` does not contain "less than"
+
+Comparison results are the following: `0x0000` means "equals", `0x0001` means "less than", `0x0002` means "greater than".
 
 The execution context is a single program binary that is interpreted by the virtual machine. The program binary contains just a sequence of instructions.
 
