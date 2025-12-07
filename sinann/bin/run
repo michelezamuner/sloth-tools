@@ -1,13 +1,13 @@
 #!/usr/bin/env node --use_strict --unhandled-rejections=strict
 
-const Bus = require('../src/bus.js');
-const Memory = require('../src/device/memory.js');
-const Processor = require('../src/processor.js');
-const Noop = require('../src/processor/instruction/noop.js');
-const Movi = require('../src/processor/instruction/movi.js');
-const Read = require('../src/processor/instruction/read.js');
-const Writei = require('../src/processor/instruction/writei.js');
-const Rom = require('../src/device/rom.js');
+const Bus = require('../src/vm/bus.js');
+const Memory = require('../src/vm/device/memory.js');
+const Processor = require('../src/vm/processor.js');
+const Noop = require('../src/vm/processor/instruction/noop.js');
+const Movi = require('../src/vm/processor/instruction/movi.js');
+const Read = require('../src/vm/processor/instruction/read.js');
+const Writei = require('../src/vm/processor/instruction/writei.js');
+const Rom = require('../src/vm/device/rom.js');
 
 (async() => {
   let confFile = './conf.js';
@@ -44,7 +44,7 @@ const Rom = require('../src/device/rom.js');
   let memory;
   if (conf.memory && conf.memory.type) {
     console.log(conf.memory.type);
-    const memoryClass = (await import(`../src/device/${conf.memory.type}.js`)).default;
+    const memoryClass = (await import(`../src/vm/device/${conf.memory.type}.js`)).default;
     memory = new memoryClass();
   } else {
     memory = new Memory([]);
@@ -53,7 +53,7 @@ const Rom = require('../src/device/rom.js');
 
   for (const segment in conf.devices) {
     const deviceConfig = conf.devices[segment];
-    const deviceClass = (await import(`../src/device/${deviceConfig.type}.js`)).default;
+    const deviceClass = (await import(`../src/vm/device/${deviceConfig.type}.js`)).default;
     const device = new deviceClass();
     bus.register(+segment, device);
   }
