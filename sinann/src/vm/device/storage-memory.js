@@ -1,19 +1,15 @@
-module.exports = class Rom {
+module.exports = class StorageMemory {
   constructor(data) {
     this._data = data;
   }
 
   async read(addr) {
     if (addr === 0xfff) {
-      // Device type: ROM
-      return [0x00, 0x01];
+      // Device type: storage
+      return [0x00, 0x04];
     }
 
-    if (addr > this._data.length - 1) {
-      throw 'ROM address out of bounds';
-    }
-
-    // Simulate ROM slowness
+    // Simulate storage slowness
     return new Promise(resolve => {
       setTimeout(() => {
         resolve(this._data.slice(addr, addr + 2));
@@ -21,7 +17,7 @@ module.exports = class Rom {
     });
   }
 
-  write() {
-    throw 'Cannot write to device';
+  write(addr, data) {
+    this._data.splice(addr, 2, ...data);
   }
 };

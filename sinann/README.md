@@ -43,6 +43,14 @@ The execution context is a single program binary that is interpreted by the virt
 
 Communication with the underlying virtual machine can be done by writing special data to special memory addresses. This is down to the VM implementation, so it's context-specific.
 
+Device types:
+
+- `0x00`: memory
+- `0x01`: rom
+- `0x02`: input
+- `0x03`: output
+- `0x04`: storage
+
 ## Architecture
 
 The computer simulator is composed of a virtual machine executable that can run Sinann instructions.

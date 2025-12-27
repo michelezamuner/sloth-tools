@@ -2,7 +2,7 @@ const Movi = require('./movi');
 
 describe('movi', () => {
   it('stores immediate data into register', async() => {
-    const registers = [];
+    const registers = {};
     const instruction = new Movi(registers, {});
 
     await instruction.exec(0x00, 0x01, 0x02);
