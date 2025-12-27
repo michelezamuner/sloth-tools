@@ -2,7 +2,7 @@ const Processor = require('./processor');
 
 describe('processor', () => {
   it('executes instructions read from bus in sequence', async() => {
-    const registers = [];
+    const registers = {};
     const program = [
       0x00, 0x01, 0x02, 0x03,
       0x01, 0x11, 0x12, 0x13,
@@ -82,10 +82,53 @@ describe('processor', () => {
         },
       }),
     ];
-    processor = new Processor([], instructions, bus);
+    processor = new Processor({}, instructions, bus);
 
     const output = await processor.run();
 
     expect(output).toBe(0x1234);
+  });
+
+  it('allows instructions to override ip', async() => {
+    const registers = {};
+    let processor;
+    const program = [
+      0x00, 0x00, 0x00, 0x00,
+      0x01, 0x00, 0x00, 0x00,
+      0x02, 0x00, 0x00, 0x00,
+    ];
+    const bus = {
+      read: jest.fn(addr => program.slice(addr, addr + 2)),
+    };
+    const instructions = [
+      // 0x00
+      () => ({
+        // Jump to the third instruction
+        exec() {
+          registers.ip = 0x0008;
+          expect(true).toBe(true);
+        },
+      }),
+      // 0x01
+      () => ({
+        exec() {
+          processor.write(0x00, [0x12, 0x34]);
+        },
+      }),
+      // 0x02
+      () => ({
+        // Jump to the second instruction
+        exec() {
+          registers.ip = 0x0004;
+          expect(true).toBe(true);
+        },
+      }),
+    ];
+    processor = new Processor(registers, instructions, bus);
+
+    const output = await processor.run();
+
+    expect(output).toBe(0x1234);
+    expect.assertions(3);
   });
 });
